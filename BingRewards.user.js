@@ -16,7 +16,6 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
-// @namespace    https://greasyfork.org.cn/zh-CN/scripts/477107
 // ==/UserScript==
 
 'use strict';
