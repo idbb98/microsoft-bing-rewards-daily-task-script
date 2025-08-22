@@ -5,7 +5,7 @@
 // @author       KEEPA
 // @match        https://*.bing.com/*
 // @exclude      https://rewards.bing.com/*
-// @license      GNU GPLv3
+// @license      MIT
 // @icon         https://www.bing.com/favicon.ico
 // @connect      top.baidu.com
 // @connect      trends.so.com
