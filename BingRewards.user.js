@@ -1,15 +1,14 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.1
-// @description  自动完成微软 Rewards 每日搜索任务，实时显示进度，按设备类型获取热门词（PC:百度热榜，手机:微博热榜）
+// @version      V0.0.2
+// @description  自动完成微软 Rewards 每日搜索任务，实时显示进度，按设备类型获取热门词（PC:百度热榜，手机:头条热榜）
 // @author       KEEPA
 // @match        https://*.bing.com/*
 // @exclude      https://rewards.bing.com/*
 // @license      MIT
 // @icon         https://www.bing.com/favicon.ico
 // @connect      top.baidu.com
-// @connect      trends.so.com
-// @connect      s.weibo.com
+// @connect      www.toutiao.com
 // @connect      gist.githubusercontent.com
 // @run-at       document-end
 // @grant        GM_registerMenuCommand
@@ -210,7 +209,7 @@ function shuffleArray(array) {
 }
 
 /**
- * 根据设备类型获取热门词（PC:百度热榜，手机:微博热榜）
+ * 根据设备类型获取热门词（PC:百度热榜，手机:头条热榜）
  */
 async function fetchSearchKeywords() {
     // 判断设备类型（PC/移动）
@@ -230,16 +229,16 @@ async function fetchSearchKeywords() {
 
     // 根据设备类型选择不同的热词来源
     const sources = isMobile ? [
-        // 移动端优先微博热榜
+        // 移动端优先头条热榜
         {
-            name: "微博热榜",
-            url: "https://s.weibo.com/top/summary",
-            isHtml: true,
-            parser: (html) => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                const links = tempDiv.querySelectorAll('#pl_top_realtimehot table tbody tr td.td-02 a');
-                return Array.from(links).map(link => link.textContent.trim());
+            name: "头条热榜",
+            url: "https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc",
+            isHtml: false,
+            referer: "https://www.toutiao.com/",
+            parser: (data) => {
+                return data.data
+                    ?.filter(item => item?.Title && item.Title.trim().length >= 2)
+                    .map(item => item.Title.trim()) || [];
             }
         }
     ] : [
@@ -262,7 +261,7 @@ async function fetchSearchKeywords() {
                         url: source.url,
                         headers: {
                             "User-Agent": getRandomUA(isMobile),
-                            "Referer": source.url.includes('weibo') ? "https://s.weibo.com/" :
+                            "Referer": source.url.includes('weibo') ? "https://www.toutiao.com/" :
                                        source.url.includes('baidu') ? "https://top.baidu.com/" : ""
                         },
                         timeout: 15000,
