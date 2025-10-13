@@ -2,7 +2,7 @@
 
 ## 介绍
 
-这是一个自动化脚本，用于自动完成微软 Bing Rewards 的每日搜索任务。脚本支持实时显示任务进度，并根据设备类型（PC 或手机）自动获取热门搜索词（PC 使用百度热榜，手机使用微博热榜）。
+这是一个自动化脚本，用于自动完成微软 Bing Rewards 的每日搜索任务。脚本支持实时显示任务进度，并根据设备类型（PC 或手机）自动获取热门搜索词。
 
 ## 功能特点
 
@@ -15,22 +15,17 @@
 ## 使用方法
 
 1. 安装支持用户脚本的浏览器扩展（如 [Tampermonkey](https://www.tampermonkey.net/)）。
-2. 新建一个用户脚本，并将 `BingRewards.user.js` 的内容粘贴进去。
-3. 保存并运行脚本。
+2. 点击[BingRewards脚本连接](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)。
+3. 安装脚本。
+4. 新标签页打开[Bing网页](https://cn.bing.com/)。
+5. 点击Tampermonkey扩展，选择“开始Bing任务”，请 **耐心** 等待脚本执行，您可以在页面上看到任务进度和当前搜索词。
 
-脚本会自动检测并开始执行 Bing Rewards 的每日任务，您可以在页面上看到任务进度和当前搜索词。
-
-## 配置
-
-您可以在脚本的 `config` 部分调整以下设置：
-
-- `autoStart`: 是否自动开始任务（默认为 `true`）
-- `searchDelay`: 每次搜索之间的延迟时间（单位：毫秒，默认为 `3000`）
-- `maxSearchesPerDevice`: 每台设备的最大搜索次数（默认为 `30`）
 
 ## 注意事项
 
 - 请确保您的网络连接正常。
+- 请 **耐心** 等待脚本执行。
+- 保持脚本执行标签页始终在 **激活** 状态。
 - 请勿频繁刷新页面，以免影响任务进度。
 - 如果任务未自动开始，可以手动触发任务启动。
 
