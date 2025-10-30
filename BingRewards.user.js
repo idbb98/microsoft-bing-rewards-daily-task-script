@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.3
+// @version      V0.0.4
 // @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -371,7 +371,7 @@ function checkAndStartTask() {
     if (new URLSearchParams(window.location.search).has('startTask')) {
         setTimeout(executeSearch, 2000);
     } else {
-        createStatusPanel();
+        // createStatusPanel();
     }
 }
 
