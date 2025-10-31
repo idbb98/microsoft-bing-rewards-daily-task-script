@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.4
+// @version      V0.0.5
 // @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -40,7 +40,10 @@ const state = {
     statusPanel: null,
     timers: new Set(),
     isRunning: false,
-    searchHistory: []
+    searchHistory: [],
+    countdownStartTime: 0,
+    countdownDuration: 0,
+    lastActiveTime: Date.now()
 };
 
 // 工具函数
@@ -82,6 +85,30 @@ const utils = {
     // 生成随机ID
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    },
+
+    // 获取精确的剩余时间（不受标签页激活状态影响）
+    getAccurateRemainingTime() {
+        if (!state.countdownStartTime || !state.countdownDuration) return 0;
+
+        const elapsed = Date.now() - state.countdownStartTime;
+        const remaining = Math.max(0, state.countdownDuration - elapsed);
+        return remaining / 1000; // 转换为秒
+    },
+
+    // 检查页面是否可见
+    isPageVisible() {
+        return !document.hidden;
+    },
+
+    // 页面可见性变化处理
+    handleVisibilityChange(callback) {
+        document.addEventListener('visibilitychange', () => {
+            state.lastActiveTime = Date.now();
+            if (!document.hidden) {
+                callback();
+            }
+        });
     }
 };
 
@@ -112,6 +139,9 @@ function createStatusPanel() {
         <div style="position:absolute;top:8px;right:10px;cursor:pointer;font-size:18px;" onclick="this.parentElement.style.display='none'">×</div>
         <h3 style="margin:0 0 12px 0;color:#0067b8;font-size:16px;">📈 Bing Rewards</h3>
         <div id="panel-content"></div>
+        <div style="margin-top:8px;font-size:11px;color:#999;text-align:center;">
+            <span id="page-status">🟢 页面活跃</span>
+        </div>
     `;
 
     Object.assign(panel.style, {
@@ -132,6 +162,10 @@ function createStatusPanel() {
 
     document.body.appendChild(panel);
     state.statusPanel = panel;
+
+    // 监听页面可见性变化
+    utils.handleVisibilityChange(updateStatusPanel);
+
     updateStatusPanel();
     return panel;
 }
@@ -144,10 +178,23 @@ function updateStatusPanel(data = {}) {
 
     const taskStatus = getTaskStatus();
     const content = document.getElementById('panel-content');
-    const { currentWord = '', remainingTime = 0, pauseTimeLeft = null } = data;
+    const pageStatus = document.getElementById('page-status');
+    const { currentWord = '', pauseTimeLeft = null } = data;
+
+    // 更新页面状态指示器
+    if (utils.isPageVisible()) {
+        pageStatus.textContent = '🟢 页面活跃';
+        pageStatus.style.color = '#107c10';
+    } else {
+        pageStatus.textContent = '⚫ 后台运行';
+        pageStatus.style.color = '#666';
+    }
 
     const progress = taskStatus.overallProgress;
     const deviceType = taskStatus.currentType === 'web' ? '💻 PC端' : '📱 移动端';
+
+    // 计算剩余时间（使用精确计时）
+    const remainingTime = utils.getAccurateRemainingTime();
 
     content.innerHTML = `
         <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
@@ -170,7 +217,7 @@ function updateStatusPanel(data = {}) {
                 <div style="font-size:14px;color:#8a6900;font-weight:600;">剩余 ${Math.floor(pauseTimeLeft/60)}分${Math.round(pauseTimeLeft%60)}秒</div>
             </div>
         ` : ''}
-        ${!pauseTimeLeft && currentWord ? `
+        ${!pauseTimeLeft && currentWord && remainingTime > 0 ? `
             <div style="margin-top:10px;padding:8px;background:#f0f7ff;border-radius:6px;">
                 <div style="font-size:12px;color:#005a9e;margin-bottom:4px;">🔍 下个搜索词（${remainingTime.toFixed(1)}秒后）:</div>
                 <div style="font-size:13px;word-break:break-all;color:#0067b8;">${currentWord}</div>
@@ -312,27 +359,24 @@ async function executeSearch() {
     const searchIndex = taskStatus.currentCount % state.searchWords.length;
     const searchWord = state.searchWords[searchIndex];
     const delay = utils.getRandomDelay();
-    let remainingTime = delay / 1000;
+
+    // 设置精确倒计时
+    state.countdownStartTime = Date.now();
+    state.countdownDuration = delay;
 
     // 更新面板
-    updateStatusPanel({ currentWord: searchWord, remainingTime });
+    updateStatusPanel({ currentWord: searchWord });
 
-    // 倒计时
-    const countdown = utils.addTimer(setInterval(() => {
-        remainingTime -= 0.1;
-        if (remainingTime <= 0) {
-            utils.clearAllTimers();
-            performSearch(searchWord, taskStatus);
-        } else {
-            updateStatusPanel({ currentWord: searchWord, remainingTime });
-        }
-    }, 100));
-
-    // 超时保护
-    utils.addTimer(setTimeout(() => {
+    // 使用精确计时器，不受页面可见性影响
+    const searchTimer = utils.addTimer(setTimeout(() => {
         utils.clearAllTimers();
         performSearch(searchWord, taskStatus);
-    }, delay + 1000));
+    }, delay));
+
+    // 添加一个定期更新面板的定时器（每秒更新一次）
+    const updateTimer = utils.addTimer(setInterval(() => {
+        updateStatusPanel({ currentWord: searchWord });
+    }, 1000));
 }
 
 /**
@@ -345,13 +389,20 @@ function performSearch(searchWord, taskStatus) {
     GM_setValue(counterKey, nextCount);
     GM_log(`搜索: ${searchWord} (${nextCount}/${taskStatus.maxCount})`);
 
+    // 重置倒计时状态
+    state.countdownStartTime = 0;
+    state.countdownDuration = 0;
+
     // 暂停检查
     if (nextCount % CONFIG.pauseInterval === 0) {
         let pauseTimeLeft = CONFIG.pauseTime / 1000;
         updateStatusPanel({ pauseTimeLeft });
 
+        // 使用精确的暂停计时
+        const pauseStartTime = Date.now();
         const pauseTimer = utils.addTimer(setInterval(() => {
-            pauseTimeLeft -= 1;
+            const elapsed = Date.now() - pauseStartTime;
+            pauseTimeLeft = Math.max(0, (CONFIG.pauseTime - elapsed) / 1000);
             updateStatusPanel({ pauseTimeLeft });
 
             if (pauseTimeLeft <= 0) {
@@ -388,6 +439,8 @@ GM_registerMenuCommand('⏹️ 停止任务', () => {
     GM_setValue(counterKey, taskStatus.maxCount);
     utils.clearAllTimers();
     state.isRunning = false;
+    state.countdownStartTime = 0;
+    state.countdownDuration = 0;
     updateStatusPanel();
 });
 
