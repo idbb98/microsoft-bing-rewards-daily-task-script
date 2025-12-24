@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.5
+// @version      V0.0.6
 // @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -20,17 +20,67 @@
 // @updateURL    https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js
 // ==/UserScript==
 
+/*
+ * 更新说明：
+ * V0.0.6 (2025-12-24):
+ * 1. 修复面板关闭按钮无效问题
+ * 2. 添加面板显示/隐藏切换功能
+ * 3. 优化关闭按钮的悬停交互效果
+ * 4. 修复倒计时变量引用错误
+ * 
+ * V0.0.5 (2025-10-31):
+ * 1. 优化状态面板UI设计
+ * 2. 添加精确计时器，不受页面可见性影响
+ * 3. 优化搜索词获取逻辑
+ * 
+ * V0.0.4 (2025-10-30):
+ * 1. 添加搜索任务暂停机制
+ * 2. 改进进度显示方式
+ * 3. 修复移动端搜索数量限制问题
+ * 
+ * V0.0.3 (2025-10-30):
+ * 1. 优化搜索URL构建逻辑
+ * 2. 添加更多搜索参数变化
+ * 3. 改进错误处理和重试机制
+ * 
+ * V0.0.2 (2025-10-13):
+ * 1. 添加状态显示面板
+ * 2. 支持后台运行和页面活跃状态显示
+ * 3. 优化搜索词获取策略
+ * 
+ * V0.0.1 (2025-08-22):
+ * 1. 初始版本发布
+ * 2. 支持PC和移动端自动搜索
+ * 3. 基本的进度追踪功能
+ */
+
 'use strict';
 
 // 配置参数
 const CONFIG = {
-    maxWebSearches: 40,
-    maxMobileSearches: 35,
+    // PC端最大搜索次数
+    // 注意：实际每日上限可能因地区而异，请根据实际情况调整
+    maxWebSearches: 50,
+
+    // 移动端最大搜索次数
+    // 注意：实际每日上限可能因地区而异，请根据实际情况调整
+    maxMobileSearches: 36,
+
+    // 暂停间隔：每执行多少次搜索后暂停一次
+    // 建议值：3-10，设置过小可能频繁暂停，设置过大可能触发反爬机制
     pauseInterval: 5,
-    pauseTime: 15 * 60 * 1000, // 15分钟
-    decimalDelay: 3000,
-    minDelay: 8000,
-    maxDelay: 15000,
+
+    // 暂停时间（毫秒）：每次暂停的持续时间
+    // 建议值：10-30分钟，可以有效降低被封风险
+    // 15分钟 = 15 * 60 * 1000 毫秒
+    pauseTime: 15 * 60 * 1000, 
+
+    // 搜索延迟相关配置
+    decimalDelay: 3000,   // 小数部分延迟（随机延迟的基础值）
+    minDelay: 8000,       // 最小延迟（毫秒）：两次搜索之间的最短间隔时间
+    maxDelay: 15000,      // 最大延迟（毫秒）：两次搜索之间的最长间隔时间
+
+    // 网络请求超时时间（毫秒）：获取热门搜索词的最大等待时间
     requestTimeout: 20000
 };
 
@@ -92,7 +142,7 @@ const utils = {
         if (!state.countdownStartTime || !state.countdownDuration) return 0;
 
         const elapsed = Date.now() - state.countdownStartTime;
-        const remaining = Math.max(0, state.countdownDuration - elapsed);
+        const remaining = Math.max(0, CONFIG.countdownDuration - elapsed);
         return remaining / 1000; // 转换为秒
     },
 
@@ -136,7 +186,7 @@ function createStatusPanel() {
     const panel = document.createElement('div');
     panel.id = 'bing-rewards-panel';
     panel.innerHTML = `
-        <div style="position:absolute;top:8px;right:10px;cursor:pointer;font-size:18px;" onclick="this.parentElement.style.display='none'">×</div>
+        <div id="panel-close-btn" style="position:absolute;top:8px;right:10px;cursor:pointer;font-size:18px;color:#666;">×</div>
         <h3 style="margin:0 0 12px 0;color:#0067b8;font-size:16px;">📈 Bing Rewards</h3>
         <div id="panel-content"></div>
         <div style="margin-top:8px;font-size:11px;color:#999;text-align:center;">
@@ -162,6 +212,25 @@ function createStatusPanel() {
 
     document.body.appendChild(panel);
     state.statusPanel = panel;
+
+    // 为关闭按钮添加事件监听器
+    const closeBtn = document.getElementById('panel-close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            panel.style.display = 'none';
+        });
+        
+        // 添加悬停效果
+        closeBtn.addEventListener('mouseenter', () => {
+            closeBtn.style.color = '#000';
+            closeBtn.style.transform = 'scale(1.2)';
+        });
+        
+        closeBtn.addEventListener('mouseleave', () => {
+            closeBtn.style.color = '#666';
+            closeBtn.style.transform = 'scale(1)';
+        });
+    }
 
     // 监听页面可见性变化
     utils.handleVisibilityChange(updateStatusPanel);
@@ -444,7 +513,14 @@ GM_registerMenuCommand('⏹️ 停止任务', () => {
     updateStatusPanel();
 });
 
-GM_registerMenuCommand('📊 查看进度', createStatusPanel);
+GM_registerMenuCommand('📊 查看/隐藏面板', () => {
+    if (!state.statusPanel) {
+        createStatusPanel();
+    } else {
+        const panel = state.statusPanel;
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+});
 
 // 启动脚本
 if (document.readyState === 'loading') {
