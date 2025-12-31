@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.6
+// @version      V0.0.7
 // @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -22,32 +22,35 @@
 
 /*
  * 更新说明：
+ * V0.0.7 (2025-12-31)
+ * 1. 修复获取精确的剩余时间错误，无法显示下个搜索词问题
+ *
  * V0.0.6 (2025-12-24):
  * 1. 修复面板关闭按钮无效问题
  * 2. 添加面板显示/隐藏切换功能
  * 3. 优化关闭按钮的悬停交互效果
  * 4. 修复倒计时变量引用错误
- * 
+ *
  * V0.0.5 (2025-10-31):
  * 1. 优化状态面板UI设计
  * 2. 添加精确计时器，不受页面可见性影响
  * 3. 优化搜索词获取逻辑
- * 
+ *
  * V0.0.4 (2025-10-30):
  * 1. 添加搜索任务暂停机制
  * 2. 改进进度显示方式
  * 3. 修复移动端搜索数量限制问题
- * 
+ *
  * V0.0.3 (2025-10-30):
  * 1. 优化搜索URL构建逻辑
  * 2. 添加更多搜索参数变化
  * 3. 改进错误处理和重试机制
- * 
+ *
  * V0.0.2 (2025-10-13):
  * 1. 添加状态显示面板
  * 2. 支持后台运行和页面活跃状态显示
  * 3. 优化搜索词获取策略
- * 
+ *
  * V0.0.1 (2025-08-22):
  * 1. 初始版本发布
  * 2. 支持PC和移动端自动搜索
@@ -73,7 +76,7 @@ const CONFIG = {
     // 暂停时间（毫秒）：每次暂停的持续时间
     // 建议值：10-30分钟，可以有效降低被封风险
     // 15分钟 = 15 * 60 * 1000 毫秒
-    pauseTime: 15 * 60 * 1000, 
+    pauseTime: 15 * 60 * 1000,
 
     // 搜索延迟相关配置
     decimalDelay: 3000,   // 小数部分延迟（随机延迟的基础值）
@@ -142,7 +145,7 @@ const utils = {
         if (!state.countdownStartTime || !state.countdownDuration) return 0;
 
         const elapsed = Date.now() - state.countdownStartTime;
-        const remaining = Math.max(0, CONFIG.countdownDuration - elapsed);
+        const remaining = Math.max(0, state.countdownDuration - elapsed);
         return remaining / 1000; // 转换为秒
     },
 
@@ -219,13 +222,13 @@ function createStatusPanel() {
         closeBtn.addEventListener('click', () => {
             panel.style.display = 'none';
         });
-        
+
         // 添加悬停效果
         closeBtn.addEventListener('mouseenter', () => {
             closeBtn.style.color = '#000';
             closeBtn.style.transform = 'scale(1.2)';
         });
-        
+
         closeBtn.addEventListener('mouseleave', () => {
             closeBtn.style.color = '#666';
             closeBtn.style.transform = 'scale(1)';
