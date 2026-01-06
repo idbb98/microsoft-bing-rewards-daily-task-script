@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards每日任务脚本
-// @version      V0.0.7
+// @version      V26.1.6.1
 // @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -9,6 +9,8 @@
 // @icon         https://www.bing.com/favicon.ico
 // @connect      top.baidu.com
 // @connect      www.toutiao.com
+// @connect      r.inews.qq.com
+// @connect      m.weibo.cn
 // @run-at       document-end
 // @grant        GM_registerMenuCommand
 // @grant        GM_setValue
@@ -22,6 +24,11 @@
 
 /*
  * 更新说明：
+ * V26.1.6.1 (2026-01-06)
+ * 1. 增加更多热词源，改进热词补充和过滤机制
+ * 2. 改进Fisher-Yates洗牌算法，提高随机性
+ * 3. 版本号机制改为 年：月：日：最小版本号 格式
+ * 
  * V0.0.7 (2025-12-31)
  * 1. 修复获取精确的剩余时间错误，无法显示下个搜索词问题
  *
@@ -130,9 +137,14 @@ const utils = {
         }
     },
 
-    // 数组洗牌
+    // Fisher-Yates洗牌算法
     shuffleArray(array) {
-        return [...array].sort(() => Math.random() - 0.5);
+        const result = [...array]; // 创建副本以避免修改原数组
+        for (let i = result.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [result[i], result[j]] = [result[j], result[i]]; // 交换元素
+        }
+        return result;
     },
 
     // 生成随机ID
@@ -167,9 +179,41 @@ const utils = {
 
 // 搜索词库
 const SEARCH_WORDS = [
+    // 科技类
     "人工智能发展", "量子计算机", "5G技术应用", "区块链", "物联网",
-    "自动驾驶技术", "黑洞研究", "基因编辑", "火星探测", "气候变化",
-    "传统文化", "世界遗产", "健康饮食", "运动健身", "旅游景点"
+    "自动驾驶技术", "机器学习", "云计算", "大数据分析", "虚拟现实",
+    "增强现实", "边缘计算", "网络安全", "人工智能伦理", "深度学习",
+    "神经网络", "机器人技术", "无人机技术", "智能家居", "数字孪生",
+    
+    // 科学研究
+    "黑洞研究", "基因编辑", "火星探测", "气候变化", "量子纠缠",
+    "暗物质探索", "纳米技术", "生物技术", "干细胞研究", "基因测序",
+    "蛋白质折叠", "量子力学", "相对论", "宇宙起源", "粒子物理",
+    
+    // 生活健康
+    "健康饮食", "运动健身", "心理健康", "营养搭配", "睡眠质量",
+    "减肥方法", "养生之道", "中医养生", "瑜伽练习", "冥想技巧",
+    "维生素补充", "健身器材", "家庭护理", "疾病预防", "免疫力提升",
+    
+    // 旅游文化
+    "旅游景点", "传统文化", "世界遗产", "民俗文化", "历史古迹",
+    "美食文化", "民族风情", "古镇旅游", "自然风光", "文化遗产",
+    "博物馆之旅", "艺术展览", "摄影技巧", "旅行攻略", "民宿体验",
+    
+    // 教育学习
+    "在线教育", "学习方法", "技能提升", "编程学习", "外语学习",
+    "考试技巧", "读书笔记", "知识管理", "思维导图", "终身学习",
+    "职业技能", "证书考试", "学术研究", "论文写作", "图书馆资源",
+    
+    // 经济金融
+    "数字货币", "股票投资", "基金理财", "房地产投资", "保险规划",
+    "经济趋势", "货币政策", "国际贸易", "创业机会", "商业模式",
+    "财务管理", "税收政策", "银行业务", "投资策略", "财富管理",
+    
+    // 娱乐休闲
+    "电影推荐", "音乐欣赏", "游戏攻略", "电视剧推荐", "综艺节目",
+    "体育赛事", "明星资讯", "动漫推荐", "小说阅读", "短视频制作",
+    "直播平台", "电竞比赛", "体育锻炼", "户外运动", "极限运动"
 ];
 
 // 搜索参数配置
@@ -311,44 +355,116 @@ async function fetchSearchKeywords() {
         return cached.words;
     }
 
+    // 定义热词API源
     const sources = isMobile ? [
         {
+            name: "今日头条热榜",
             url: "https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc",
             parser: data => data.data?.map(item => item.Title?.trim()).filter(Boolean) || []
+        },
+        {
+            name: "微博实时热点",
+            url: "https://m.weibo.cn/api/container/getIndex?containerid=106003type%3D25%26t%3D3%26disable_hot%3D1%26filter_type%3Drealtimehot",
+            parser: data => {
+                if (data.data.cards && data.data.cards[0].card_group) {
+                    return data.data.cards[0].card_group
+                        .filter(item => item.desc && !item.desc.match(/[\u4e00-\u9fa5]/) || item.desc.match(/[\u4e00-\u9fa5]/))
+                        .map(item => item.desc)
+                        .filter(Boolean);
+                }
+                return [];
+            }
         }
     ] : [
         {
+            name: "百度热搜",
             url: "https://top.baidu.com/api/board?tab=realtime",
             parser: data => data.data?.cards?.[0]?.content?.map(item => item.word) || []
+        },
+        {
+            name: "腾讯新闻热点",
+            url: "https://r.inews.qq.com/gw/event/hot_ranking_list?page_size=50",
+            parser: data => data.idlist?.[0]?.newslist?.map(item => item.title) || []
         }
     ];
 
-    for (const source of sources) {
-        try {
-            const response = await new Promise((resolve, reject) => {
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: source.url,
-                    timeout: CONFIG.requestTimeout,
-                    onload: res => res.status === 200 ? resolve(res.responseText) : reject(new Error(`HTTP ${res.status}`)),
-                    onerror: reject,
-                    ontimeout: () => reject(new Error("请求超时"))
-                });
+    const allWords = new Set(); // 使用Set避免重复词
+
+    // 并行请求所有API
+    const promises = sources.map(source => 
+        new Promise(resolve => {
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: source.url,
+                timeout: CONFIG.requestTimeout,
+                onload: res => {
+                    if (res.status === 200) {
+                        try {
+                            const data = utils.safeJsonParse(res.responseText, {});
+                            const words = source.parser(data).filter(word => 
+                                word && 
+                                word.length >= 2 && 
+                                word.length <= 30 &&
+                                !/^[0-9]+$/.test(word) // 过滤纯数字
+                            );
+                            GM_log(`从 ${source.name} 获取到 ${words.length} 个热词`);
+                            resolve(words);
+                        } catch (e) {
+                            GM_log(`解析 ${source.name} 数据失败: ${e.message}`);
+                            resolve([]);
+                        }
+                    } else {
+                        GM_log(`${source.name} 请求失败: HTTP ${res.status}`);
+                        resolve([]);
+                    }
+                },
+                onerror: () => {
+                    GM_log(`${source.name} 请求出错`);
+                    resolve([]);
+                },
+                ontimeout: () => {
+                    GM_log(`${source.name} 请求超时`);
+                    resolve([]);
+                }
             });
+        })
+    );
 
-            const data = utils.safeJsonParse(response, {});
-            const words = source.parser(data).filter(word => word && word.length >= 2 && word.length <= 20);
-
-            if (words.length >= 5) {
-                GM_setValue(cacheKey, { words, time: Date.now() });
-                return words;
+    // 等待所有API请求完成
+    const results = await Promise.all(promises);
+    
+    // 合并所有结果并去重
+    results.forEach(words => {
+        words.forEach(word => {
+            // 额外过滤条件
+            if (word && !allWords.has(word)) {
+                allWords.add(word);
             }
-        } catch (error) {
-            GM_log(`获取热词失败: ${error.message}`);
+        });
+    });
+
+    const allWordsArray = Array.from(allWords);
+    GM_log(`总共获取到 ${allWordsArray.length} 个不重复的热词`);
+
+    const maxSearches = isMobile ? CONFIG.maxMobileSearches : CONFIG.maxWebSearches;
+    // 如果从API获取的词不够，补充本地词库
+    if (allWordsArray.length < maxSearches) {
+        const remainingCount = Math.max(maxSearches, 50) - allWordsArray.length; // 总共至少最大搜索次数或50个词
+        const localWords = utils.shuffleArray(SEARCH_WORDS);
+        for (let i = 0; i < remainingCount && i < SEARCH_WORDS.length; i++) {
+            if (!allWords.has(localWords[i])) {
+                allWordsArray.push(localWords[i]);
+            }
         }
     }
 
-    return utils.shuffleArray(SEARCH_WORDS);
+    // 随机打乱合并后的词库
+    const words = utils.shuffleArray(allWordsArray);
+
+    // 保存到缓存
+    GM_setValue(cacheKey, { words, time: Date.now() });
+    
+    return words;
 }
 
 /**
@@ -502,6 +618,9 @@ function checkAndStartTask() {
 GM_registerMenuCommand('🚀 开始任务', () => {
     GM_setValue('webSearchCount', 0);
     GM_setValue('mobileSearchCount', 0);
+    // 清除热词缓存，确保开始新任务时获取新的热词
+    GM_setValue('cache_pc', undefined);
+    GM_setValue('cache_mobile', undefined);
     window.location.href = 'https://www.bing.com/?startTask=1';
 });
 
