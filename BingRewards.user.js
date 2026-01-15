@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Microsoft Bing Rewards每日任务脚本
-// @version      V26.1.6.1
-// @description  自动完成微软 Rewards 每日搜索任务，实时显示进度
+// @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
+// @version      26.1.15.1
+// @description  自动化完成微软必应每日搜索任务，实时显示进度，轻松积累奖励积分。
 // @author       KEEPA
 // @match        https://*.bing.com/*
 // @exclude      https://rewards.bing.com/*
@@ -24,6 +24,10 @@
 
 /*
  * 更新说明：
+ * V26.1.15.1
+ * 1. 增加随机加词和截词功能，默认不开启
+ * 2. 可配置化启动参数标记
+ * 
  * V26.1.6.1 (2026-01-06)
  * 1. 增加更多热词源，改进热词补充和过滤机制
  * 2. 改进Fisher-Yates洗牌算法，提高随机性
@@ -76,6 +80,16 @@ const CONFIG = {
     // 注意：实际每日上限可能因地区而异，请根据实际情况调整
     maxMobileSearches: 36,
 
+    // 是否随机加词，如：人工智能发展  -->  人工1智能发z展 
+    randomAddSearchWords: false,
+    // 随机加词因子，控制加词的概率（0-1之间的小数），默认为0.3即30%概率添加字符
+    randomAddSearchWordsFactor: 0.3,
+
+    // 是否随机截词，如：人工1智能发z展  --> 人工1智
+    randomCutSearchWords: false,
+    // 随机截词因子，控制截取的概率（0-1之间的小数），默认为0.2即20%概率截取字符
+    randomCutSearchWordsFactor: 0.2,
+
     // 暂停间隔：每执行多少次搜索后暂停一次
     // 建议值：3-10，设置过小可能频繁暂停，设置过大可能触发反爬机制
     pauseInterval: 5,
@@ -91,7 +105,10 @@ const CONFIG = {
     maxDelay: 15000,      // 最大延迟（毫秒）：两次搜索之间的最长间隔时间
 
     // 网络请求超时时间（毫秒）：获取热门搜索词的最大等待时间
-    requestTimeout: 20000
+    requestTimeout: 20000,
+
+    // 启动参数标记，取值参考：bingTask / runSearch / initiateSearch / bingSearchMode / autoSearch 
+    startParam: 'bingTask',
 };
 
 // 状态管理
@@ -121,6 +138,55 @@ const utils = {
     addTimer(timer) {
         state.timers.add(timer);
         return timer;
+    },
+
+    // 随机对搜索词加词，例如：人工智能发展  -->  人工1智能发z展
+    addRandomCharsToSearchWord(word) {
+        if (!CONFIG.randomAddSearchWords || !word || Math.random() > CONFIG.randomAddSearchWordsFactor) return word;
+
+        // 控制添加字符的数量，避免过度添加导致词无意义
+        const maxAdditions = Math.min(3, Math.floor(word.length / 3)); // 最多添加原词长度1/3的随机字符
+        let result = word;
+
+        for (let i = 0; i < Math.floor(Math.random() * (maxAdditions + 1)); i++) {
+            // 随机选择插入位置（避开开头和结尾）
+            const insertPos = Math.floor(Math.random() * (result.length - 1)) + 1;
+            // 随机选择要插入的字符
+            const randomChar = String.fromCharCode(
+                Math.random() > 0.5 ? 
+                Math.floor(Math.random() * 10) + 48 : // 数字 0-9
+                Math.floor(Math.random() * 26) + 97   // 小写字母 a-z
+            );
+            
+            result = result.slice(0, insertPos) + randomChar + result.slice(insertPos);
+        }
+
+        return result;
+    },
+
+    // 随机对搜索词进行截取，例如：人工1智能发z展  --> 人工1智
+    cutSearchWordRandomly(word) {
+        if (!CONFIG.randomCutSearchWords || !word || Math.random() > CONFIG.randomCutSearchWordsFactor) return word;
+
+        // 控制截取长度，保留至少一半的字符
+        const minLength = Math.max(2, Math.ceil(word.length / 2)); // 至少保留2个字符或一半字符
+        const maxLength = word.length; // 最大不超过原词长度
+        
+        if (minLength >= maxLength) return word;
+
+        // 随机选择截取长度
+        const cutLength = Math.floor(Math.random() * (maxLength - minLength)) + minLength;
+
+        return word.substring(0, cutLength);
+    },
+
+    // 依次应用加词和截取
+    processSearchWord(word) {
+        // 先加词
+        let processedWord = this.addRandomCharsToSearchWord(word);
+        // 再截取
+        processedWord = this.cutSearchWordRandomly(processedWord);
+        return processedWord;
     },
 
     // 生成随机延迟
@@ -485,7 +551,7 @@ function buildSearchUrl(searchWord) {
         mkt
     });
 
-    return `${domain}/search?${urlParams.toString()}&startTask=1`;
+    return `${domain}/search?${urlParams.toString()}&${CONFIG.startParam}=1`;
 }
 
 /**
@@ -546,6 +612,10 @@ async function executeSearch() {
 
     const searchIndex = taskStatus.currentCount % state.searchWords.length;
     const searchWord = state.searchWords[searchIndex];
+
+    // 对搜索词进行处理
+    const processedSearchWord = utils.processSearchWord(searchWord);
+    
     const delay = utils.getRandomDelay();
 
     // 设置精确倒计时
@@ -553,17 +623,17 @@ async function executeSearch() {
     state.countdownDuration = delay;
 
     // 更新面板
-    updateStatusPanel({ currentWord: searchWord });
+    updateStatusPanel({ currentWord: processedSearchWord });
 
     // 使用精确计时器，不受页面可见性影响
     const searchTimer = utils.addTimer(setTimeout(() => {
         utils.clearAllTimers();
-        performSearch(searchWord, taskStatus);
+        performSearch(processedSearchWord, taskStatus);
     }, delay));
 
     // 添加一个定期更新面板的定时器（每秒更新一次）
     const updateTimer = utils.addTimer(setInterval(() => {
-        updateStatusPanel({ currentWord: searchWord });
+        updateStatusPanel({ currentWord: processedSearchWord });
     }, 1000));
 }
 
@@ -571,6 +641,7 @@ async function executeSearch() {
  * 执行搜索
  */
 function performSearch(searchWord, taskStatus) {
+
     const nextCount = taskStatus.currentCount + 1;
     const counterKey = taskStatus.currentType === 'web' ? 'webSearchCount' : 'mobileSearchCount';
 
@@ -607,7 +678,7 @@ function performSearch(searchWord, taskStatus) {
  * 检查并启动任务
  */
 function checkAndStartTask() {
-    if (new URLSearchParams(window.location.search).has('startTask')) {
+    if (new URLSearchParams(window.location.search).has(CONFIG.startParam)) {
         setTimeout(executeSearch, 2000);
     } else {
         // createStatusPanel();
@@ -621,10 +692,10 @@ GM_registerMenuCommand('🚀 开始任务', () => {
     // 清除热词缓存，确保开始新任务时获取新的热词
     GM_setValue('cache_pc', undefined);
     GM_setValue('cache_mobile', undefined);
-    window.location.href = 'https://www.bing.com/?startTask=1';
+    window.location.href = 'https://www.bing.com/?' + CONFIG.startParam + '=1';
 });
 
-GM_registerMenuCommand('⏹️ 停止任务', () => {
+GM_registerMenuCommand('⏹️ 终止任务', () => {
     const taskStatus = getTaskStatus();
     const counterKey = taskStatus.currentType === 'web' ? 'webSearchCount' : 'mobileSearchCount';
     GM_setValue(counterKey, taskStatus.maxCount);
