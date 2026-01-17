@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "Microsoft Bing Rewards Daily Task Script",
+  "version": "26.1.17.1",
+  "description": "自动化完成微软必应每日搜索任务，实时显示进度，轻松积累奖励积分。",
+  "icons": {
+    "16": "images/favicon.png",
+    "48": "images/favicon.png",
+    "128": "images/favicon.png"
+  },
+  "host_permissions": [
+    "https://*.bing.com/*",
+    "https://top.baidu.com/*",
+    "https://www.toutiao.com/*",
+    "https://r.inews.qq.com/*",
+    "https://m.weibo.cn/*",
+    "https://*.baidu.com/*",
+    "https://*.qq.com/*",
+    "https://*.weibo.cn/*"
+  ],
+  "permissions": [
+    "storage",
+    "notifications",
+    "tabs"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.bing.com/*"],
+      "exclude_matches": ["https://rewards.bing.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/favicon.png",
+      "48": "images/favicon.png",
+      "128": "images/favicon.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}

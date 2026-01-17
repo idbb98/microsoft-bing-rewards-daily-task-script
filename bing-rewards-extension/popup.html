@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bing Rewards</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/popup.css">
+</head>
+<body class="p-3">
+    <h1 class="h5 text-center mb-3 text-primary fw-bold">📈 Bing Rewards</h1>
+    
+    <div class="vstack gap-2 mb-3">
+        <button class="btn btn-primary" id="startBtn">
+            <span class="me-2">🚀</span>开始任务
+        </button>
+        <button class="btn btn-danger" id="stopBtn">
+            <span class="me-2">⏹️</span>终止任务
+        </button>
+        <button class="btn btn-success" id="togglePanelBtn">
+            <span class="me-2">📊</span>查看/隐藏面板
+        </button>
+        <button class="btn btn-outline-secondary" id="settingsBtn">
+            <span class="me-2">⚙️</span>扩展设置
+        </button>
+    </div>
+    
+    <div class="card bg-light mb-3">
+        <div class="card-body py-2">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">💻 PC端进度</span>
+                <span class="fw-bold" id="pcProgress">0/50</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">📱 移动端进度</span>
+                <span class="fw-bold" id="mobileProgress">0/36</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">📊 总体进度</span>
+                <span class="fw-bold" id="overallProgress">0%</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="configStatus" class="alert alert-warning text-center small" style="display: none;">
+        ⏳ 任务执行中
+    </div>
+    
+    <div class="text-center text-muted small" id="versionInfo"></div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

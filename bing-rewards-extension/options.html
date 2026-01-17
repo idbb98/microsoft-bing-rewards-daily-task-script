@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bing Rewards 设置</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/options.css">
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="text-center mb-4">
+            <h1 class="h3 fw-bold text-primary">⚙️ Bing Rewards 设置</h1>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">🔍 搜索策略</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearchStrategy" aria-expanded="true">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="collapseSearchStrategy">
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="randomAddWords">
+                                        <label class="form-check-label" for="randomAddWords">随机加词</label>
+                                    </div>
+                                    <div class="ps-4 mt-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label for="addWordsFactor" class="form-label mb-0 text-muted small" style="min-width: 100px;">加词概率</label>
+                                            <input type="range" class="form-range flex-grow-1" min="0" max="1" step="0.1" id="addWordsFactor">
+                                            <span class="badge bg-primary" id="addWordsFactorValue">30%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="randomCutWords">
+                                        <label class="form-check-label" for="randomCutWords">随机截词</label>
+                                    </div>
+                                    <div class="ps-4 mt-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label for="cutWordsFactor" class="form-label mb-0 text-muted small" style="min-width: 100px;">截词概率</label>
+                                            <input type="range" class="form-range flex-grow-1" min="0" max="1" step="0.1" id="cutWordsFactor">
+                                            <span class="badge bg-primary" id="cutWordsFactorValue">20%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">📊 搜索设置</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearchCount" aria-expanded="true">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="collapseSearchCount">
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="maxWebSearches" class="form-label mb-0" style="min-width: 120px;">PC端搜索次数</label>
+                                        <input type="number" class="form-control form-control-sm" id="maxWebSearches" min="10" max="100" value="50">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="maxMobileSearches" class="form-label mb-0" style="min-width: 120px;">移动端搜索次数</label>
+                                        <input type="number" class="form-control form-control-sm" id="maxMobileSearches" min="10" max="50" value="36">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">⏱️ 延迟设置</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDelay" aria-expanded="true">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="collapseDelay">
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="minDelay" class="form-label mb-0" style="min-width: 120px;">最小延迟 (秒)</label>
+                                        <input type="number" class="form-control form-control-sm" id="minDelay" min="1" max="30" step="1" value="8">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="maxDelay" class="form-label mb-0" style="min-width: 120px;">最大延迟 (秒)</label>
+                                        <input type="number" class="form-control form-control-sm" id="maxDelay" min="5" max="60" step="1" value="15">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="pauseInterval" class="form-label mb-0" style="min-width: 120px;">暂停间隔 (次)</label>
+                                        <input type="number" class="form-control form-control-sm" id="pauseInterval" min="1" max="20" value="5">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="pauseTime" class="form-label mb-0" style="min-width: 120px;">暂停时间 (分钟)</label>
+                                        <input type="number" class="form-control form-control-sm" id="pauseTime" min="1" max="60" value="15">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">🌐 其他设置</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOther" aria-expanded="true">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse show" id="collapseOther">
+                        <div class="card-body py-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="requestTimeout" class="form-label mb-0" style="min-width: 120px;">请求超时 (秒)</label>
+                                        <input type="number" class="form-control form-control-sm" id="requestTimeout" min="5" max="60" value="20">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="startParam" class="form-label mb-0" style="min-width: 120px;">启动参数</label>
+                                        <select class="form-select form-select-sm" id="startParam">
+                                            <option value="bingTask">bingTask</option>
+                                            <option value="runSearch">runSearch</option>
+                                            <option value="initiateSearch">initiateSearch</option>
+                                            <option value="bingSearchMode">bingSearchMode</option>
+                                            <option value="autoSearch">autoSearch</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">🔥 热词源</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSources" aria-expanded="false">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse" id="collapseSources">
+                        <div class="card-body py-3">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3 pb-2 border-bottom">PC端</h6>
+                                    <div id="pcSourcesContainer"></div>
+                                    <button class="btn btn-outline-primary btn-sm mt-2" id="addPcSource">
+                                        <span class="me-1">➕</span>添加
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3 pb-2 border-bottom">移动端</h6>
+                                    <div id="mobileSourcesContainer"></div>
+                                    <button class="btn btn-outline-primary btn-sm mt-2" id="addMobileSource">
+                                        <span class="me-1">➕</span>添加
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2">
+                        <span class="fw-bold">📝 保底搜索词库</span>
+                        <button class="btn btn-sm btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearchWords" aria-expanded="false">
+                            <span class="collapse-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="collapse" id="collapseSearchWords">
+                        <div class="card-body py-3">
+                            <div class="mb-3">
+                                <label for="searchWords" class="form-label">搜索词库（每行一个词）</label>
+                                <textarea class="form-control" id="searchWords" rows="15" placeholder="每行输入一个搜索词"></textarea>
+                                <div class="form-text">当API获取的热词不足时，将使用这些词作为补充。建议至少保留50个词。</div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small" id="searchWordsCount">共 0 个词</span>
+                                <button class="btn btn-outline-secondary btn-sm" id="resetSearchWords">
+                                    <span class="me-1">🔄</span>恢复默认
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-center gap-2 my-4">
+            <button class="btn btn-primary px-4" id="saveSettings">
+                <span class="me-2">💾</span>保存配置
+            </button>
+            <button class="btn btn-outline-secondary px-4" id="resetSettings">
+                <span class="me-2">🔄</span>重置配置
+            </button>
+        </div>
+        
+        <div class="text-center text-muted small" id="versionInfo"></div>
+    </div>
+    
+    <template id="sourceItemTemplate">
+        <div class="source-item">
+            <div class="source-item-header">
+                <span class="source-item-name"></span>
+                <div class="source-item-actions">
+                    <button class="btn btn-sm btn-outline-warning" data-action="edit">编辑</button>
+                    <button class="btn btn-sm btn-outline-danger" data-action="delete">删除</button>
+                </div>
+            </div>
+            <div class="source-item-body">
+                <div class="mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 small text-muted" style="min-width: 50px;">名称</label>
+                        <input type="text" class="form-control form-control-sm" data-field="name">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label mb-0 small text-muted" style="min-width: 50px;">URL</label>
+                        <input type="text" class="form-control form-control-sm" data-field="url">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted">解析器 (JavaScript表达式，返回数组)</label>
+                    <textarea class="form-control form-control-sm" data-field="parser"></textarea>
+                </div>
+                <div class="text-end">
+                    <button class="btn btn-sm btn-outline-secondary me-1" data-action="cancel">取消</button>
+                    <button class="btn btn-sm btn-outline-success" data-action="save">保存</button>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="options.js"></script>
+</body>
+</html>
