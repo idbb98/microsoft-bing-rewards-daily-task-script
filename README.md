@@ -20,7 +20,7 @@
 > - ✅ **功能更完善**：支持热词 API 源管理、保底搜索词库、详细配置选项
 > - ✅ **操作更便捷**：通过扩展图标直接控制任务，无需进入 Tampermonkey 菜单
 >
-> 👉 **[查看浏览器插件版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/bing-rewards-extension/README.md)**
+> 👉 **[查看浏览器插件版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-extension/README.md)**
 >
 > 如果您习惯使用 Tampermonkey 或需要更轻量的解决方案，可以继续阅读下方的用户脚本版本说明。
 
