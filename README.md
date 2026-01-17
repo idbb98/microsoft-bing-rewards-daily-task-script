@@ -3,26 +3,28 @@
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
 ![](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/badge/star.svg?theme=white) <!-- 星标数徽章 -->
 
-**自动化完成微软必应每日搜索任务，轻松积累奖励积分**
-
-此脚本是一个浏览器用户脚本（UserScript），可在安装 Tampermonkey 等脚本管理器后，自动模拟人工搜索行为，帮助您完成 Microsoft Bing Rewards（微软必应奖励）的每日PC端和移动端搜索任务，节省您的时间。
-
 ---
 
-## 🌟 推荐使用：浏览器插件版本
+## 🌟 推荐使用：浏览器扩展版本
 
-> **💡 更推荐使用浏览器插件版本！**
+> **💡 更推荐使用 浏览器扩展版本！**
 >
-> 本项目同时提供 **浏览器插件** 和 **Tampermonkey 用户脚本** 两种版本。
+> 本项目同时提供 **浏览器扩展** 和 **Tampermonkey 用户脚本** 两种版本。
 >
-> **使用浏览器插件版本**，具有以下优势：
+> **推荐使用浏览器扩展版本**，具有以下优势：
 > - ✅ **界面更友好**：提供独立的设置页面和状态面板
 > - ✅ **功能更完善**：支持热词 API 源管理、保底搜索词库、详细配置选项
 > - ✅ **操作更便捷**：通过扩展图标直接控制任务，无需进入 Tampermonkey 菜单
 >
-> 👉 **[查看浏览器插件版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-extension/README.md)**
+> 👉 **[查看浏览器扩展版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/bing-rewards-extension/README.md)**
 >
 > 如果您习惯使用 Tampermonkey 或需要更轻量的解决方案，可以继续阅读下方的用户脚本版本说明。
+
+---
+
+**自动化完成微软必应每日搜索任务，轻松积累奖励积分**
+
+此脚本是一个浏览器用户脚本（UserScript），可在安装 Tampermonkey 等脚本管理器后，自动模拟人工搜索行为，帮助您完成 Microsoft Bing Rewards（微软必应奖励）的每日PC端和移动端搜索任务，节省您的时间。
 
 ---
 
