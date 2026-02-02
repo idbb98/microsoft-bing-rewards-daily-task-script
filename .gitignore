@@ -1,0 +1,45 @@
+# 编译输出和构建产物
+bin/
+obj/
+publish/
+
+# 日志文件
+logs/
+
+# Visual Studio 和 Visual Studio Code 相关文件
+.vs/
+.vscode/
+*.user.js.map
+
+# Visual Studio Code 特定配置
+.vscode/settings.json
+
+# IDE 特定文件
+*.suo
+*.ntvs*
+*.njsproj.user
+*.swp
+*~
+.project
+.DS_Store
+
+# 浏览器扩展相关（如果不需要版本控制）
+bing-rewards-extension/css/bootstrap.min.css
+bing-rewards-extension/js/bootstrap.bundle.min.js
+
+# 临时文件
+*.tmp
+*.temp
+Thumbs.db
+ehthumbs.db
+
+# 运行时生成的文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 用户特定设置
+*.user
+*.userosscache
+*.sln.docstates

@@ -7,16 +7,20 @@
 
 ## 浏览器扩展版本
 
-> 本项目同时提供 **浏览器扩展** 和 **Tampermonkey 用户脚本** 两种版本。
->
-> **浏览器扩展版本**，具有以下优势：
-> - ✅ **界面更友好**：提供独立的设置页面和状态面板
-> - ✅ **功能更完善**：支持热词 API 源管理、保底搜索词库、详细配置选项
-> - ✅ **操作更便捷**：通过扩展图标直接控制任务，无需进入 Tampermonkey 菜单
->
-> 👉 **[查看浏览器扩展版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-extension/README.md)**
->
-> 如果您习惯使用 Tampermonkey 或需要更轻量的解决方案，可以继续阅读下方的用户脚本版本说明。
+> 【版本已过期】本项目曾经提供 **浏览器扩展** 和 **Tampermonkey 用户脚本** 两种版本。 
+> 现在推荐使用新的 **bing-rewards-simulator** 版本，它提供了更好的功能和维护支持。
+
+---
+
+## bing-rewards-simulator 版本
+
+> 新版本：**bing-rewards-simulator** 是一个桌面自动化程序，使用 .NET Framework 实现，可以更稳定地完成 Bing Rewards 搜索任务。
+
+- ✅ **更稳定**：基于桌面应用的自动化，不受浏览器扩展政策影响
+- ✅ **功能更强**：支持键盘模拟、更精细的浏览器控制
+- ✅ **易于配置**：通过配置文件灵活调整各项参数
+
+👉 **[查看 bing-rewards-simulator 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-simulator/README.md)**
 
 ---
 
