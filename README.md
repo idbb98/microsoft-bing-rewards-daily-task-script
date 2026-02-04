@@ -8,17 +8,25 @@
 ## 浏览器扩展版本
 
 > 【版本已过期】本项目曾经提供 **浏览器扩展** 和 **Tampermonkey 用户脚本** 两种版本。 
-> 现在推荐使用新的 **bing-rewards-simulator** 版本，它提供了更好的功能和维护支持。
+> 现在推荐使用新的 **bing-rewards-python** 版本，它提供了更好的功能和维护支持。
+
+---
+
+## bing-rewards-python 版本 （推荐使用）
+
+> 最新版本：**bing-rewards-python** 是一个Windows的自动化程序，使用 Python 实现，可以更灵活、高效地完成 Bing Rewards 搜索任务。
+
+- ✅ **稳定可靠**：独立运行，不受浏览器扩展政策变更影响
+- ✅ **功能强大**：支持键盘模拟、多账户管理及精细化控制
+- ✅ **轻松配置**：通过配置文件实现参数的灵活调整
+
+👉 **[查看 bing-rewards-python 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-python/README.md)**
 
 ---
 
 ## bing-rewards-simulator 版本
 
-> 新版本：**bing-rewards-simulator** 是一个桌面自动化程序，使用 .NET Framework 实现，可以更稳定地完成 Bing Rewards 搜索任务。
-
-- ✅ **更稳定**：基于桌面应用的自动化，不受浏览器扩展政策影响
-- ✅ **功能更强**：支持键盘模拟、更精细的浏览器控制
-- ✅ **易于配置**：通过配置文件灵活调整各项参数
+> 版本：**bing-rewards-simulator** 是一个桌面自动化程序，使用 .NET Framework 实现，可以稳定地完成 Bing Rewards 搜索任务。
 
 👉 **[查看 bing-rewards-simulator 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-simulator/README.md)**
 
@@ -104,9 +112,13 @@
 
 ## 🛠️ 技术说明
 
--   **脚本类型**：纯粹的前端用户脚本，运行于您的浏览器沙盒环境中。
--   **工作原理**：通过模拟鼠标点击、键盘输入和等待延迟，自动在搜索框输入关键词并触发搜索。
--   **更新**：脚本会通过 Tampermonkey 自动检查更新。您也可以在 Tampermonkey 仪表盘中手动检查。
+本项目提供多个版本的 Bing Rewards 自动化工具，满足不同用户的需求：
+
+-   **bing-rewards-python**：跨平台的 Python 实现，支持多账户管理和完整的任务自动化
+-   **bing-rewards-simulator**：基于 .NET Framework 的桌面自动化程序
+-   **Tampermonkey 用户脚本**：纯粹的前端用户脚本，运行于浏览器沙盒环境中
+
+各版本均通过模拟人工搜索行为，自动完成 Bing Rewards 的每日搜索任务，节省您的时间。
 
 ---
 
