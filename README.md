@@ -14,11 +14,11 @@
 
 ## bing-rewards-python 版本 （推荐使用）
 
-> 最新版本：**bing-rewards-python** 是一个Windows的自动化程序，使用 Python 实现，可以更灵活、高效地完成 Bing Rewards 搜索任务。
+> 最新版本：**bing-rewards-python** 是一个支持 Windows 的桌面自动化程序，使用 Python 实现，可以更灵活、高效地完成 Bing Rewards 搜索任务。
 
 - ✅ **稳定可靠**：独立运行，不受浏览器扩展政策变更影响
-- ✅ **功能强大**：支持键盘模拟、多账户管理及精细化控制
-- ✅ **轻松配置**：通过配置文件实现参数的灵活调整
+- ✅ **功能强大**：支持键盘模拟、窗口焦点恢复及精细化控制
+- ✅ **轻松配置**：通过配置页面实现参数的灵活调整
 
 👉 **[查看 bing-rewards-python 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-python/README.md)**
 
@@ -26,7 +26,7 @@
 
 ## bing-rewards-simulator 版本
 
-> 版本：**bing-rewards-simulator** 是一个桌面自动化程序，使用 .NET Framework 实现，可以稳定地完成 Bing Rewards 搜索任务。
+> 版本：**bing-rewards-simulator** 是一个支持 Windows 的桌面自动化程序，使用 .NET Framework 实现，可以稳定地完成 Bing Rewards 搜索任务。
 
 👉 **[查看 bing-rewards-simulator 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-simulator/README.md)**
 
@@ -38,6 +38,8 @@
 
 ---
 
+> 以下为油猴脚本版本说明
+
 ## ✨ 核心功能特性
 
 ### 🎯 自动化与效率
@@ -45,7 +47,6 @@
 -   **智能进度管理**：自动计算并显示任务进度，清晰了解完成情况。
 
 ### 🔧 智能模拟与安全
--   **双端模式支持**：脚本自动识别并模拟PC和手机两种设备环境进行搜索。
 -   **动态搜索策略**：内置丰富词库，自动获取并随机使用热门搜索词，使行为更接近真人。
 -   **隐私与混淆**：支持随机化用户代理（User-Agent），并对搜索词进行混淆处理，有效降低被识别为自动化脚本的风险。
 
@@ -114,7 +115,7 @@
 
 本项目提供多个版本的 Bing Rewards 自动化工具，满足不同用户的需求：
 
--   **bing-rewards-python**：跨平台的 Python 实现，支持多账户管理和完整的任务自动化
+-   **bing-rewards-python**：跨平台的 Python 实现，支持任务自动化
 -   **bing-rewards-simulator**：基于 .NET Framework 的桌面自动化程序
 -   **Tampermonkey 用户脚本**：纯粹的前端用户脚本，运行于浏览器沙盒环境中
 

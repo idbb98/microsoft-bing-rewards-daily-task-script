@@ -32,7 +32,7 @@ class BingRewardsAutomation:
         self.ui_manager = UIManager(root, self)
         
         # 初始化浏览器自动化模块（稍后会更新浏览器路径）
-        self.browser_automation = BrowserAutomation()
+        self.browser_automation = BrowserAutomation(log_manager=self.log_manager)
         
         # 将UI管理器设置到日志管理器
         self.log_manager.set_ui_manager(self.ui_manager)
@@ -60,7 +60,7 @@ class BingRewardsAutomation:
         browser_path = self.ui_manager.get_browser_selection()
         
         # 更新浏览器自动化模块的浏览器路径
-        self.browser_automation = BrowserAutomation(browser_path)
+        self.browser_automation = BrowserAutomation(browser_path, log_manager=self.log_manager)
         
         # 在新线程中执行自动化任务
         self.thread = threading.Thread(target=self.run_automation, args=(browser_path,))
@@ -114,17 +114,37 @@ class BingRewardsAutomation:
             self.log("信息", f"使用浏览器路径: {browser_path}")
 
             # 打开浏览器并导航到Bing
-            self.browser_automation.open_browser()
+            self.log("信息", "正在启动浏览器...")
+            success = self.browser_automation.open_browser()
+            if not success:
+                self.log("错误", "无法启动或激活浏览器窗口")
+                self.stop_automation()
+                return
+            self.log("信息", "浏览器启动并激活成功")
+
+            # 预热浏览器
+            self.log("信息", "正在预热浏览器...")
+            success = self.browser_automation.preheat_browser()
+            if not success:
+                self.log("错误", "浏览器预热失败")
+                self.stop_automation()
+                return
+            self.log("信息", "浏览器预热完成")
             
             # 执行多次搜索
             for i, term in enumerate(search_terms):
                 if not self.is_running:
                     break
-                
+
                 self.log("信息", f"执行第{i+1}次搜索，搜索词: {term}")
                 
                 # 调用浏览器自动化模块的单次搜索方法
-                self.browser_automation.perform_single_search(term)
+                success = self.browser_automation.perform_single_search(term)
+                if not success:
+                    self.log("错误", f"第{i+1}次搜索失败")
+                    # 可以选择继续执行下一次搜索或停止
+                    # 这里选择继续执行
+                    self.log("信息", "继续执行下一次搜索")
                 
                 # 随机延迟
                 if i < len(search_terms) - 1:

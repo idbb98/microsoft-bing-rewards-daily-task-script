@@ -29,7 +29,7 @@ executables = [
 # 执行打包
 setup(
     name='BingRewardsAutomation',
-    version='26.2.5.1',
+    version='26.2.10.1',
     description='Bing Rewards Daily Task Automation',
     options=options,
     executables=executables

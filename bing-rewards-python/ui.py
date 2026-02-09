@@ -88,7 +88,8 @@ class UIManager:
         self.warning_frame.pack(fill=tk.X, pady=5)
         
         # 添加警告信息
-        ttk.Label(self.warning_frame, text="程序运行期间请勿使用键盘和鼠标进行任何操作，否则可能导致程序异常或任务中断！", 
+        ttk.Label(self.warning_frame, text="程序运行期间请勿使用键盘和鼠标进行任何操作，否则可能导致程序异常或任务中断！\n"
+                                          "请避免打开或编辑重要文档，防止因鼠标键盘被占用导致误操作或数据异常！！！", 
                   wraplength=650, foreground="#FF0000", font=("Microsoft YaHei", 10, "bold")).pack(anchor=tk.W, pady=5)
         
         # 创建按钮区域
@@ -126,8 +127,22 @@ class UIManager:
         # 浏览器路径配置
         ttk.Label(self.config_frame, text="浏览器路径：").grid(row=1, column=0, sticky=tk.W, pady=5)
         self.browser_var = tk.StringVar(value=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
-        self.browser_entry = ttk.Entry(self.config_frame, textvariable=self.browser_var, width=50)
-        self.browser_entry.grid(row=1, column=1, sticky=tk.W, pady=5)
+        # 添加变量变化监听，自动保存配置
+        self.browser_var.trace_add('write', lambda *args: self.save_config())
+        
+        # 常用浏览器路径
+        self.common_browser_paths = [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",  # Chrome
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",  # Edge
+            r"C:\Program Files\Mozilla Firefox\firefox.exe",  # Firefox
+            r"C:\Users\User\AppData\Local\Programs\Quark\quark.exe",  # 夸克浏览器
+            r"C:\Program Files\Opera\launcher.exe",  # Opera
+            r"C:\Program Files\UC\UCBrowser\Application\UCBrowser.exe"  # UC浏览器
+        ]
+        
+        # 创建下拉框
+        self.browser_combobox = ttk.Combobox(self.config_frame, textvariable=self.browser_var, values=self.common_browser_paths, width=48)
+        self.browser_combobox.grid(row=1, column=1, sticky=tk.W, pady=5)
         self.browse_button = ttk.Button(self.config_frame, text="浏览", command=self.browse_browser_path)
         self.browse_button.grid(row=1, column=2, sticky=tk.W, padx=5, pady=5)
         
@@ -231,7 +246,7 @@ class UIManager:
             # 设置标签框架的样式
             notes_frame.configure(relief="raised")
             for note in important_notes:
-                ttk.Label(notes_frame, text=f"• {note}", font=("Microsoft YaHei", 11, "bold"), wraplength=650, foreground="#dc3545").pack(anchor=tk.W, pady=3)
+                ttk.Label(notes_frame, text=f"{note}", font=("Microsoft YaHei", 11, "bold"), wraplength=650, foreground="#dc3545").pack(anchor=tk.W, pady=3)
         
         # 免责声明
         disclaimer = self.about_config.get("disclaimer", "")
