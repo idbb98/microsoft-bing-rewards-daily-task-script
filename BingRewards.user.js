@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.1.26.1
+// @version      26.2.13.1
 // @description  自动化完成微软必应每日搜索任务，实时显示进度，轻松积累奖励积分。
 // @author       KEEPA
 // @match        https://*.bing.com/*
@@ -24,6 +24,10 @@
 
 /*
  * 更新说明：
+ * V26.2.13.1
+ * • 搜索URL优化：调整搜索URL参数构建，增强脚本行为真实性
+ * • 菜单优化：调整菜单顺序，提升用户体验
+ * 
  * V26.1.26.1
  * • 统一搜索配置：移除设备类型区分，采用单一最大搜索次数配置
  * • 动态间隔控制：暂停间隔与暂停时间采用区间随机配置，增强行为真实性
@@ -80,8 +84,12 @@
 
 // 配置参数
 const CONFIG = {
+    // 搜索form参数
+    // ⚠️ 手动进入https://cn.bing.com，确保登录后执行几次搜索，根据实际地址栏的form=xxx修改
+    searchFormParam: 'QBLH',
+
     // 最大搜索次数
-    maxSearches: 25,
+    maxSearches: 20,
 
     // 是否随机加词，如：人工智能发展  -->  人工1智能发z展 
     randomAddSearchWords: false,
@@ -113,13 +121,6 @@ const CONFIG = {
 
     // 启动参数标记数组
     startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch'],
-};
-
-// 搜索参数配置
-const SEARCH_CONFIG = {
-    domains: ['https://www.bing.com', 'https://cn.bing.com'],
-    params: ['QBLH', 'QBRE', 'QBRP', 'QBRL', 'QBSB', 'QBVA', 'QBNT', 'QBUS', 'QBIN', 'QBEN'],
-    markets: ['zh-CN', 'en-US', 'en-GB', 'ja-JP']
 };
 
 // 状态管理
@@ -337,16 +338,23 @@ const SEARCH_WORDS = [
  * 构建搜索URL
  */
 function buildSearchUrl(searchWord) {
-    const domain = SEARCH_CONFIG.domains[Math.floor(Math.random() * SEARCH_CONFIG.domains.length)];
-    const form = SEARCH_CONFIG.params[Math.floor(Math.random() * SEARCH_CONFIG.params.length)];
-    const mkt = SEARCH_CONFIG.markets[Math.floor(Math.random() * SEARCH_CONFIG.markets.length)];
+    const domain = 'https://cn.bing.com'; 
+    const form = CONFIG.searchFormParam;
+
+    const length = searchWord.length;
+    const hitPosition = Math.random() < 0.9 ? 0 : Math.floor(Math.random() * Math.min(length, 5)) + 1;
+    const sc = `${hitPosition}-${length}`;
 
     const urlParams = new URLSearchParams({
         q: searchWord,
         form,
+        sp: -1,
+        lq: 0,
+        pq: searchWord,
+        sc,
+        qs: 'n',
+        sk: '',
         cvid: utils.generateId(),
-        pc: 'U01',  // 固定使用U01参数
-        mkt
     });
 
     const startParam = utils.getRandomStartParam();
@@ -773,6 +781,16 @@ GM_registerMenuCommand('📊 查看/隐藏面板', () => {
         const panel = state.statusPanel;
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     }
+});
+
+GM_registerMenuCommand('⚙️ 配置脚本参数', () => {
+    alert('请配置以下参数：\n\n1. searchFormParam: 登录Bing后手动搜索几次，从地址栏获取实际的form参数值\n2. maxSearches: 设置每日最大搜索次数\n3. 其他高级参数可根据需要调整\n\n配置完成后刷新页面开始使用。');
+    window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script#-%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B%E6%8C%87%E5%8D%97', '_blank');
+});
+
+GM_registerMenuCommand('👨‍💻 关于作者', () => {
+    alert('作者：KEEPA\n版本：' + GM_info.script.version + '\n\n这是一个自动化完成微软必应每日搜索任务的脚本，帮助您轻松积累奖励积分。\n\n如果您觉得这个脚本有用，欢迎给作者点个Star！');
+    window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script', '_blank');
 });
 
 // 启动脚本
