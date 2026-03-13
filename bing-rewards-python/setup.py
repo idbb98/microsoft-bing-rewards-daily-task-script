@@ -11,7 +11,8 @@ include_files = [
 options = {
     'build_exe': {
         'include_files': include_files,
-        'packages': ['requests', 'pyautogui', 'win32api', 'win32con', 'win32gui'],
+        'packages': ['requests', 'pyautogui', 'win32api', 'win32con', 'win32gui', 'encodings'],
+        'includes': ['encodings'],
         'include_msvcr': True  # 包含Microsoft Visual C++运行时
     }
 }
@@ -28,9 +29,9 @@ executables = [
 
 # 执行打包
 setup(
-    name='BingRewardsAutomation',
-    version='26.2.10.1',
-    description='Bing Rewards Daily Task Automation',
+    name='微软必应奖励每日任务脚本',
+    version='26.3.13.1',
+    description='微软必应奖励每日任务脚本 - keepa',
     options=options,
     executables=executables
 )

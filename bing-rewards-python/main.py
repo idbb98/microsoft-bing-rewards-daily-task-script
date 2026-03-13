@@ -2,6 +2,7 @@ import tkinter as tk
 import threading
 import time
 import os
+import sys
 import requests
 import random
 import webbrowser
@@ -10,6 +11,9 @@ import win32api
 import win32con
 import win32gui
 import json
+import win32event
+import win32process
+import win32security
 
 # 导入自定义模块
 from ui import UIManager
@@ -54,7 +58,7 @@ class BingRewardsAutomation:
         
         self.is_running = True
         self.ui_manager.update_button_states(True)
-        self.ui_manager.set_opacity(0.7)  # 设置透明度为50%
+        self.ui_manager.set_opacity(0.7)
         
         # 获取浏览器路径
         browser_path = self.ui_manager.get_browser_selection()
@@ -117,7 +121,7 @@ class BingRewardsAutomation:
             self.log("信息", "正在启动浏览器...")
             success = self.browser_automation.open_browser()
             if not success:
-                self.log("错误", "无法启动或激活浏览器窗口")
+                self.log("错误", "无法启动或激活浏览器窗口，请检查配置页面浏览器路径是否正确")
                 self.stop_automation()
                 return
             self.log("信息", "浏览器启动并激活成功")
@@ -165,6 +169,27 @@ class BingRewardsAutomation:
             self.stop_automation()
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = BingRewardsAutomation(root)
-    root.mainloop()
+    # 创建Windows互斥量，确保只能运行一个实例
+    mutex_name = "BingRewardsAutomationMutex"
+    
+    # 创建互斥量
+    mutex = win32event.CreateMutex(None, False, mutex_name)
+    
+    # 检查是否已经存在实例
+    if win32api.GetLastError() == 183:  # ERROR_ALREADY_EXISTS = 183
+        # 已经存在实例，显示提示并退出
+        import tkinter.messagebox
+        root = tk.Tk()
+        root.withdraw()  # 隐藏主窗口
+        tkinter.messagebox.showinfo("提示", "程序已经在运行中！")
+        root.destroy()
+        sys.exit()
+    
+    try:
+        root = tk.Tk()
+        app = BingRewardsAutomation(root)
+        root.mainloop()
+    finally:
+        # 释放互斥量
+        if mutex:
+            win32api.CloseHandle(mutex)
