@@ -40,15 +40,25 @@ class UIManager:
         self.root.resizable(False, False)
         self.root.attributes('-topmost', True)  # 默认置顶
         
-        # 获取屏幕尺寸
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
+        # 获取窗口尺寸
         window_width = 750
         window_height = 500
         
-        # 计算右下角位置
-        x = screen_width - window_width
-        y = screen_height - window_height
+        # 尝试使用工作区域尺寸（排除任务栏）
+        try:
+            work_area = self.root.winfo_workarea()
+            work_width = work_area[2]
+            work_height = work_area[3]
+            # 计算右下角位置
+            x = work_width - window_width
+            y = work_height - window_height
+        except AttributeError:
+            # 兼容不支持winfo_workarea的环境
+            screen_width = self.root.winfo_screenwidth()
+            screen_height = self.root.winfo_screenheight()
+            # 计算右下角位置，留出任务栏空间
+            x = screen_width - window_width
+            y = screen_height - window_height - 60  # 减去任务栏高度的估计值
         
         # 设置窗口位置
         self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
@@ -132,12 +142,13 @@ class UIManager:
         
         # 常用浏览器路径
         self.common_browser_paths = [
-            r"C:\Program Files\Google\Chrome\Application\chrome.exe",  # Chrome
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",  # Edge
-            r"C:\Program Files\Mozilla Firefox\firefox.exe",  # Firefox
-            r"C:\Users\User\AppData\Local\Programs\Quark\quark.exe",  # 夸克浏览器
-            r"C:\Program Files\Opera\launcher.exe",  # Opera
-            r"C:\Program Files\UC\UCBrowser\Application\UCBrowser.exe"  # UC浏览器
+            r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",  # Chrome
+            r"D:\\development\\PortableTool\\CentBrowserPortable\\chrome.exe",
+            r"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",  # Edge
+            r"C:\\Program Files\\Mozilla Firefox\\firefox.exe",  # Firefox
+            r"C:\\Users\\User\\AppData\\Local\\Programs\\Quark\\quark.exe",  # 夸克浏览器
+            r"C:\\Program Files\\Opera\\launcher.exe",  # Opera
+            r"C:\\Program Files\\UC\\UCBrowser\\Application\\UCBrowser.exe"  # UC浏览器
         ]
         
         # 创建下拉框
