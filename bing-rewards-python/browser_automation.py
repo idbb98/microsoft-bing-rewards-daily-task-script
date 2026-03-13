@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import subprocess
@@ -23,19 +24,44 @@ class BrowserAutomation:
             # 回退到print
             print(f"[{level}] {message}")
     
-    def open_browser(self):
-        """打开浏览器"""
+    def open_browser(self, custom_browser_title=None, custom_browser_process=None):
+        """打开浏览器
+        
+        Args:
+            custom_browser_title: 自定义浏览器标题
+            custom_browser_process: 自定义浏览器进程名称
+            
+        Returns:
+            bool: 成功打开并激活浏览器窗口返回True，失败返回False
+        """
         process = None
         if self.browser_path:
             # 使用指定的浏览器路径打开
-            process = subprocess.Popen([self.browser_path, "https://www.bing.com"])
+            # 构建命令行参数
+            args = [self.browser_path, "https://www.bing.com"]
+            
+            # 为不同浏览器添加自定义标题的支持
+            browser_name = os.path.basename(self.browser_path).lower()
+            if custom_browser_title:
+                if "chrome" in browser_name or "msedge" in browser_name:
+                    # Chrome和Edge支持--app参数来设置标题
+                    args = [self.browser_path, "--app=https://www.bing.com"]
+                elif "firefox" in browser_name:
+                    # Firefox支持-title参数
+                    args.extend(["-title", custom_browser_title])
+            
+            process = subprocess.Popen(args)
         else:
             # 使用系统默认浏览器
             import webbrowser
             webbrowser.open("https://www.bing.com")
         
         # 等待浏览器窗口加载完成并激活
-        success = self.wait_for_browser_window(process.pid if process else None)
+        success = self.wait_for_browser_window(
+            process.pid if process else None,
+            custom_browser_title=custom_browser_title,
+            custom_browser_process=custom_browser_process
+        )
         return success
     
     def ensure_browser_focus(self, timeout=10, check_interval=0.5):
@@ -104,7 +130,7 @@ class BrowserAutomation:
         self.log("错误", f"超时: 无法在{timeout}秒内恢复浏览器窗口焦点")
         return False
     
-    def wait_for_browser_window(self, process_id=None, timeout=30, check_interval=0.5):
+    def wait_for_browser_window(self, process_id=None, timeout=30, check_interval=0.5, custom_browser_title=None, custom_browser_process=None):
         """
         等待浏览器窗口加载完成并激活
         
@@ -112,6 +138,8 @@ class BrowserAutomation:
             process_id: 浏览器进程ID，如果为None则通过窗口标题查找
             timeout: 超时时间（秒）
             check_interval: 检查间隔（秒）
+            custom_browser_title: 自定义浏览器标题
+            custom_browser_process: 自定义浏览器进程名称
             
         Returns:
             bool: 成功激活浏览器窗口返回True，失败返回False
@@ -120,8 +148,28 @@ class BrowserAutomation:
         attempts = 0
         max_attempts = int(timeout / check_interval)
         
-        # 扩展浏览器窗口标题匹配模式
-        browser_titles = ["Bing", "bing", "Microsoft Edge", "Chrome", "Firefox", "Opera", "浏览器", "Quark", "夸克", "UC", "Safari", "Internet Explorer", "IE"]
+        # 浏览器进程名称和标题匹配规则
+        browser_processes = {
+            "msedge.exe": ["Microsoft Edge", "Edge"],
+            "chrome.exe": ["Google Chrome", "Chrome"],
+            "firefox.exe": ["Mozilla Firefox", "Firefox"],
+            "opera.exe": ["Opera"],
+            "safari.exe": ["Safari"],
+            "iexplore.exe": ["Internet Explorer", "IE"],
+            "quark.exe": ["Quark", "夸克"],
+            "ucbrowser.exe": ["UC"]
+        }
+        
+        # 添加自定义浏览器进程和标题规则
+        if custom_browser_process:
+            browser_processes[custom_browser_process] = [custom_browser_title] if custom_browser_title else []
+        
+        # 通用浏览器标题关键词
+        browser_keywords = ["Browser", "浏览器"]
+        
+        # 添加自定义标题到关键词列表
+        if custom_browser_title:
+            browser_keywords.insert(0, custom_browser_title)
         
         # 初始等待时间，让浏览器有机会启动
         initial_wait = 3
@@ -158,21 +206,63 @@ class BrowserAutomation:
                         if not title or title.strip() == "":
                             return True
                         
-                        # 检查是否包含浏览器特征标题
-                        if any(browser_title in title for browser_title in browser_titles):
+                        # 获取窗口所属进程ID
+                        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                        
+                        # 检查是否指定了进程ID
+                        if process_id:
                             # 如果指定了进程ID，验证窗口所属进程
-                            if process_id:
-                                try:
-                                    _, pid = win32process.GetWindowThreadProcessId(hwnd)
-                                    if pid == process_id:
-                                        windows.append((hwnd, title))
-                                except Exception as e:
-                                    self.log("错误", f"获取窗口进程ID时出错: {e}")
-                            else:
+                            if pid == process_id:
                                 windows.append((hwnd, title))
-                        # 如果没有找到匹配的浏览器窗口，记录所有窗口用于调试
-                        elif attempts == 1:
-                            windows.append((hwnd, f"[DEBUG] {title}"))
+                        else:
+                            # 优先检查自定义浏览器标题和进程
+                            if custom_browser_title and custom_browser_title in title:
+                                # 如果有自定义标题且匹配，直接添加
+                                windows.append((hwnd, title))
+                            else:
+                                # 未指定进程ID，通过进程名称和标题关键词识别浏览器
+                                try:
+                                    # 获取进程名称
+                                    process = psutil.Process(pid)
+                                    process_name = process.name().lower()
+                                    
+                                    # 检查进程名称是否在浏览器进程列表中
+                                    is_browser_process = False
+                                    for browser_process, browser_titles in browser_processes.items():
+                                        if browser_process.lower() == process_name:
+                                            is_browser_process = True
+                                            break
+                                    
+                                    # 检查标题是否包含浏览器关键词
+                                    has_browser_keyword = any(keyword in title for keyword in browser_keywords)
+                                    
+                                    # 检查标题是否包含特定浏览器的标题
+                                    has_browser_title = False
+                                    for browser_titles in browser_processes.values():
+                                        if any(browser_title in title for browser_title in browser_titles):
+                                            has_browser_title = True
+                                            break
+                                    
+                                    # 至少满足以下条件之一：
+                                    # 1. 进程名称是浏览器进程
+                                    # 2. 标题包含浏览器关键词
+                                    # 3. 标题包含特定浏览器的标题
+                                    if is_browser_process or has_browser_keyword or has_browser_title:
+                                        windows.append((hwnd, title))
+                                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                                    # 无法获取进程信息，尝试通过标题识别
+                                    has_browser_keyword = any(keyword in title for keyword in browser_keywords)
+                                    has_browser_title = False
+                                    for browser_titles in browser_processes.values():
+                                        if any(browser_title in title for browser_title in browser_titles):
+                                            has_browser_title = True
+                                            break
+                                    
+                                    if has_browser_keyword or has_browser_title:
+                                        windows.append((hwnd, title))
+                                    # 如果没有找到匹配的浏览器窗口，记录所有窗口用于调试
+                                    elif attempts == 1:
+                                        windows.append((hwnd, f"[DEBUG] {title}"))
                     except Exception as e:
                         self.log("错误", f"枚举窗口时出错: {e}")
                 return True
