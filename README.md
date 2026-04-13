@@ -1,161 +1,243 @@
-# Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
+# Microsoft Bing Rewards 自动化工具集
 
 ![](https://img.shields.io/badge/license-MIT-blue.svg)
-![](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/badge/star.svg?theme=white) <!-- 星标数徽章 -->
+![](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/badge/star.svg?theme=white)
 
 ---
 
-## 浏览器扩展版本
+**🤖 自动化完成微软必应每日搜索任务，智能积累奖励积分**
 
-> 【版本已过期】本项目曾经提供 **浏览器扩展** 和 **Tampermonkey 用户脚本** 两种版本。 
-> 现在推荐使用新的 **bing-rewards-python** 版本，它提供了更好的功能和维护支持。
-
----
-
-## bing-rewards-python 版本 （推荐使用）
-
-> 最新版本：**bing-rewards-python** 是一个支持 Windows 的桌面自动化程序，使用 Python 实现，可以更灵活、高效地完成 Bing Rewards 搜索任务。
-
-- ✅ **稳定可靠**：独立运行，不受浏览器扩展政策变更影响
-- ✅ **功能强大**：支持键盘模拟、窗口焦点恢复及精细化控制
-- ✅ **轻松配置**：通过配置页面实现参数的灵活调整
-
-👉 **[查看 bing-rewards-python 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-python/README.md)**
+本项目提供多种实现方式，帮助您自动完成 Microsoft Bing Rewards 的每日搜索任务，节省时间并轻松获取积分奖励。
 
 ---
 
-## bing-rewards-simulator 版本
+## 📦 版本选择
 
-> 版本：**bing-rewards-simulator** 是一个支持 Windows 的桌面自动化程序，使用 .NET Framework 实现，可以稳定地完成 Bing Rewards 搜索任务。
+本项目提供 **3 种实现方式**，满足不同场景需求：
 
-👉 **[查看 bing-rewards-simulator 版本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/bing-rewards-simulator/README.md)**
+| 版本 | 技术栈 | 适用场景 | 特点 |
+|------|--------|----------|------|
+| 🖥️ **桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
+| 🪟 **桌面程序** | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
+| 🌐 **浏览器脚本** | JavaScript + Tampermonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 
----
+### 🐍 Python 桌面版
 
-**自动化完成微软必应每日搜索任务，轻松积累奖励积分**
+> 基于 Python 实现的桌面自动化工具，支持 Windows 系统，配置灵活，功能丰富。
 
-此脚本是一个浏览器用户脚本（UserScript），可在安装 Tampermonkey 等脚本管理器后，自动模拟人工搜索行为，帮助您完成 Microsoft Bing Rewards（微软必应奖励）的每日PC端和移动端搜索任务，节省您的时间。
+👉 **[查看 Python 版本文档](bing-rewards-python/README.md)**
 
----
+### 🪟 .NET 桌面版
 
-> 以下为油猴脚本版本说明
+> 基于 .NET Framework 开发的 Windows 桌面程序，运行稳定，操作简单。
 
-## ✨ 核心功能特性
+👉 **[查看 .NET 版本文档](bing-rewards-simulator/README.md)**
 
-### 🎯 自动化与效率
--   **全自动任务执行**：一键启动，自动完成当日所有可完成的搜索任务。
--   **智能进度管理**：自动计算并显示任务进度，清晰了解完成情况。
+### 🌐 Tampermonkey 浏览器脚本版
 
-### 🔧 智能模拟与安全
--   **动态搜索策略**：内置丰富词库，自动获取并随机使用热门搜索词，使行为更接近真人。
--   **隐私与混淆**：支持随机化用户代理（User-Agent），并对搜索词进行混淆处理，有效降低被识别为自动化脚本的风险。
+> 纯粹的前端用户脚本，运行于浏览器沙盒环境中，跨平台支持，轻量便捷。
 
-### 👁️ 用户体验
--   **透明化操作**：在页面实时显示当前搜索词和任务进度。
--   **简易控制**：通过 Tampermonkey 菜单提供清晰的开始控制项。
+#### 📸 界面预览
 
----
+**展开状态 - 完整信息展示**
 
-## 🚀 快速开始指南
+![面板展开状态](asset/panel.png)
 
-### 第一步：安装脚本管理器
-本脚本需要在用户脚本管理器扩展中运行。我们推荐使用 **Tampermonkey**。
+**收起状态 - 紧凑模式**
 
--   **Microsoft Edge 用户**：请前往 [Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd) 安装。
--   **Firefox 用户**：请前往 [Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/tampermonkey/) 安装。
--   其他浏览器请访问 [Tampermonkey 官网](https://www.tampermonkey.net/) 查看安装指南。
+![面板收起状态](asset/panel-collapsed.png)
 
-**重要前置步骤：确保开启开发者模式**
-> 若您并非从上述官方商店安装扩展，或遇到扩展无法正常运行的情况，请确保在浏览器的扩展管理页面中**开启了“开发者模式”**。此模式允许安装来自第三方源的扩展程序（`.crx` 或 `.xpi` 文件）。
+**设置面板 - 可视化配置**
 
-### 第二步：安装脚本
-点击下面的链接，Tampermonkey 会提示您进行安装：
+![设置面板](asset/panel-setting.png)
 
-👉 **[点击此处一键安装脚本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)**
-
-在打开的安装确认页面，点击 **“安装”** 按钮即可。
-
-### 第三步：配置脚本参数
-
-> 脚本安装完成后，您需要手动配置一些参数，以确保脚本正常运行。
-
-#### 配置参数说明
--  ⚠️ **搜索form参数**：
-    -   **默认值**：`QBLH`，必须重新配置，每个浏览器可能不同。
-    -   **说明**：搜索表单参数，用于构建搜索URL。
-    -   **获取方法**：
-        -   打开 **[https://cn.bing.com](https://cn.bing.com)** 并登录您的微软账户。
-        -   执行几次搜索操作，确保搜索结果正常返回。
-        -   查看地址栏URL，`form=xxx` 中的 `xxx` 即为搜索form参数。
-        -   将此值替换到脚本配置中的 `searchFormParam` 字段。
--   **最大搜索次数**：
-    -   **默认值**：`20`
-    -   **说明**：脚本每次运行时，最多执行的搜索次数。
-    -   **建议值**：根据您的个人需求调整。
-
-
-### 第四步：运行脚本
-1.  **打开 Bing**：在新的标签页中访问 **[https://www.bing.com](https://www.bing.com)**，并**确保已登录您的微软账户**。
-2.  **启动任务**：
-    -   点击浏览器工具栏中的 **Tampermonkey** 图标。
-    -   在弹出菜单中找到 **“开始Bing任务”** 并点击。
-3.  **等待完成**：脚本开始运行后，请在页面顶部查看进度。**请保持此标签页为前台激活状态**，不要最小化浏览器或切换到其他标签，直至所有任务完成。
+👉 **[查看浏览器脚本说明](#-浏览器脚本版快速开始)**
 
 ---
 
-## ⚠️ 重要注意事项与常见问题
+## 🌐 浏览器脚本版快速开始
 
-### 使用前提与运行环境
--   **必须已登录**：使用前请在 Bing 网页版登录您的微软账户。
--   **保持页面激活**：浏览器标签页需处于前台活动状态，部分浏览器在页面后台时会限制脚本执行。
--   **网络要求**：需要稳定访问 Bing 国际站 (`www.bing.com`)。
+### ✨ 核心特性
 
-### 账户安全与风险提示
-> **重要**：使用自动化脚本存在理论上的账户风险，请合理谨慎使用。
--   **隐私声明**：本脚本仅在您当前访问的 Bing 网页上运行，**不收集、不上传任何您的 Cookie 或个人信息**。
--   **风险行为**：以下行为可能增加账号被微软系统标记的风险，建议避免：
-    -   在极短时间内（如几分钟内）完成全部每日搜索限额。
-    -   频繁切换网络IP地址或使用不稳定的代理。
-    -   每日都精准获取满分积分，毫无波动。
--   **使用建议**：建议模拟真人使用习惯，例如不定时运行、不每日都用满额度等。
+#### 🎯 智能自动化
+- **全自动任务执行**：一键启动，自动完成当日所有搜索任务
+- **智能进度管理**：实时显示任务进度与剩余时间，完成情况一目了然
 
-### 故障排除 (脚本未运行？)
+#### 🔒 安全模拟
+- **动态搜索策略**：内置丰富词库，自动获取并随机使用热搜关键词
+- **行为混淆技术**：支持随机化 User-Agent 与搜索词混淆，降低自动化识别风险
+- **隐私保护**：纯前端运行，**不收集、不上传任何 Cookie 或个人信息**
 
--   **确认脚本已安装并启用**：点击 Tampermonkey 图标，检查“仪表盘”中 `BingRewards` 脚本是否在列表内且为启用状态（开关为绿色）。
--   **检查访问的网站**：确保您打开的网址是 `https://www.bing.com` 或其子域名。
--   **检查脚本管理器**：
-    -   确认 Tampermonkey 扩展本身已启用（浏览器扩展管理页面中）。
-    -   **如果 Tampermonkey 安装后无法使用，请检查是否已在浏览器扩展管理页面开启“开发者模式”。**
--   **重新安装**：如果问题依旧，尝试从 Tampermonkey 仪表盘中移除旧脚本，然后重新点击安装链接进行安装。
+#### 🎨 现代 UI
+- **实时状态面板**：优雅的渐变设计与流畅动画，实时追踪任务进度
+- **可视化配置**：图形化设置界面，参数调整直观便捷
+- **暗色主题支持**：自动适配系统级暗色模式
+
+### 🚀 安装与使用
+
+#### 步骤 1：安装脚本管理器
+
+本脚本需要用户脚本管理器扩展运行，推荐使用 **Tampermonkey**：
+
+- **Microsoft Edge**：[Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
+- **Firefox**：[Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/tampermonkey/)
+- **Chrome/其他浏览器**：[Tampermonkey 官网](https://www.tampermonkey.net/)
+
+> ⚠️ **注意**：若非从官方商店安装，请在浏览器扩展管理页面开启**"开发者模式"**。
+
+#### 步骤 2：安装脚本
+
+点击以下链接，Tampermonkey 将自动提示安装：
+
+👉 **[一键安装脚本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)**
+
+在安装确认页面点击 **"安装"** 按钮即可。
+
+#### 步骤 3：配置参数
+
+> 首次使用前，需要配置关键参数以确保脚本正常运行。
+
+**⚙️ 必填配置：搜索 form 参数**
+
+- **默认值**：`QBLH`（必须修改）
+- **获取方法**：
+  1. 打开 [https://cn.bing.com](https://cn.bing.com) 并登录微软账户
+  2. 执行几次搜索操作
+  3. 查看地址栏 URL，提取 `form=xxx` 中的 `xxx` 值
+  4. 在脚本设置中替换 `searchFormParam` 字段
+
+**🔧 可选配置**
+
+- **最大搜索次数**：默认 `20`，根据个人需求调整
+- **随机加词/截词**：默认关闭，开启后增强行为真实性
+- **暂停间隔**：支持区间随机配置，模拟真人使用习惯
+
+#### 步骤 4：运行脚本
+
+1. **打开 Bing**：访问 [https://www.bing.com](https://www.bing.com) 并**确保已登录微软账户**
+2. **启动任务**：
+   - 点击浏览器工具栏的 **Tampermonkey** 图标
+   - 在菜单中找到 **"开始Bing任务"** 并点击
+3. **等待完成**：
+   - 页面顶部将显示进度面板
+   - **请保持标签页为前台激活状态**，不要最小化或切换标签
+   - 任务完成后会自动停止
 
 ---
 
-## 🛠️ 技术说明
+## ⚠️ 注意事项与常见问题
 
-本项目提供多个版本的 Bing Rewards 自动化工具，满足不同用户的需求：
+### 📋 使用前提
 
--   **bing-rewards-python**：跨平台的 Python 实现，支持任务自动化
--   **bing-rewards-simulator**：基于 .NET Framework 的桌面自动化程序
--   **Tampermonkey 用户脚本**：纯粹的前端用户脚本，运行于浏览器沙盒环境中
+- ✅ **必须登录**：使用前请在 Bing 网页版登录微软账户
+- ✅ **保持前台**：浏览器标签页需处于前台活动状态
+- ✅ **网络要求**：需稳定访问 Bing 国际站 (`www.bing.com`)
 
-各版本均通过模拟人工搜索行为，自动完成 Bing Rewards 的每日搜索任务，节省您的时间。
+### 🔒 安全与风险提示
+
+> **重要提示**：使用自动化工具存在理论上的账户风险，请合理使用。
+
+**隐私保障**
+- 纯前端运行，**不收集、不上传任何 Cookie 或个人信息**
+- 所有数据仅存储在本地浏览器中
+
+**风险行为（建议避免）**
+- ⚠️ 极短时间内（如几分钟内）完成全部每日搜索限额
+- ⚠️ 频繁切换网络 IP 或使用不稳定代理
+- ⚠️ 每日精准获取满分积分，毫无波动
+
+**使用建议**
+- 💡 模拟真人使用习惯，不定时运行
+- 💡 避免每日都用满额度
+- 💡 合理设置随机间隔时间
+
+### 🔧 故障排除
+
+**脚本未运行？**
+
+1. **确认脚本已启用**
+   - 点击 Tampermonkey 图标 → "仪表盘"
+   - 检查 `BingRewards` 脚本是否在列表中且开关为绿色
+
+2. **检查访问网址**
+   - 确保打开的是 `https://www.bing.com` 或其子域名
+   - 注意：`rewards.bing.com` 已被排除
+
+3. **检查扩展状态**
+   - 确认 Tampermonkey 扩展已启用
+   - 如无法使用，请检查浏览器是否开启"开发者模式"
+
+4. **重新安装**
+   - 从 Tampermonkey 仪表盘移除旧脚本
+   - 重新点击安装链接进行安装
+
+---
+
+## 🛠️ 技术架构
+
+本项目提供多套实现方案，满足不同的使用场景：
+
+| 版本 | 技术栈 | 核心特性 |
+|------|--------|----------|
+| **Python 桌面版** | Python + 浏览器自动化 | 跨平台支持，配置灵活，适合高级用户 |
+| **.NET 桌面版** | .NET Framework + C# | Windows 原生应用，运行稳定，开箱即用 |
+| **浏览器脚本版** | JavaScript + Tampermonkey | 纯前端实现，跨浏览器，轻量便捷 |
+
+**共同特点**：
+- 🎯 模拟人工搜索行为，完成 Bing Rewards 每日任务
+- 🔒 隐私保护，不收集用户个人信息
+- ⚡ 智能词库与随机策略，降低自动化识别风险
+
+---
+
+## 📝 版本历史
+
+### V26.4.13.1（最新版本）
+- UI全面重构：采用现代化设计语言，渐变图标容器、分层阴影、圆角优化
+- 交互动画增强：展开/收起面板添加平滑旋转动画，按钮三态反馈
+- 布局智能适配：收起模式极致紧凑（200px），展开模式信息完整（380px）
+- 状态栏优化：底部三栏布局，信息层次清晰
+- 设置页面升级：三段式布局，卡片式表单，动态勾选标记
+- 图标系统优化：全面采用 Emoji 图标，CSS rotate 实现平滑翻转
+- 搜索行为优化：随机加词/截词功能可视化配置
+- 性能提升：CSS 变量主题系统，支持暗色模式，GPU 加速动画
+
+### V26.2.13.1
+- 搜索URL优化：调整搜索URL参数构建，增强脚本行为真实性
+- 菜单优化：调整菜单顺序，提升用户体验
+
+### V26.1.26.1
+- 统一搜索配置：移除设备类型区分，采用单一最大搜索次数
+- 动态间隔控制：暂停间隔与暂停时间采用区间随机配置
+- UI界面优化：重构状态面板样式
+- 行为模拟优化：实现随机滚动策略
+- 参数稳定性：启动参数采用每日固定机制
+- 扩展参数池：扩充启动参数标记数组
+
+> 📜 查看完整更新说明，请浏览 [BingRewards.user.js](BingRewards.user.js) 文件头部注释。
 
 ---
 
 ## 🤝 贡献与支持
 
-我们欢迎并感谢所有的贡献，让这个工具变得更好！
+我们欢迎所有形式的贡献，让这个项目变得更好！
 
-*   **报告问题与建议**：如果您发现了 Bug 或有功能改进建议，请在 [Gitee Issues](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/issues) 页面提交。
-*   **贡献代码**：欢迎 Fork 项目并提交 Pull Request 来帮助改进脚本。
-*   **讨论交流**：关于使用中的任何疑问，也可以在项目的 Issue 区发起讨论。
+- 🐛 **报告问题**：在 [Gitee Issues](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/issues) 提交 Bug 或建议
+- 💻 **贡献代码**：Fork 项目并提交 Pull Request
+- 💬 **参与讨论**：在 Issue 区交流使用心得与疑问
 
 ---
 
-## 📄 许可证
+## 📄 开源许可
 
 本项目基于 **MIT 许可证** 开源。
-完整许可证文本请查看项目根目录下的 [LICENSE](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/blob/master/LICENSE) 文件。
+
+完整许可证文本请查看 [LICENSE](LICENSE) 文件。
 
 ---
-*本脚本仅供学习与交流自动化技术之用，请尊重微软必应奖励的服务条款，合理使用。*
+
+> ⚖️ **免责声明**：本脚本仅供学习与交流自动化技术之用，请尊重微软必应奖励的服务条款，合理使用。
+
+---
+
+**⭐ 如果这个项目对您有帮助，欢迎 Star 支持！**
