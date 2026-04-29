@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.4.13.1
-// @description  自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
+// @version      26.5.1.1
+// @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
 // @exclude      https://rewards.bing.com/*
@@ -22,78 +22,17 @@
 // @updateURL    https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js
 // ==/UserScript==
 
-/*
- * 更新说明：
- * V26.4.13.1
- * • UI全面重构：采用现代化设计语言，渐变图标容器、分层阴影、圆角优化，视觉体验全面升级
- * • 交互动画增强：展开/收起面板添加平滑旋转动画，按钮悬停/点击具备三态反馈（默认/悬停/按下）
- * • 布局智能适配：收起模式极致紧凑（200px），仅保留倒计时与控制按钮；展开模式信息完整（380px）
- * • 状态栏优化：底部三栏布局（页面状态 | 任务执行 | 版本号），信息层次清晰，实时反映运行状态
- * • 设置页面升级：三段式布局（固定头部+可滚动内容+固定底部），卡片式表单，动态勾选标记，交互更直观
- * • 图标系统优化：全面采用 Emoji 图标，展开/收起使用 CSS rotate 实现 180° 平滑翻转，无闪烁
- * • 搜索行为优化：随机加词/截词功能可视化配置，示例代码等宽字体高亮显示，参数调整更便捷
- * • 性能提升：CSS 变量主题系统，支持系统级暗色模式自动切换，动画采用 GPU 加速
- *
- * V26.2.13.1
- * • 搜索URL优化：调整搜索URL参数构建，增强脚本行为真实性
- * • 菜单优化：调整菜单顺序，提升用户体验
- *
- * V26.1.26.1
- * • 统一搜索配置：移除设备类型区分，采用单一最大搜索次数配置
- * • 动态间隔控制：暂停间隔与暂停时间采用区间随机配置，增强行为真实性
- * • UI界面优化：重构状态面板样式，提升用户体验与信息展示效率
- * • 行为模拟优化：实现随机滚动策略，模拟真实用户浏览行为
- * • 参数稳定性：启动参数采用每日固定机制，增强行为一致性
- * • 扩展参数池：扩充启动参数标记数组，增强脚本随机性与安全性
- *
- * V26.1.15.1
- * • 功能增强：增加随机加词和截词功能（默认关闭）
- * • 参数化配置：实现启动参数标记可配置化
- *
- * V26.1.6.1 (2026-01-06)
- * • 热词获取优化：增加多源热词接口，完善热词补充与过滤机制
- * • 随机算法升级：改进Fisher-Yates洗牌算法，提高随机性质量
- * • 版本管理：调整版本号格式为年-月-日-版本号格式
- *
- * V0.0.7 (2025-12-31)
- * • 问题修复：修正剩余时间计算错误及下个搜索词显示异常
- *
- * V0.0.6 (2025-12-24):
- * • 问题修复：解决面板关闭按钮失效问题
- * • 功能增强：增加面板显示/隐藏切换功能
- * • 交互优化：优化关闭按钮悬停效果
- * • 问题修复：修复倒计时变量引用错误
- *
- * V0.0.5 (2025-10-31):
- * • UI优化：改进状态面板UI设计
- * • 功能增强：添加精确计时器，不受页面可见性影响
- * • 逻辑优化：改进搜索词获取策略
- *
- * V0.0.4 (2025-10-30):
- * • 功能增强：添加搜索任务暂停机制
- * • 显示优化：改进进度显示方式
- * • 问题修复：修复移动端搜索数量限制问题
- *
- * V0.0.3 (2025-10-30):
- * • 逻辑优化：优化搜索URL构建逻辑
- * • 参数丰富：添加更多搜索参数变化
- * • 错误处理：改进错误处理和重试机制
- *
- * V0.0.2 (2025-10-13):
- * • 功能新增：添加状态显示面板
- * • 后台支持：支持后台运行和页面活跃状态显示
- * • 策略优化：优化搜索词获取策略
- *
- * V0.0.1 (2025-08-22):
- * • 功能发布：初始版本发布
- * • 设备兼容：支持PC和移动端自动搜索
- * • 进度追踪：基础进度追踪功能
- */
-
 'use strict';
 
 // 配置参数
 const CONFIG = {
+    // ==================== 脚本基础信息 ====================
+    
+    // 版本号（动态从GM_info获取）
+    get version() {
+        return GM_info?.script?.version || '1.0.0';
+    },
+    
     // ==================== 用户可配置参数 (通过设置页面/GM_value持久化) ====================
     
     // 搜索form参数，⚠️ 手动进入https://cn.bing.com，确保登录后执行几次搜索，根据实际地址栏的form=xxx修改
@@ -152,6 +91,14 @@ const CONFIG = {
         GM_setValue('customRandomCutSearchWordsFactor', value);
     },
 
+    // 是否点击搜索结果链接
+    get clickSearchResults() {
+        return GM_getValue('customClickSearchResults', false);
+    },
+    set clickSearchResults(value) {
+        GM_setValue('customClickSearchResults', value);
+    },
+
     // 暂停间隔范围：每执行多少次搜索后暂停一次的区间
     get pauseIntervalMin() {
         return GM_getValue('customPauseIntervalMin', 3);
@@ -204,6 +151,132 @@ const CONFIG = {
 
     // 启动参数标记数组
     startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch'],
+
+    // ==================== 更新日志 (便于提取和展示) ====================
+    changeLog: [
+        {
+            version: '26.5.1.1',
+            date: '2026-04-29',
+            changes: [
+                '功能增强：新增"点击搜索结果链接"配置选项，默认关闭，用户可在设置页面自行开启，提高脚本灵活性',
+                '问题修复：解决随机滚动功能不生效的问题',
+                '布局优化：全面支持响应式设计（Responsive Design），适配不同屏幕尺寸和分辨率',
+            ]
+        },
+        {
+            version: '26.4.13.1',
+            date: '2026-04-13',
+            changes: [
+                'UI全面重构：采用现代化设计语言，渐变图标容器、分层阴影、圆角优化，视觉体验全面升级',
+                '交互动画增强：展开/收起面板添加平滑旋转动画，按钮悬停/点击具备三态反馈（默认/悬停/按下）',
+                '布局智能适配：收起模式极致紧凑（200px），仅保留倒计时与控制按钮；展开模式信息完整（380px）',
+                '状态栏优化：底部三栏布局（页面状态 | 任务执行 | 版本号），信息层次清晰，实时反映运行状态',
+                '设置页面升级：三段式布局（固定头部+可滚动内容+固定底部），卡片式表单，动态勾选标记，交互更直观',
+                '图标系统优化：全面采用 Emoji 图标，展开/收起使用 CSS rotate 实现 180° 平滑翻转，无闪烁',
+                '搜索行为优化：随机加词/截词功能可视化配置，示例代码等宽字体高亮显示，参数调整更便捷',
+                '性能提升：CSS 变量主题系统，支持系统级暗色模式自动切换，动画采用 GPU 加速'
+            ]
+        },
+        {
+            version: '26.2.13.1',
+            date: '2026-02-13',
+            changes: [
+                '搜索URL优化：调整搜索URL参数构建，增强脚本行为真实性',
+                '菜单优化：调整菜单顺序，提升用户体验'
+            ]
+        },
+        {
+            version: '26.1.26.1',
+            date: '2026-01-26',
+            changes: [
+                '统一搜索配置：移除设备类型区分，采用单一最大搜索次数配置',
+                '动态间隔控制：暂停间隔与暂停时间采用区间随机配置，增强行为真实性',
+                'UI界面优化：重构状态面板样式，提升用户体验与信息展示效率',
+                '行为模拟优化：实现随机滚动策略，模拟真实用户浏览行为',
+                '参数稳定性：启动参数采用每日固定机制，增强行为一致性',
+                '扩展参数池：扩充启动参数标记数组，增强脚本随机性与安全性'
+            ]
+        },
+        {
+            version: '26.1.15.1',
+            date: '2026-01-15',
+            changes: [
+                '功能增强：增加随机加词和截词功能（默认关闭）',
+                '参数化配置：实现启动参数标记可配置化'
+            ]
+        },
+        {
+            version: '26.1.6.1',
+            date: '2026-01-06',
+            changes: [
+                '热词获取优化：增加多源热词接口，完善热词补充与过滤机制',
+                '随机算法升级：改进Fisher-Yates洗牌算法，提高随机性质量',
+                '版本管理：调整版本号格式为年-月-日-版本号格式'
+            ]
+        },
+        {
+            version: '0.0.7',
+            date: '2025-12-31',
+            changes: [
+                '问题修复：修正剩余时间计算错误及下个搜索词显示异常'
+            ]
+        },
+        {
+            version: '0.0.6',
+            date: '2025-12-24',
+            changes: [
+                '问题修复：解决面板关闭按钮失效问题',
+                '功能增强：增加面板显示/隐藏切换功能',
+                '交互优化：优化关闭按钮悬停效果',
+                '问题修复：修复倒计时变量引用错误'
+            ]
+        },
+        {
+            version: '0.0.5',
+            date: '2025-10-31',
+            changes: [
+                'UI优化：改进状态面板UI设计',
+                '功能增强：添加精确计时器，不受页面可见性影响',
+                '逻辑优化：改进搜索词获取策略'
+            ]
+        },
+        {
+            version: '0.0.4',
+            date: '2025-10-30',
+            changes: [
+                '功能增强：添加搜索任务暂停机制',
+                '显示优化：改进进度显示方式',
+                '问题修复：修复移动端搜索数量限制问题'
+            ]
+        },
+        {
+            version: '0.0.3',
+            date: '2025-10-30',
+            changes: [
+                '逻辑优化：优化搜索URL构建逻辑',
+                '参数丰富：添加更多搜索参数变化',
+                '错误处理：改进错误处理和重试机制'
+            ]
+        },
+        {
+            version: '0.0.2',
+            date: '2025-10-13',
+            changes: [
+                '功能新增：添加状态显示面板',
+                '后台支持：支持后台运行和页面活跃状态显示',
+                '策略优化：优化搜索词获取策略'
+            ]
+        },
+        {
+            version: '0.0.1',
+            date: '2025-08-22',
+            changes: [
+                '功能发布：初始版本发布',
+                '设备兼容：支持PC和移动端自动搜索',
+                '进度追踪：基础进度追踪功能'
+            ]
+        }
+    ]
 };
 
 // 状态管理
@@ -503,7 +576,7 @@ function createStatusPanel() {
             <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
                 <div id="panel-title-container" style="flex:1;min-width:0;${defaultCollapsed ? 'display:none;' : ''}">
                     <h3 style="margin:0;font-size:16px;color:var(--panel-primary-color,#0067b8);white-space:nowrap;font-weight:700;letter-spacing:-0.3px;">
-                        Bing Rewards
+                        Brian Tool
                     </h3>
                     <div style="font-size:11px;color:var(--panel-text-muted,#999);margin-top:2px;font-weight:500;">
                         自动化搜索任务助手
@@ -574,6 +647,87 @@ function createStatusPanel() {
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+        
+        /* 响应式布局 - 主面板 */
+        #bing-rewards-panel {
+            /* 移动端适配 */
+            @media (max-width: 768px) {
+                right: 10px !important;
+                bottom: 20px !important;
+                min-width: calc(100vw - 60px) !important;
+                max-width: calc(100vw - 60px) !important;
+                border-radius: 16px !important;
+            }
+            
+            @media (max-width: 480px) {
+                right: 8px !important;
+                bottom: 16px !important;
+                padding: 12px 14px !important;
+                min-width: calc(100vw - 46px) !important;
+                max-width: calc(100vw - 46px) !important;
+            }
+            
+            /* 确保面板有最大宽度限制 */
+            width: auto !important;
+        }
+        
+        /* 面板头部响应式 */
+        #bing-rewards-panel #panel-header {
+            @media (max-width: 480px) {
+                padding: 0 0 10px 0 !important;
+                gap: 6px !important;
+            }
+        }
+        
+        /* 面板头部标题容器 */
+        #bing-rewards-panel #panel-title-container h3 {
+            @media (max-width: 480px) {
+                font-size: 14px !important;
+            }
+        }
+        
+        #bing-rewards-panel #panel-title-container div {
+            @media (max-width: 480px) {
+                font-size: 10px !important;
+            }
+        }
+        
+        /* 倒计时响应式 */
+        #bing-rewards-panel #panel-countdown {
+            @media (max-width: 480px) {
+                font-size: 11px !important;
+                padding: 5px 10px !important;
+                margin-left: 8px !important;
+            }
+        }
+        
+        /* 按钮响应式 */
+        #bing-rewards-panel #panel-toggle-btn,
+        #bing-rewards-panel #panel-settings-btn,
+        #bing-rewards-panel #panel-close-btn {
+            @media (max-width: 480px) {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 14px !important;
+            }
+        }
+        
+        /* 面板底部状态栏响应式 */
+        #bing-rewards-panel #panel-body > div:last-child {
+            @media (max-width: 480px) {
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                padding-top: 10px !important;
+                margin-top: 12px !important;
+            }
+        }
+        
+        /* 进度条区域响应式 */
+        #bing-rewards-panel #panel-content > div {
+            @media (max-width: 480px) {
+                gap: 8px !important;
             }
         }
     `;
@@ -869,6 +1023,7 @@ function showSettingsDialog(theme) {
     const savedRandomAddFactor = GM_getValue('customRandomAddSearchWordsFactor', 0.3);
     const savedRandomCut = GM_getValue('customRandomCutSearchWords', false);
     const savedRandomCutFactor = GM_getValue('customRandomCutSearchWordsFactor', 0.2);
+    const savedClickSearchResults = GM_getValue('customClickSearchResults', false);
     const savedPauseIntervalMin = GM_getValue('customPauseIntervalMin', 3);
     const savedPauseIntervalMax = GM_getValue('customPauseIntervalMax', 5);
     const savedPauseTimeMin = GM_getValue('customPauseTimeMin', 10 * 60 * 1000) / 60000; // 转换为分钟
@@ -884,91 +1039,134 @@ function showSettingsDialog(theme) {
         randomAddFactor: savedRandomAddFactor,
         randomCut: savedRandomCut,
         randomCutFactor: savedRandomCutFactor,
+        clickSearchResults: savedClickSearchResults,
         pauseInterval: `${savedPauseIntervalMin}-${savedPauseIntervalMax}`,
         pauseTime: `${savedPauseTimeMin}-${savedPauseTimeMax}分钟`,
         delay: `${savedMinDelay}-${savedMaxDelay}秒`
     });
+
+    // 版本号（从CONFIG获取）
+    const currentVersion = CONFIG.version;
+
+    // 生成更新日志HTML（从CONFIG.changeLog获取）
+    const generateChangeLogHTML = () => {
+        return CONFIG.changeLog.map(item => `
+            <div style="padding-bottom:16px;border-bottom:1px solid ${theme['--panel-border']};margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-size:14px;font-weight:600;color:${theme['--panel-primary-color']};">V${item.version}</span>
+                    ${item.date ? `<span style="font-size:12px;color:${theme['--panel-text-muted']};">${item.date}</span>` : ''}
+                </div>
+                <ul style="margin:0;padding-left:20px;">
+                    ${item.changes.map(f => `<li style="font-size:13px;color:${theme['--panel-text-secondary']};line-height:1.7;">${f}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
+    };
 
     // 创建设置对话框
     const dialog = document.createElement('div');
     dialog.id = 'settings-dialog';
     dialog.innerHTML = `
         <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10001;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);animation:fadeIn 0.2s ease;">
-            <div style="background:${theme['--panel-bg']};border:1px solid ${theme['--panel-border']};border-radius:24px;padding:0;min-width:600px;max-width:720px;max-height:90vh;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.6),0 0 0 1px ${theme['--panel-border']}40;animation:dialogSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column;">
+            <div class="dialog-container" style="background:${theme['--panel-bg']};border:1px solid ${theme['--panel-border']};border-radius:24px;padding:0;min-width:600px;max-width:800px;width:92vw;max-height:90vh;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.6),0 0 0 1px ${theme['--panel-border']}40;animation:dialogSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column;">
                 <!-- 固定头部 -->
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:28px 32px 24px;background:linear-gradient(135deg,${theme['--panel-bg']} 0%,${theme['--panel-hover-bg']} 100%);">
+                <div class="dialog-header" style="display:flex;justify-content:space-between;align-items:center;padding:20px 32px;flex-wrap:wrap;gap:16px;background:linear-gradient(135deg,${theme['--panel-bg']} 0%,${theme['--panel-hover-bg']} 100%);">
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,${theme['--panel-primary-color']},${theme['--panel-primary-color']}cc);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px ${theme['--panel-primary-color']}40;">
-                            ⚙️
+                        <div class="dialog-header-icon" style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,${theme['--panel-primary-color']},${theme['--panel-primary-color']}cc);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px ${theme['--panel-primary-color']}40;">
+                            🌐
                         </div>
                         <div>
                             <h3 style="margin:0;font-size:24px;color:${theme['--panel-primary-color']};font-weight:800;letter-spacing:-0.5px;">
-                                脚本设置
+                                Brian Tool
                             </h3>
                             <p style="margin:4px 0 0;font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">
-                                自定义搜索行为，优化任务执行策略
+                                v${currentVersion}
                             </p>
                         </div>
                     </div>
-                    <div id="settings-close-btn" style="cursor:pointer;font-size:20px;color:${theme['--panel-text-secondary']};width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);background:transparent;user-select:none;" title="关闭设置">
-                        ✕
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <!-- 搜索框 -->
+                        <div id="search-wrapper" style="position:relative;flex:1;max-width:280px;">
+                            <input type="text" id="settings-search-input" 
+                                style="width:100%;box-sizing:border-box;padding:10px 14px 10px 40px;border:2px solid ${theme['--panel-border']};border-radius:10px;font-size:13px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:42px;"
+                                placeholder="搜索设置项...">
+                            <span id="search-icon" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:${theme['--panel-text-muted']};font-size:14px;">🔍</span>
+                            <button id="clear-search-btn" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);color:${theme['--panel-text-muted']};font-size:14px;cursor:pointer;background:none;border:none;padding:2px;" title="清除搜索">✕</button>
+                        </div>
+                        <!-- 导航标签 -->
+                        <div class="nav-tabs" style="display:flex;gap:4px;background:${theme['--panel-bg']};padding:4px;border-radius:10px;border:1px solid ${theme['--panel-border']};">
+                            <button id="nav-settings-btn" class="nav-tab active" style="padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;color:#ffffff;background:${theme['--panel-primary-color']};border:none;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);">
+                                ⚙️ 设置
+                            </button>
+                            <button id="nav-about-btn" class="nav-tab" style="padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;color:${theme['--panel-text-secondary']};background:transparent;border:none;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);">
+                                ℹ️ 关于
+                            </button>
+                        </div>
+                        
+                        <div id="settings-close-btn" class="dialog-close-btn" style="cursor:pointer;font-size:20px;color:${theme['--panel-text-secondary']};width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);background:transparent;user-select:none;" title="关闭设置">
+                            ✕
+                        </div>
                     </div>
                 </div>
 
                 <!-- 可滚动内容区 -->
-                <div style="padding:32px;overflow-y:auto;flex:1;">
+                <div class="dialog-content" style="padding:24px 32px;overflow-y:auto;flex:1;">
                     <!-- 基础配置 -->
-                    <div style="margin-bottom:36px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid ${theme['--panel-primary-color']}20;">
-                            <div style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-info-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                    <div class="config-section" style="margin-bottom:24px;" data-section="基础配置">
+                        <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
+                            <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-info-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
                                 🔧
                             </div>
-                            <div>
-                                <h4 style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
+                            <div style="flex:1;">
+                                <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
                                     基础配置
                                 </h4>
-                                <p style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
                                     设置脚本运行的基本参数
                                 </p>
                             </div>
+                            <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
-
-                        <div style="margin-bottom:24px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="form-card" style="margin-bottom:18px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="搜索表单参数 form参数">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">🔍</span>
                                 搜索表单参数
                                 <span style="color:#f44336;">*</span>
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="登录必应后手动搜索几次，从地址栏获取form=xxx参数值">❓</span>
                             </label>
-                            <input type="text" id="search-form-param-input" value="${savedSearchFormParam}"
+                            <input type="text" id="search-form-param-input" class="form-input" value="${savedSearchFormParam}"
                                 style="width:100%;box-sizing:border-box;padding:14px 16px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:48px;font-weight:500;letter-spacing:0.5px;"
                                 placeholder="例如: QBLH">
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
                                 <span>登录必应后手动搜索几次，从地址栏获取 <code style="background:${theme['--panel-bg']};padding:3px 8px;border-radius:6px;font-family:'Courier New',monospace;font-size:11px;font-weight:600;border:1px solid ${theme['--panel-border']};">form=xxx</code> 参数值</span>
                             </div>
                         </div>
 
-                        <div style="margin-bottom:24px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="form-card" style="margin-bottom:18px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="每日最大搜索次数 搜索次数">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">📊</span>
                                 每日最大搜索次数
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="设置每日执行的最大搜索次数，建议10-20次">❓</span>
                             </label>
-                            <input type="number" id="max-searches-input" value="${savedMaxSearches}" min="1" max="50"
+                            <input type="number" id="max-searches-input" class="form-input" value="${savedMaxSearches}" min="1" max="50"
                                 style="width:100%;box-sizing:border-box;padding:14px 16px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:48px;font-weight:500;"
                                 placeholder="建议 10-20 次">
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">⚠️</span>
                                 <span>建议设置为 <strong style="color:${theme['--panel-warning-text']};">10-20次</strong>，过高可能触发微软风控机制，增加账号风险</span>
                             </div>
                         </div>
 
-                        <div style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="面板默认显示状态 面板状态">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">📱</span>
                                 面板默认显示状态
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="选择脚本加载时面板的默认显示状态">❓</span>
                             </label>
-                            <div style="display:flex;gap:12px;">
-                                <label style="flex:1;display:flex;align-items:center;gap:12px;padding:16px;border:2px solid ${!savedPanelCollapsed ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:12px;background:${!savedPanelCollapsed ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',' + theme['--panel-hover-bg'] + ')' : theme['--panel-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;">
+                            <div class="radio-cards" style="display:flex;gap:12px;">
+                                <label class="radio-card" style="flex:1;display:flex;align-items:center;gap:12px;padding:16px;border:2px solid ${!savedPanelCollapsed ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:12px;background:${!savedPanelCollapsed ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',' + theme['--panel-hover-bg'] + ')' : theme['--panel-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;">
                                     <input type="radio" name="panel-default-state" value="expanded" ${!savedPanelCollapsed ? 'checked' : ''}
                                         style="width:20px;height:20px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
                                     <div style="flex:1;">
@@ -976,7 +1174,7 @@ function showSettingsDialog(theme) {
                                         <div style="font-size:11px;color:${theme['--panel-text-muted']};">显示完整面板信息</div>
                                     </div>
                                 </label>
-                                <label style="flex:1;display:flex;align-items:center;gap:12px;padding:16px;border:2px solid ${savedPanelCollapsed ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:12px;background:${savedPanelCollapsed ? 'linear-gradient(135deg,' + theme['--panel-info-bg'] + ',' + theme['--panel-hover-bg'] + ')' : theme['--panel-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;">
+                                <label class="radio-card" style="flex:1;display:flex;align-items:center;gap:12px;padding:16px;border:2px solid ${savedPanelCollapsed ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:12px;background:${savedPanelCollapsed ? 'linear-gradient(135deg,' + theme['--panel-info-bg'] + ',' + theme['--panel-hover-bg'] + ')' : theme['--panel-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;">
                                     <input type="radio" name="panel-default-state" value="collapsed" ${savedPanelCollapsed ? 'checked' : ''}
                                         style="width:20px;height:20px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
                                     <div style="flex:1;">
@@ -985,32 +1183,34 @@ function showSettingsDialog(theme) {
                                     </div>
                                 </label>
                             </div>
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
                                 <span>选择脚本加载时面板的默认显示状态，可随时手动切换</span>
                             </div>
                         </div>
+                        </div>
                     </div>
 
                     <!-- 搜索行为配置 -->
-                    <div style="margin-bottom:36px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid ${theme['--panel-primary-color']}20;">
-                            <div style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-success-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                    <div class="config-section" style="margin-bottom:24px;" data-section="搜索行为优化">
+                        <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
+                            <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-success-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
                                 🎲
                             </div>
-                            <div>
-                                <h4 style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
+                            <div style="flex:1;">
+                                <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
                                     搜索行为优化
                                 </h4>
-                                <p style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
                                     模拟真实用户搜索习惯，降低检测风险
                                 </p>
                             </div>
+                            <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
-
-                        <div style="display:flex;gap:14px;margin-bottom:18px;">
-                            <label style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedRandomAdd ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedRandomAdd ? 'linear-gradient(135deg,' + theme['--panel-info-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;">
-                                ${savedRandomAdd ? '<div style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
+                        <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="checkbox-cards" style="display:flex;gap:14px;margin-bottom:14px;">
+                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedRandomAdd ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedRandomAdd ? 'linear-gradient(135deg,' + theme['--panel-info-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="随机加词功能 加词">
+                                ${savedRandomAdd ? '<div class="badge" style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
                                 <input type="checkbox" id="random-add-checkbox" ${savedRandomAdd ? 'checked' : ''}
                                     style="width:20px;height:20px;margin-top:2px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
                                 <div style="flex:1;">
@@ -1023,8 +1223,8 @@ function showSettingsDialog(theme) {
                                     </div>
                                 </div>
                             </label>
-                            <label style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedRandomCut ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedRandomCut ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;">
-                                ${savedRandomCut ? '<div style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
+                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedRandomCut ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedRandomCut ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="随机截词功能 截词">
+                                ${savedRandomCut ? '<div class="badge" style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
                                 <input type="checkbox" id="random-cut-checkbox" ${savedRandomCut ? 'checked' : ''}
                                     style="width:20px;height:20px;margin-top:2px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
                                 <div style="flex:1;">
@@ -1039,23 +1239,25 @@ function showSettingsDialog(theme) {
                             </label>
                         </div>
 
-                        <div style="display:flex;gap:14px;margin-bottom:16px;">
-                            <div style="flex:1;padding:18px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="factor-inputs" style="display:flex;gap:14px;margin-bottom:14px;">
+                            <div class="factor-input-card" style="flex:1;padding:18px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="加词触发概率">
                                 <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:${theme['--panel-text-primary']};font-weight:600;">
                                     加词触发概率
+                                    <span class="help-icon" style="font-size:12px;color:${theme['--panel-text-muted']};cursor:help;" title="控制加词功能的触发概率，0-1之间，值越高触发概率越大">❓</span>
                                 </label>
-                                <input type="number" id="random-add-factor-input" value="${savedRandomAddFactor}" min="0" max="1" step="0.1"
+                                <input type="number" id="random-add-factor-input" class="form-input" value="${savedRandomAddFactor}" min="0" max="1" step="0.1"
                                     style="width:100%;box-sizing:border-box;padding:12px 14px;border:2px solid ${theme['--panel-border']};border-radius:10px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:46px;font-weight:600;">
                                 <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
                                     <span style="font-size:11px;color:${theme['--panel-text-muted']};">范围：0-1</span>
                                     <span style="font-size:11px;color:${theme['--panel-primary-color']};font-weight:600;background:${theme['--panel-info-bg']};padding:3px 8px;border-radius:6px;">默认 0.3 (30%)</span>
                                 </div>
                             </div>
-                            <div style="flex:1;padding:18px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                            <div class="factor-input-card" style="flex:1;padding:18px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="截词触发概率">
                                 <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:${theme['--panel-text-primary']};font-weight:600;">
                                     截词触发概率
+                                    <span class="help-icon" style="font-size:12px;color:${theme['--panel-text-muted']};cursor:help;" title="控制截词功能的触发概率，0-1之间，值越高触发概率越大">❓</span>
                                 </label>
-                                <input type="number" id="random-cut-factor-input" value="${savedRandomCutFactor}" min="0" max="1" step="0.1"
+                                <input type="number" id="random-cut-factor-input" class="form-input" value="${savedRandomCutFactor}" min="0" max="1" step="0.1"
                                     style="width:100%;box-sizing:border-box;padding:12px 14px;border:2px solid ${theme['--panel-border']};border-radius:10px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:46px;font-weight:600;">
                                 <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
                                     <span style="font-size:11px;color:${theme['--panel-text-muted']};">范围：0-1</span>
@@ -1063,128 +1265,308 @@ function showSettingsDialog(theme) {
                                 </div>
                             </div>
                         </div>
-                        <div style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;padding:14px 16px;background:linear-gradient(135deg,${theme['--panel-warning-bg']},${theme['--panel-hover-bg']});border-radius:10px;display:flex;align-items:flex-start;gap:8px;border-left:3px solid ${theme['--panel-warning-border']};">
+                        <div class="form-hint" style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;padding:14px 16px;background:linear-gradient(135deg,${theme['--panel-warning-bg']},${theme['--panel-hover-bg']});border-radius:10px;display:flex;align-items:flex-start;gap:8px;border-left:3px solid ${theme['--panel-warning-border']};">
                             <span style="flex-shrink:0;font-size:16px;">💡</span>
                             <div>
                                 <strong style="color:${theme['--panel-text-primary']};">使用建议：</strong>开启后可有效混淆搜索行为，模拟真人输入习惯。因子值越高，触发概率越大。建议保持默认值，既能保证真实性，又不会影响搜索效果。
                             </div>
                         </div>
+                        <div class="checkbox-cards" style="margin-top:14px;">
+                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedClickSearchResults ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedClickSearchResults ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="点击搜索结果链接">
+                                ${savedClickSearchResults ? '<div class="badge" style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
+                                <input type="checkbox" id="click-search-results-checkbox" ${savedClickSearchResults ? 'checked' : ''}
+                                    style="width:20px;height:20px;margin-top:2px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:16px;">🔗</span>
+                                        点击搜索结果链接
+                                    </div>
+                                    <div style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;background:${theme['--panel-bg']};padding:12px 14px;border-radius:8px;border:1px solid ${theme['--panel-border']};">
+                                        <div style="margin-bottom:8px;">搜索完成后自动点击（非100%）一个搜索结果链接，模拟真实用户行为。</div>
+                                        <div style="color:${theme['--panel-warning-color']};font-weight:500;padding:6px 8px;background:${theme['--panel-warning-bg']};border-radius:6px;border-left:3px solid ${theme['--panel-warning-color']};">
+                                            ⚠️ 注意：新打开的标签页无法自动关闭，需手动关闭
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        </div>
                     </div>
 
                     <!-- 暂停配置 -->
-                    <div style="margin-bottom:36px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid ${theme['--panel-primary-color']}20;">
-                            <div style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-warning-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                    <div class="config-section" style="margin-bottom:24px;" data-section="智能暂停策略">
+                        <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
+                            <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-warning-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
                                 ⏸️
                             </div>
-                            <div>
-                                <h4 style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
+                            <div style="flex:1;">
+                                <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
                                     智能暂停策略
                                 </h4>
-                                <p style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
                                     模拟人类休息节奏，大幅降低检测风险
                                 </p>
                             </div>
+                            <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
-
-                        <div style="margin-bottom:20px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="暂停间隔设置">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">🔄</span>
                                 暂停间隔设置
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="设置每执行多少次搜索后暂停一次">❓</span>
                             </label>
-                            <div style="display:flex;gap:12px;align-items:center;">
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="pause-interval-min-input" value="${savedPauseIntervalMin}" min="1" max="20"
+                            <div class="interval-inputs" style="display:flex;gap:12px;align-items:center;">
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="pause-interval-min-input" class="form-input" value="${savedPauseIntervalMin}" min="1" max="20"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:50px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">次</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">次</span>
                                 </div>
                                 <span style="color:${theme['--panel-text-muted']};font-size:14px;font-weight:600;padding:0 4px;">至</span>
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="pause-interval-max-input" value="${savedPauseIntervalMax}" min="1" max="20"
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="pause-interval-max-input" class="form-input" value="${savedPauseIntervalMax}" min="1" max="20"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:50px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">次</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">次</span>
                                 </div>
                             </div>
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">📝</span>
-                                <span>每完成 <strong style="color:${theme['--panel-primary-color']};">3-5次</strong> 搜索后随机暂停一次，模拟人类工作节奏</span>
+                                <span>默认每完成 <strong style="color:${theme['--panel-primary-color']};">3-5次</strong> 搜索后随机暂停一次，模拟人类工作节奏</span>
                             </div>
                         </div>
 
-                        <div style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="暂停时长设置">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">⏱️</span>
                                 暂停时长设置
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="设置每次暂停的持续时间">❓</span>
                             </label>
-                            <div style="display:flex;gap:12px;align-items:center;">
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="pause-time-min-input" value="${savedPauseTimeMin}" min="1" max="60" step="1"
+                            <div class="interval-inputs" style="display:flex;gap:12px;align-items:center;">
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="pause-time-min-input" class="form-input" value="${savedPauseTimeMin}" min="1" max="60" step="1"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">分钟</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">分钟</span>
                                 </div>
                                 <span style="color:${theme['--panel-text-muted']};font-size:14px;font-weight:600;padding:0 4px;">至</span>
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="pause-time-max-input" value="${savedPauseTimeMax}" min="1" max="120" step="1"
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="pause-time-max-input" class="form-input" value="${savedPauseTimeMax}" min="1" max="120" step="1"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">分钟</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">分钟</span>
                                 </div>
                             </div>
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">⚠️</span>
                                 <span>建议设置为 <strong style="color:${theme['--panel-warning-text']};">10-30分钟</strong>，有效模拟人类休息间隔，显著降低账号被封风险</span>
                             </div>
                         </div>
+                        </div>
                     </div>
 
                     <!-- 延迟配置 -->
-                    <div style="margin-bottom:36px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid ${theme['--panel-primary-color']}20;">
-                            <div style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-info-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                    <div class="config-section" style="margin-bottom:24px;" data-section="搜索延迟控制">
+                        <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
+                            <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-info-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
                                 ⏱️
                             </div>
-                            <div>
-                                <h4 style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
+                            <div style="flex:1;">
+                                <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
                                     搜索延迟控制
                                 </h4>
-                                <p style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
                                     控制搜索间隔时间，避免过于频繁
                                 </p>
                             </div>
+                            <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
-
-                        <div style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                        <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="搜索间隔时间">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">⏳</span>
                                 两次搜索之间的间隔时间
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="设置两次搜索之间的随机延迟时间范围">❓</span>
                             </label>
-                            <div style="display:flex;gap:12px;align-items:center;">
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="min-delay-input" value="${savedMinDelay}" min="5" max="60" step="1"
+                            <div class="delay-inputs" style="display:flex;gap:12px;align-items:center;">
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="min-delay-input" class="form-input" value="${savedMinDelay}" min="5" max="60" step="1"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:45px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">秒</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">秒</span>
                                 </div>
                                 <span style="color:${theme['--panel-text-muted']};font-size:14px;font-weight:600;padding:0 4px;">至</span>
-                                <div style="flex:1;position:relative;">
-                                    <input type="number" id="max-delay-input" value="${savedMaxDelay}" min="10" max="120" step="1"
+                                <div class="interval-input-card" style="flex:1;position:relative;">
+                                    <input type="number" id="max-delay-input" class="form-input" value="${savedMaxDelay}" min="10" max="120" step="1"
                                         style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:45px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
-                                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">秒</span>
+                                    <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">秒</span>
                                 </div>
                             </div>
-                            <div style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
+                            <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
                                 <span>建议设置为 <strong style="color:${theme['--panel-primary-color']};">15-30秒</strong>，模拟真人浏览搜索结果页的自然节奏</span>
                             </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- 配置管理 -->
+                    <div class="config-section" style="margin-bottom:24px;" data-section="配置管理">
+                        <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
+                            <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-success-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
+                                📦
+                            </div>
+                            <div style="flex:1;">
+                                <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
+                                    配置管理
+                                </h4>
+                                <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                    导出/导入配置，方便备份和迁移
+                                </p>
+                            </div>
+                            <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
+                        </div>
+                        <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};">
+                            <div style="display:flex;gap:12px;">
+                                <button id="export-config-btn" style="flex:1;padding:14px 20px;border:2px solid ${theme['--panel-border']};border-radius:12px;background:transparent;color:${theme['--panel-text-primary']};font-size:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;position:relative;overflow:hidden;" title="导出当前配置">
+                                    <span style="font-size:16px;">📤</span>
+                                    <span>导出配置</span>
+                                </button>
+                                <button id="import-config-btn" style="flex:1;padding:14px 20px;border:2px solid ${theme['--panel-border']};border-radius:12px;background:transparent;color:${theme['--panel-text-primary']};font-size:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;user-select:none;position:relative;overflow:hidden;" title="导入配置文件">
+                                    <span style="font-size:16px;">📥</span>
+                                    <span>导入配置</span>
+                                </button>
+                                <input type="file" id="config-file-input" accept=".json" style="display:none;">
+                            </div>
+                            <div class="form-hint" style="margin-top:12px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;">
+                                <span style="flex-shrink:0;">💡</span>
+                                <span>导出配置可备份当前设置，导入配置可快速恢复或迁移到其他浏览器/设备。配置文件为JSON格式，包含所有用户设置项。</span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 关于页面内容 -->
+                <div id="about-content" class="dialog-content" style="padding:24px 32px;overflow-y:auto;flex:1;display:none;">
+                    <!-- 脚本信息卡片 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:28px;background:linear-gradient(135deg,${theme['--panel-info-bg']}20,transparent);border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:flex-start;gap:20px;">
+                            <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,${theme['--panel-primary-color']},${theme['--panel-primary-color']}cc);display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 24px ${theme['--panel-primary-color']}30;">
+                                🚀
+                            </div>
+                            <div style="flex:1;">
+                                <h2 style="margin:0;font-size:28px;color:${theme['--panel-primary-color']};font-weight:800;letter-spacing:-0.5px;">
+                                    <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script" target="_blank" style="color:inherit;text-decoration:none;">Brian Tool</a>
+                                </h2>
+                                <p style="margin:6px 0 0;font-size:14px;color:${theme['--panel-text-muted']};font-weight:500;">
+                                    Bing Rewards 自动任务脚本
+                                </p>
+                                <div style="display:flex;gap:16px;margin-top:12px;">
+                                    <span style="display:flex;align-items:center;gap:4px;font-size:13px;color:${theme['--panel-text-secondary']};">
+                                        <span>📌</span>
+                                        <span>版本: <strong style="color:${theme['--panel-primary-color']};">v${currentVersion}</strong></span>
+                                    </span>
+                                    <span style="display:flex;align-items:center;gap:4px;font-size:13px;color:${theme['--panel-text-secondary']};">
+                                        <span>👤</span>
+                                        <span>作者: <a href="https://gitee.com/idbb98" target="_blank" style="color:${theme['--panel-primary-color']};text-decoration:none;font-weight:600;">Brian</a></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 功能说明 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <span style="font-size:20px;">✨</span>
+                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
+                                功能说明
+                            </h3>
+                        </div>
+                        <ul style="margin:0;padding-left:24px;">
+                            <li style="margin-bottom:10px;font-size:14px;color:${theme['--panel-text-primary']};line-height:1.8;">
+                                <strong style="color:${theme['--panel-primary-color']};">🔍 自动搜索</strong> - 自动执行必应搜索任务，获取每日积分
+                            </li>
+                            <li style="margin-bottom:10px;font-size:14px;color:${theme['--panel-text-primary']};line-height:1.8;">
+                                <strong style="color:${theme['--panel-success-text']};">🎯 智能优化</strong> - 支持随机加词、截词功能，模拟真实搜索行为
+                            </li>
+                            <li style="margin-bottom:10px;font-size:14px;color:${theme['--panel-text-primary']};line-height:1.8;">
+                                <strong style="color:${theme['--panel-info-text']};">⏱️ 智能延迟</strong> - 可配置的搜索间隔和暂停时间，避免触发风控
+                            </li>
+                            <li style="font-size:14px;color:${theme['--panel-text-primary']};line-height:1.8;">
+                                <strong style="color:${theme['--panel-warning-text']};">📊 进度追踪</strong> - 实时显示任务进度和剩余时间
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 协议与条款 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <span style="font-size:20px;">📜</span>
+                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
+                                使用条款与协议
+                            </h3>
+                        </div>
+                        <div style="font-size:13px;color:${theme['--panel-text-secondary']};line-height:1.8;">
+                            <p style="margin:0 0 12px;">
+                                本脚本仅供学习和个人使用。使用本脚本即表示您同意以下条款：
+                            </p>
+                            <ul style="margin:0;padding-left:20px;">
+                                <li style="margin-bottom:8px;">本脚本仅用于个人学习和研究目的</li>
+                                <li style="margin-bottom:8px;">请勿用于商业用途或大规模部署</li>
+                                <li style="margin-bottom:8px;">使用本脚本需遵守微软必应服务条款</li>
+                                <li style="margin-bottom:8px;">作者不对使用本脚本造成的任何后果负责</li>
+                                <li>建议合理使用，避免过度频繁操作</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 联系与支持 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <span style="font-size:20px;">💬</span>
+                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
+                                联系与支持
+                            </h3>
+                        </div>
+                        <div style="display:flex;flex-wrap:gap:16px;">
+                            <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                                <span style="font-size:18px;">💎</span>
+                                <span>Gitee</span>
+                            </a>
+                            <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/issues" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                                <span style="font-size:18px;">📮</span>
+                                <span>反馈问题</span>
+                            </a>
+                            <a href="mailto:idbb98@163.com" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                                <span style="font-size:18px;">✉️</span>
+                                <span>发送邮件</span>
+                            </a>
+                        </div>
+                        <p style="margin-top:16px;font-size:12px;color:${theme['--panel-text-muted']};">
+                            如果您遇到问题或有改进建议，欢迎随时联系！
+                        </p>
+                    </div>
+
+                    <!-- 更新日志 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <span style="font-size:20px;">📝</span>
+                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
+                                更新日志
+                            </h3>
+                        </div>
+                        <div style="space-y:12px;" id="changelog-container">
+                            ${generateChangeLogHTML()}
                         </div>
                     </div>
                 </div>
 
                 <!-- 固定底部按钮区 -->
-                <div style="display:flex;gap:12px;justify-content:space-between;padding:24px 32px;border-top:1px solid ${theme['--panel-border']};background:linear-gradient(135deg,${theme['--panel-hover-bg']} 0%,${theme['--panel-bg']} 100%);">
-                    <button id="settings-reset-btn" style="padding:14px 28px;border:2px solid ${theme['--panel-border']};border-radius:12px;background:transparent;color:${theme['--panel-text-secondary']};font-size:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);font-weight:600;display:flex;align-items:center;gap:8px;user-select:none;position:relative;overflow:hidden;">
+                <div class="dialog-footer" style="display:flex;gap:12px;justify-content:space-between;padding:20px 32px;border-top:1px solid ${theme['--panel-border']};background:linear-gradient(135deg,${theme['--panel-hover-bg']} 0%,${theme['--panel-bg']} 100%);">
+                    <button id="settings-reset-btn" style="padding:14px 24px;border:2px solid ${theme['--panel-border']};border-radius:12px;background:transparent;color:${theme['--panel-text-secondary']};font-size:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);font-weight:600;display:flex;align-items:center;gap:8px;user-select:none;position:relative;overflow:hidden;" title="恢复所有设置为默认值">
                         <span style="font-size:16px;">🔄</span>
                         <span>恢复默认</span>
                     </button>
-                    <div style="display:flex;gap:12px;">
+                    <div class="btn-group" style="display:flex;gap:12px;">
                         <button id="settings-cancel-btn" style="padding:14px 28px;border:2px solid ${theme['--panel-border']};border-radius:12px;background:transparent;color:${theme['--panel-text-primary']};font-size:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);font-weight:600;user-select:none;position:relative;overflow:hidden;">
                             取消
                         </button>
@@ -1209,10 +1591,265 @@ function showSettingsDialog(theme) {
                 0% { transform: scale(0); opacity: 0.5; }
                 100% { transform: scale(4); opacity: 0; }
             }
-            #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar { width: 10px; }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+            #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar { width: 8px; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-track { background: transparent; }
-            #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb { background: ${theme['--panel-border']}; border-radius: 5px; }
+            #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb { background: ${theme['--panel-border']}; border-radius: 4px; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb:hover { background: ${theme['--panel-text-muted']}; }
+            
+            /* 搜索框样式 */
+            #search-wrapper {
+                position: relative;
+            }
+            #settings-search-input:focus {
+                border-color: ${theme['--panel-primary-color']} !important;
+                box-shadow: 0 0 0 3px ${theme['--panel-primary-color']}20 !important;
+            }
+            .help-icon:hover {
+                color: ${theme['--panel-primary-color']} !important;
+            }
+            
+            /* 响应式布局 - 设置对话框 */
+            @media (max-width: 768px) {
+                #settings-dialog .dialog-container {
+                    width: 95vw !important;
+                    max-width: 95vw !important;
+                    min-width: auto !important;
+                    border-radius: 16px !important;
+                    max-height: 92vh !important;
+                }
+                #settings-dialog .dialog-header {
+                    padding: 20px 20px 16px !important;
+                    flex-wrap: wrap !important;
+                }
+                #settings-dialog .dialog-header-icon {
+                    width: 40px !important;
+                    height: 40px !important;
+                    font-size: 22px !important;
+                    border-radius: 10px !important;
+                }
+                #settings-dialog .dialog-header h3 {
+                    font-size: 20px !important;
+                }
+                #settings-dialog .dialog-header p {
+                    font-size: 11px !important;
+                }
+                #settings-dialog #search-wrapper {
+                    width: 100% !important;
+                    max-width: none !important;
+                }
+                #settings-dialog .dialog-close-btn {
+                    width: 36px !important;
+                    height: 36px !important;
+                    font-size: 18px !important;
+                }
+                #settings-dialog .dialog-content {
+                    padding: 20px !important;
+                }
+                #settings-dialog .config-section {
+                    margin-bottom: 20px !important;
+                }
+                #settings-dialog .section-header {
+                    margin-bottom: 12px !important;
+                    padding-bottom: 8px !important;
+                }
+                #settings-dialog .section-icon {
+                    width: 30px !important;
+                    height: 30px !important;
+                    font-size: 15px !important;
+                    border-radius: 8px !important;
+                }
+                #settings-dialog .section-title {
+                    font-size: 14px !important;
+                }
+                #settings-dialog .section-desc {
+                    font-size: 10px !important;
+                }
+                #settings-dialog .form-card {
+                    padding: 14px !important;
+                    border-radius: 12px !important;
+                    margin-bottom: 12px !important;
+                }
+                #settings-dialog .form-card label {
+                    font-size: 13px !important;
+                    margin-bottom: 8px !important;
+                }
+                #settings-dialog .form-input {
+                    height: 44px !important;
+                    padding: 12px 14px !important;
+                    font-size: 13px !important;
+                    border-radius: 10px !important;
+                }
+                #settings-dialog .checkbox-cards {
+                    gap: 10px !important;
+                }
+                #settings-dialog .checkbox-card {
+                    padding: 14px !important;
+                    border-radius: 12px !important;
+                }
+                #settings-dialog .checkbox-card input[type="checkbox"] {
+                    width: 18px !important;
+                    height: 18px !important;
+                }
+                #settings-dialog .checkbox-card .badge {
+                    font-size: 9px !important;
+                    padding: 2px 6px !important;
+                }
+                #settings-dialog .factor-inputs {
+                    gap: 10px !important;
+                }
+                #settings-dialog .factor-input-card {
+                    padding: 14px !important;
+                    border-radius: 12px !important;
+                }
+                #settings-dialog .factor-input-card input {
+                    height: 42px !important;
+                    padding: 10px 12px !important;
+                    font-size: 13px !important;
+                    border-radius: 8px !important;
+                }
+                #settings-dialog .interval-inputs {
+                    gap: 8px !important;
+                }
+                #settings-dialog .interval-input-card {
+                    padding: 14px !important;
+                    border-radius: 12px !important;
+                }
+                #settings-dialog .interval-input-card input {
+                    height: 46px !important;
+                    padding: 12px 14px !important;
+                    padding-right: 40px !important;
+                    font-size: 13px !important;
+                    border-radius: 10px !important;
+                }
+                #settings-dialog .input-unit {
+                    font-size: 11px !important;
+                    right: 12px !important;
+                }
+                #settings-dialog .dialog-footer {
+                    padding: 16px 20px !important;
+                    flex-wrap: wrap !important;
+                    gap: 10px !important;
+                }
+                #settings-dialog .dialog-footer button {
+                    padding: 12px 20px !important;
+                    font-size: 13px !important;
+                    border-radius: 10px !important;
+                }
+                #settings-dialog .dialog-footer .btn-group {
+                    flex-wrap: wrap !important;
+                    width: 100% !important;
+                    justify-content: flex-end !important;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                #settings-dialog .dialog-container {
+                    width: 96vw !important;
+                    max-width: 96vw !important;
+                    border-radius: 12px !important;
+                    max-height: 95vh !important;
+                }
+                #settings-dialog .dialog-header {
+                    padding: 16px !important;
+                }
+                #settings-dialog .dialog-header-icon {
+                    width: 36px !important;
+                    height: 36px !important;
+                    font-size: 20px !important;
+                }
+                #settings-dialog .dialog-header h3 {
+                    font-size: 18px !important;
+                }
+                #settings-dialog .dialog-header p {
+                    display: none !important;
+                }
+                #settings-dialog .nav-tabs {
+                    order: 3 !important;
+                    width: 100% !important;
+                    justify-content: center !important;
+                }
+                #settings-dialog .nav-tab {
+                    padding: 10px 16px !important;
+                    font-size: 12px !important;
+                }
+                #settings-dialog .dialog-close-btn {
+                    width: 32px !important;
+                    height: 32px !important;
+                }
+                #settings-dialog .dialog-content {
+                    padding: 16px !important;
+                }
+                #settings-dialog .config-section {
+                    margin-bottom: 20px !important;
+                }
+                #settings-dialog .section-icon {
+                    width: 28px !important;
+                    height: 28px !important;
+                    font-size: 14px !important;
+                }
+                #settings-dialog .section-title {
+                    font-size: 13px !important;
+                }
+                #settings-dialog .form-card {
+                    padding: 12px !important;
+                    border-radius: 10px !important;
+                    margin-bottom: 10px !important;
+                }
+                #settings-dialog .form-card label {
+                    font-size: 12px !important;
+                }
+                #settings-dialog .form-input {
+                    height: 40px !important;
+                    padding: 10px 12px !important;
+                    font-size: 12px !important;
+                }
+                #settings-dialog .form-hint {
+                    font-size: 11px !important;
+                }
+                #settings-dialog .form-hint code {
+                    font-size: 10px !important;
+                    padding: 2px 6px !important;
+                }
+                #settings-dialog .checkbox-cards {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+                #settings-dialog .checkbox-card {
+                    padding: 12px !important;
+                }
+                #settings-dialog .factor-inputs,
+                #settings-dialog .interval-inputs,
+                #settings-dialog .delay-inputs {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+                #settings-dialog .factor-input-card,
+                #settings-dialog .interval-input-card {
+                    width: 100% !important;
+                }
+                #settings-dialog .dialog-footer {
+                    padding: 12px 16px !important;
+                    flex-direction: column-reverse !important;
+                }
+                #settings-dialog .dialog-footer > button:first-child {
+                    width: 100% !important;
+                    margin-top: 0 !important;
+                }
+                #settings-dialog .dialog-footer .btn-group {
+                    width: 100% !important;
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+                #settings-dialog .dialog-footer button {
+                    width: 100% !important;
+                    padding: 14px !important;
+                    justify-content: center !important;
+                }
+            }
         </style>
     `;
 
@@ -1228,6 +1865,7 @@ function showSettingsDialog(theme) {
     const panelStateRadios = document.getElementsByName('panel-default-state');
     const randomAddCheckbox = document.getElementById('random-add-checkbox');
     const randomCutCheckbox = document.getElementById('random-cut-checkbox');
+    const clickSearchResultsCheckbox = document.getElementById('click-search-results-checkbox');
     const randomAddFactorInput = document.getElementById('random-add-factor-input');
     const randomCutFactorInput = document.getElementById('random-cut-factor-input');
     const pauseIntervalMinInput = document.getElementById('pause-interval-min-input');
@@ -1236,6 +1874,15 @@ function showSettingsDialog(theme) {
     const pauseTimeMaxInput = document.getElementById('pause-time-max-input');
     const minDelayInput = document.getElementById('min-delay-input');
     const maxDelayInput = document.getElementById('max-delay-input');
+    
+    // 搜索相关元素
+    const searchInput = document.getElementById('settings-search-input');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    
+    // 配置管理相关元素
+    const exportConfigBtn = document.getElementById('export-config-btn');
+    const importConfigBtn = document.getElementById('import-config-btn');
+    const configFileInput = document.getElementById('config-file-input');
 
     const closeDialog = () => {
         dialog.remove();
@@ -1249,6 +1896,252 @@ function showSettingsDialog(theme) {
         if (e.target === dialog.querySelector('div')) {
             closeDialog();
         }
+    });
+
+    // 设置项搜索功能
+    const performSearch = (keyword) => {
+        const sections = dialog.querySelectorAll('.config-section');
+        let foundCount = 0;
+        
+        sections.forEach(section => {
+            const sectionTitle = section.getAttribute('data-section');
+            const searchTags = section.querySelectorAll('[data-search-tags]');
+            let shouldShow = false;
+            
+            // 检查section标题是否匹配
+            if (sectionTitle && sectionTitle.toLowerCase().includes(keyword.toLowerCase())) {
+                shouldShow = true;
+            }
+            
+            // 检查各个设置项的搜索标签
+            searchTags.forEach(tagElement => {
+                const tags = tagElement.getAttribute('data-search-tags');
+                if (tags && tags.toLowerCase().includes(keyword.toLowerCase())) {
+                    shouldShow = true;
+                }
+            });
+            
+            // 检查section内的文本内容
+            if (!shouldShow) {
+                const textContent = section.textContent.toLowerCase();
+                if (textContent.includes(keyword.toLowerCase())) {
+                    shouldShow = true;
+                }
+            }
+            
+            if (shouldShow) {
+                section.style.display = 'block';
+                foundCount++;
+                // 确保匹配的section是展开状态
+                const content = section.querySelector('.section-content');
+                if (content) {
+                    content.style.maxHeight = '1000px';
+                    content.style.opacity = '1';
+                }
+                const toggle = section.querySelector('.section-toggle');
+                if (toggle) {
+                    toggle.style.transform = 'rotate(0deg)';
+                }
+            } else {
+                section.style.display = 'none';
+            }
+        });
+        
+        // 显示搜索结果提示
+        const searchResultsHint = document.getElementById('search-results-hint');
+        if (keyword.trim()) {
+            if (!searchResultsHint) {
+                const hint = document.createElement('div');
+                hint.id = 'search-results-hint';
+                hint.style.cssText = `
+                    padding: 12px 16px;
+                    background: ${theme['--panel-info-bg']};
+                    border-radius: 10px;
+                    margin-bottom: 16px;
+                    font-size: 12px;
+                    color: ${theme['--panel-text-muted']};
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                hint.innerHTML = `<span>🔍</span>找到 <strong style="color:${theme['--panel-primary-color']};">${foundCount}</strong> 个匹配的设置项`;
+                dialog.querySelector('.dialog-content').insertBefore(hint, dialog.querySelector('.dialog-content').firstChild);
+            } else {
+                searchResultsHint.innerHTML = `<span>🔍</span>找到 <strong style="color:${theme['--panel-primary-color']};">${foundCount}</strong> 个匹配的设置项`;
+            }
+        } else if (searchResultsHint) {
+            searchResultsHint.remove();
+        }
+    };
+
+    // 导航切换逻辑
+    const navSettingsBtn = document.getElementById('nav-settings-btn');
+    const navAboutBtn = document.getElementById('nav-about-btn');
+    const settingsContent = dialog.querySelector('.dialog-content:not(#about-content)');
+    const aboutContent = document.getElementById('about-content');
+    const searchWrapper = document.getElementById('search-wrapper');
+    const dialogFooter = dialog.querySelector('.dialog-footer');
+
+    const switchToSettings = () => {
+        navSettingsBtn.classList.add('active');
+        navSettingsBtn.style.background = theme['--panel-primary-color'];
+        navSettingsBtn.style.color = '#ffffff';
+        navAboutBtn.classList.remove('active');
+        navAboutBtn.style.background = 'transparent';
+        navAboutBtn.style.color = theme['--panel-text-secondary'];
+        
+        settingsContent.style.display = 'block';
+        aboutContent.style.display = 'none';
+        searchWrapper.style.display = 'block';
+        dialogFooter.style.display = 'flex';
+        
+        // 清除搜索
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        performSearch('');
+    };
+
+    const switchToAbout = () => {
+        navAboutBtn.classList.add('active');
+        navAboutBtn.style.background = theme['--panel-primary-color'];
+        navAboutBtn.style.color = '#ffffff';
+        navSettingsBtn.classList.remove('active');
+        navSettingsBtn.style.background = 'transparent';
+        navSettingsBtn.style.color = theme['--panel-text-secondary'];
+        
+        aboutContent.style.display = 'block';
+        settingsContent.style.display = 'none';
+        searchWrapper.style.display = 'none';
+        dialogFooter.style.display = 'none';
+    };
+
+    navSettingsBtn.addEventListener('click', switchToSettings);
+    navAboutBtn.addEventListener('click', switchToAbout);
+
+    searchInput.addEventListener('input', (e) => {
+        const keyword = e.target.value;
+        performSearch(keyword);
+        
+        // 显示/隐藏清除按钮
+        clearSearchBtn.style.display = keyword.trim() ? 'block' : 'none';
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        performSearch('');
+    });
+
+    // 设置分组折叠/展开功能
+    const sectionHeaders = dialog.querySelectorAll('.section-header');
+    sectionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const section = header.closest('.config-section');
+            const content = section.querySelector('.section-content');
+            const toggle = section.querySelector('.section-toggle');
+            
+            if (content.style.maxHeight === '0px' || !content.style.maxHeight) {
+                content.style.maxHeight = '1000px';
+                content.style.opacity = '1';
+                toggle.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = '0px';
+                content.style.opacity = '0';
+                toggle.style.transform = 'rotate(-90deg)';
+            }
+        });
+    });
+
+    // 配置导出功能
+    exportConfigBtn.addEventListener('click', () => {
+        const config = {
+            searchFormParam: GM_getValue('customSearchFormParam', 'QBLH'),
+            panelDefaultCollapsed: GM_getValue('customPanelDefaultCollapsed', false),
+            maxSearches: GM_getValue('customMaxSearches', 20),
+            randomAddSearchWords: GM_getValue('customRandomAddSearchWords', false),
+            randomAddSearchWordsFactor: GM_getValue('customRandomAddSearchWordsFactor', 0.3),
+            randomCutSearchWords: GM_getValue('customRandomCutSearchWords', false),
+            randomCutSearchWordsFactor: GM_getValue('customRandomCutSearchWordsFactor', 0.2),
+            clickSearchResults: GM_getValue('customClickSearchResults', false),
+            pauseIntervalMin: GM_getValue('customPauseIntervalMin', 3),
+            pauseIntervalMax: GM_getValue('customPauseIntervalMax', 5),
+            pauseTimeMin: GM_getValue('customPauseTimeMin', 10 * 60 * 1000),
+            pauseTimeMax: GM_getValue('customPauseTimeMax', 30 * 60 * 1000),
+            minDelay: GM_getValue('customMinDelay', 15 * 1000),
+            maxDelay: GM_getValue('customMaxDelay', 30 * 1000),
+            exportTime: new Date().toISOString(),
+            version: CONFIG.version
+        };
+        
+        const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BingRewards_config_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        GM_notification({
+            title: '配置导出成功',
+            text: '配置文件已保存到本地',
+            icon: '📥',
+            timeout: 3000
+        });
+    });
+
+    // 配置导入功能
+    importConfigBtn.addEventListener('click', () => {
+        configFileInput.click();
+    });
+
+    configFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const config = JSON.parse(event.target.result);
+                
+                // 确认导入
+                if (!confirm(`⚠️ 确认导入配置文件？\n\n这将覆盖当前所有设置。\n\n导入时间: ${config.exportTime || '未知'}\n版本: ${config.version || '未知'}`)) {
+                    return;
+                }
+                
+                // 保存配置
+                if (config.searchFormParam !== undefined) GM_setValue('customSearchFormParam', config.searchFormParam);
+                if (config.panelDefaultCollapsed !== undefined) GM_setValue('customPanelDefaultCollapsed', config.panelDefaultCollapsed);
+                if (config.maxSearches !== undefined) GM_setValue('customMaxSearches', config.maxSearches);
+                if (config.randomAddSearchWords !== undefined) GM_setValue('customRandomAddSearchWords', config.randomAddSearchWords);
+                if (config.randomAddSearchWordsFactor !== undefined) GM_setValue('customRandomAddSearchWordsFactor', config.randomAddSearchWordsFactor);
+                if (config.randomCutSearchWords !== undefined) GM_setValue('customRandomCutSearchWords', config.randomCutSearchWords);
+                if (config.randomCutSearchWordsFactor !== undefined) GM_setValue('customRandomCutSearchWordsFactor', config.randomCutSearchWordsFactor);
+                if (config.clickSearchResults !== undefined) GM_setValue('customClickSearchResults', config.clickSearchResults);
+                if (config.pauseIntervalMin !== undefined) GM_setValue('customPauseIntervalMin', config.pauseIntervalMin);
+                if (config.pauseIntervalMax !== undefined) GM_setValue('customPauseIntervalMax', config.pauseIntervalMax);
+                if (config.pauseTimeMin !== undefined) GM_setValue('customPauseTimeMin', config.pauseTimeMin);
+                if (config.pauseTimeMax !== undefined) GM_setValue('customPauseTimeMax', config.pauseTimeMax);
+                if (config.minDelay !== undefined) GM_setValue('customMinDelay', config.minDelay);
+                if (config.maxDelay !== undefined) GM_setValue('customMaxDelay', config.maxDelay);
+                
+                GM_notification({
+                    title: '配置导入成功',
+                    text: '配置已成功导入，页面将刷新',
+                    icon: '📤',
+                    timeout: 3000
+                });
+                
+                closeDialog();
+                setTimeout(() => window.location.reload(), 2000);
+                
+            } catch (error) {
+                alert('❌ 配置文件格式错误，请确保导入的是有效的JSON配置文件');
+                console.error('配置导入失败:', error);
+            }
+        };
+        reader.readAsText(file);
     });
 
     // 添加关闭按钮悬停效果
@@ -1404,14 +2297,20 @@ function showSettingsDialog(theme) {
     });
 
     // Checkbox卡片样式更新
-    [randomAddCheckbox, randomCutCheckbox].forEach(checkbox => {
+    [randomAddCheckbox, randomCutCheckbox, clickSearchResultsCheckbox].forEach(checkbox => {
         if (!checkbox) return;
         const label = checkbox.closest('label');
 
         checkbox.addEventListener('change', () => {
             if (checkbox.checked) {
                 label.style.borderColor = theme['--panel-primary-color'];
-                label.style.background = `linear-gradient(135deg,${checkbox.id === 'random-add-checkbox' ? theme['--panel-info-bg'] : theme['--panel-success-bg']},transparent)`;
+                let bgColor = theme['--panel-info-bg'];
+                if (checkbox.id === 'random-cut-checkbox') {
+                    bgColor = theme['--panel-success-bg'];
+                } else if (checkbox.id === 'click-search-results-checkbox') {
+                    bgColor = theme['--panel-success-bg'];
+                }
+                label.style.background = `linear-gradient(135deg,${bgColor},transparent)`;
                 // 添加已启用标记
                 let badge = label.querySelector('.badge');
                 if (!badge) {
@@ -1443,6 +2342,11 @@ function showSettingsDialog(theme) {
 
     // 恢复默认按钮
     resetBtn.addEventListener('click', () => {
+        // 确认恢复默认设置
+        if (!confirm('⚠️ 确认恢复所有设置为默认值？\n\n此操作将清除您所有的自定义设置，请确保已备份配置。')) {
+            return;
+        }
+        
         searchFormInput.value = 'QBLH';
         // 设置面板状态为展开
         Array.from(panelStateRadios).forEach(r => {
@@ -1454,6 +2358,7 @@ function showSettingsDialog(theme) {
         randomAddFactorInput.value = 0.3;
         randomCutCheckbox.checked = false;
         randomCutFactorInput.value = 0.2;
+        clickSearchResultsCheckbox.checked = false;
         pauseIntervalMinInput.value = 3;
         pauseIntervalMaxInput.value = 5;
         pauseTimeMinInput.value = 10;
@@ -1464,9 +2369,28 @@ function showSettingsDialog(theme) {
         // 触发checkbox样式更新
         randomAddCheckbox.dispatchEvent(new Event('change'));
         randomCutCheckbox.dispatchEvent(new Event('change'));
+        clickSearchResultsCheckbox.dispatchEvent(new Event('change'));
     });
 
     // 保存按钮事件
+    // 检测设置是否有变更
+    const hasChanges = () => {
+        return searchFormInput.value.trim() !== savedSearchFormParam ||
+               parseInt(maxSearchesInput.value) !== savedMaxSearches ||
+               (Array.from(panelStateRadios).find(r => r.checked).value === 'collapsed') !== savedPanelCollapsed ||
+               randomAddCheckbox.checked !== savedRandomAdd ||
+               parseFloat(randomAddFactorInput.value) !== savedRandomAddFactor ||
+               randomCutCheckbox.checked !== savedRandomCut ||
+               parseFloat(randomCutFactorInput.value) !== savedRandomCutFactor ||
+               clickSearchResultsCheckbox.checked !== savedClickSearchResults ||
+               parseInt(pauseIntervalMinInput.value) !== savedPauseIntervalMin ||
+               parseInt(pauseIntervalMaxInput.value) !== savedPauseIntervalMax ||
+               parseFloat(pauseTimeMinInput.value) !== savedPauseTimeMin ||
+               parseFloat(pauseTimeMaxInput.value) !== savedPauseTimeMax ||
+               parseFloat(minDelayInput.value) !== savedMinDelay ||
+               parseFloat(maxDelayInput.value) !== savedMaxDelay;
+    };
+
     saveBtn.addEventListener('click', () => {
         const searchFormParam = searchFormInput.value.trim();
         const maxSearches = parseInt(maxSearchesInput.value);
@@ -1475,6 +2399,7 @@ function showSettingsDialog(theme) {
         const randomAddFactor = parseFloat(randomAddFactorInput.value);
         const randomCut = randomCutCheckbox.checked;
         const randomCutFactor = parseFloat(randomCutFactorInput.value);
+        const clickSearchResults = clickSearchResultsCheckbox.checked;
         const pauseIntervalMin = parseInt(pauseIntervalMinInput.value);
         const pauseIntervalMax = parseInt(pauseIntervalMaxInput.value);
         const pauseTimeMin = parseFloat(pauseTimeMinInput.value) * 60 * 1000; // 转换为毫秒
@@ -1512,6 +2437,11 @@ function showSettingsDialog(theme) {
             return;
         }
 
+        // 设置变更确认机制
+        if (!confirm('⚠️ 确认保存设置变更？\n\n保存后页面将自动刷新以应用新配置。')) {
+            return;
+        }
+
         // 保存所有配置
         GM_setValue('customSearchFormParam', searchFormParam);
         GM_setValue('customPanelDefaultCollapsed', panelDefaultCollapsed);
@@ -1520,6 +2450,7 @@ function showSettingsDialog(theme) {
         GM_setValue('customRandomAddSearchWordsFactor', randomAddFactor);
         GM_setValue('customRandomCutSearchWords', randomCut);
         GM_setValue('customRandomCutSearchWordsFactor', randomCutFactor);
+        GM_setValue('customClickSearchResults', clickSearchResults);
         GM_setValue('customPauseIntervalMin', pauseIntervalMin);
         GM_setValue('customPauseIntervalMax', pauseIntervalMax);
         GM_setValue('customPauseTimeMin', pauseTimeMin);
@@ -1535,13 +2466,14 @@ function showSettingsDialog(theme) {
             randomAddFactor,
             randomCut,
             randomCutFactor,
+            clickSearchResults,
             pauseInterval: `${pauseIntervalMin}-${pauseIntervalMax}`,
             pauseTime: `${pauseTimeMin/60000}-${pauseTimeMax/60000}分钟`,
             delay: `${minDelay/1000}-${maxDelay/1000}秒`
         });
 
         // 显示成功提示
-        alert('✅ 配置已保存!页面将在3秒后刷新以应用新配置...');
+        alert('✅ 配置已保存！确认后页面将在3秒后刷新以应用新配置...');
 
         // 关闭对话框
         closeDialog();
@@ -1837,7 +2769,7 @@ async function executeSearch() {
 
     // 更新标题
     const title = document.querySelector('title');
-    if (title) title.textContent = `[${taskStatus.currentCount}/${taskStatus.maxCount}] Bing Rewards...`;
+    if (title) title.textContent = `[${taskStatus.currentCount}/${taskStatus.maxCount}] Brian Tool...`;
 
     // 获取搜索词
     if (state.searchWords.length === 0) {
@@ -1863,21 +2795,8 @@ async function executeSearch() {
     // 更新面板
     updateStatusPanel({ currentWord: processedSearchWord });
 
-    // 使用精确计时器，不受页面可见性影响
+    // 使用精确计时器,不受页面可见性影响
     const searchTimer = utils.addTimer(setTimeout(() => {
-        // 随机滚动到页面任意位置，增加随机性
-        const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-        const viewportHeight = window.innerHeight;
-        const maxScroll = scrollHeight - viewportHeight;
-
-        // 随机滚动到页面的某个位置，而不是总是滚动到底部
-        const randomScrollPosition = Math.floor(Math.random() * maxScroll);
-
-        window.scrollTo({
-            top: randomScrollPosition,
-            behavior: 'smooth'
-        });
-
         utils.clearAllTimers();
         performSearch(processedSearchWord, taskStatus);
     }, delay));
@@ -1940,13 +2859,365 @@ function performSearch(searchWord, taskStatus) {
 }
 
 /**
+ * 页面加载完成后执行随机滚动，模拟真实用户行为
+ * 随机滚动多次，方向（上滑/下滑）和次数都是随机的
+ */
+function randomScrollAfterPageLoad() {
+    // 等待页面内容完全加载
+    setTimeout(() => {
+        const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+        const viewportHeight = window.innerHeight;
+        const maxScroll = scrollHeight - viewportHeight;
+
+        // 如果页面可以滚动
+        if (maxScroll > 0) {
+            // 随机生成滚动次数（2-5次）
+            const scrollCount = Math.floor(Math.random() * 4) + 2;
+            GM_log(`开始随机滚动，总次数: ${scrollCount}次`);
+
+            // 执行多次随机滚动
+            let currentScroll = window.scrollY;
+            for (let i = 0; i < scrollCount; i++) {
+                setTimeout(() => {
+                    // 随机决定滚动方向：true=下滑，false=上滑
+                    const scrollDown = Math.random() > 0.2;
+                    
+                    // 随机生成滚动距离（100-800px）
+                    const scrollDistance = Math.floor(Math.random() * 700) + 100;
+                    
+                    // 计算新的滚动位置
+                    let newScrollPosition;
+                    if (scrollDown) {
+                        // 下滑：当前位置 + 随机距离，不超过最大滚动位置
+                        newScrollPosition = Math.min(currentScroll + scrollDistance, maxScroll);
+                    } else {
+                        // 上滑：当前位置 - 随机距离，不小于0
+                        newScrollPosition = Math.max(currentScroll - scrollDistance, 0);
+                    }
+                    
+                    // 执行滚动
+                    window.scrollTo({
+                        top: newScrollPosition,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 更新当前位置
+                    currentScroll = newScrollPosition;
+                    
+                    const direction = scrollDown ? '下滑' : '上滑';
+                    GM_log(`第${i + 1}次滚动: ${direction} ${scrollDistance}px，目标位置: ${newScrollPosition}px`);
+                    
+                    // 如果是最后一次滚动，滚动结束后检查并点击链接
+                    if (i === scrollCount - 1) {
+                        setTimeout(() => {
+                            checkAndClickSearchResult();
+                        }, 1500); // 等待滚动动画完成
+                    }
+                    
+                }, i * 1000); // 每次滚动间隔1秒，模拟真实用户操作
+            }
+        } else {
+            // 页面无法滚动，直接检查并点击链接
+            checkAndClickSearchResult();
+        }
+    }, 2500); // 等待2.5秒让页面内容加载完成
+}
+
+/**
+ * 检查当前页面是否为搜索结果页且包含启动参数，如果是则点击搜索结果链接
+ */
+function checkAndClickSearchResult() {
+    try {
+        // 检查是否启用了点击搜索结果功能
+        if (!CONFIG.clickSearchResults) {
+            GM_log('未启用点击搜索结果功能，跳过点击');
+            return;
+        }
+        
+        // 检查是否在搜索结果页面（使用正则表达式提高性能）
+        const isSearchPage = /\/search/.test(window.location.pathname) && /[?&]q=/.test(window.location.search);
+        if (!isSearchPage) {
+            GM_log('当前不是搜索结果页面，跳过点击');
+            return;
+        }
+
+        // 获取当天的启动参数并检查URL
+        const startParam = utils.getRandomStartParam();
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (!urlParams.has(startParam)) {
+            GM_log(`URL中未包含启动参数标记: ${startParam}，跳过点击`);
+            return;
+        }
+
+        GM_log(`检测到搜索结果页且包含启动参数: ${startParam}，准备点击搜索结果`);
+
+        // 获取搜索结果（缓存查询结果）
+        const searchResults = document.querySelectorAll('li.b_algo');
+        
+        // 筛选出可见的搜索结果
+        const visibleResults = Array.from(searchResults).filter(result => isElementVisible(result));
+        const visibleResultsCount = visibleResults.length;
+        
+        if (visibleResultsCount === 0) {
+            GM_log('未找到可见的搜索结果项');
+            return;
+        }
+
+        GM_log(`找到 ${visibleResultsCount} 个可见的搜索结果`);
+
+        // 尝试多次选择搜索结果
+        const maxAttempts = 3;
+        let attempt = 0;
+        let targetLink = null;
+        
+        while (attempt < maxAttempts && !targetLink) {
+            // 随机选择一个可见的搜索结果
+            const randomIndex = Math.floor(Math.random() * visibleResultsCount);
+            const selectedResult = visibleResults[randomIndex];
+            GM_log(`从 ${visibleResultsCount} 个可见结果中随机选择第 ${randomIndex + 1} 个结果（尝试 ${attempt + 1}/${maxAttempts}）`);
+            
+            // 查找可点击的链接
+            const link = findClickableLink(selectedResult);
+            
+            // 验证链接有效性和可见性
+            if (link && validateLink(link) && isElementVisible(link)) {
+                targetLink = link;
+            } else {
+                GM_log('链接无效或不可见，尝试选择其他结果');
+                attempt++;
+            }
+        }
+
+        if (!targetLink) {
+            GM_log('未找到有效的可点击链接');
+            return;
+        }
+
+        GM_log(`找到目标链接: ${targetLink.href}`);
+
+        // 尝试打开链接
+        simulateHumanClick(targetLink);
+        
+    } catch (error) {
+        GM_log(`检查并点击搜索结果时出错: ${error.message}`);
+        console.error('checkAndClickSearchResult error:', error);
+    }
+}
+
+/**
+ * 验证链接是否有效
+ * @param {HTMLAnchorElement} link - 要验证的链接元素
+ * @returns {boolean} - 链接是否有效
+ */
+function validateLink(link) {
+    try {
+        if (!link || !link.href) {
+            return false;
+        }
+        
+        const url = new URL(link.href);
+        
+        // 排除内部链接和无效链接
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return false;
+        }
+        
+        // 排除bing自身的链接（可选）
+        if (url.hostname.includes('bing.com')) {
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        GM_log(`验证链接时出错: ${error.message}`);
+        return false;
+    }
+}
+
+/**
+ * 检查元素是否在当前窗口可见
+ * @param {Element} element - 要检查的元素
+ * @returns {boolean} - 元素是否在当前窗口可见
+ */
+function isElementVisible(element) {
+    try {
+        if (!element) {
+            return false;
+        }
+        
+        const rect = element.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+        
+        // 检查元素是否在视口内
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= windowHeight &&
+            rect.right <= windowWidth
+        );
+    } catch (error) {
+        GM_log(`检查元素可见性时出错: ${error.message}`);
+        return false;
+    }
+}
+
+/**
+ * 从搜索结果中查找可点击的链接
+ * @param {Element} result - 搜索结果元素
+ * @returns {HTMLAnchorElement|null} - 找到的链接元素或null
+ */
+function findClickableLink(result) {
+    try {
+        if (!result) {
+            GM_log('查找链接失败：搜索结果元素为null');
+            return null;
+        }
+        
+        // 优先查找 h2 中的链接（主标题链接）
+        const h2Link = result.querySelector('h2 a');
+        if (h2Link && h2Link.href) {
+            return h2Link;
+        }
+        
+        // 备选：查找 .tilk 类的链接
+        const tilkLink = result.querySelector('a.tilk');
+        if (tilkLink && tilkLink.href) {
+            return tilkLink;
+        }
+        
+        // 备选：查找其他可能的链接
+        const otherLink = result.querySelector('a[href]');
+        if (otherLink && otherLink.href) {
+            return otherLink;
+        }
+        
+        return null;
+    } catch (error) {
+        GM_log(`查找链接时出错: ${error.message}`);
+        return null;
+    }
+}
+
+/**
+ * 模拟人工操作点击链接
+ * @param {HTMLAnchorElement} link - 要点击的链接元素
+ */
+function simulateHumanClick(link) {
+    try {
+        // 策略1: 优先使用 ctrlKey + click 事件（最佳的后台打开方式，不会切换焦点）
+        GM_log('尝试使用 Ctrl+Click 在新标签页打开链接（保持原页面焦点）');
+        
+        // 保存原始属性
+        const originalTarget = link.target;
+        const originalRel = link.rel;
+        
+        // 设置链接属性以确保在新标签页打开且安全
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        // 模拟 Ctrl+Click（后台打开新标签页，不会切换焦点）
+        // 不包含 view 参数以避免沙盒环境中的类型转换错误
+        const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            ctrlKey: true,  // 关键：模拟按住Ctrl键，实现后台打开
+            button: 0       // 左键
+        });
+        
+        const eventResult = link.dispatchEvent(clickEvent);
+        
+        // 恢复原始属性
+        link.target = originalTarget;
+        link.rel = originalRel;
+        
+        if (eventResult) {
+            GM_log('已使用 Ctrl+Click 成功在后台打开链接，焦点保持在原页面');
+            return;
+        }
+        
+        // 策略2: Ctrl+Click 失败，尝试 window.open 并立即恢复焦点
+        GM_log('Ctrl+Click 未生效，尝试 window.open 并恢复焦点');
+        const newWindow = window.open(link.href, '_blank', 'noopener,noreferrer');
+        
+        if (newWindow) {
+            GM_log('已使用 window.open 打开链接，尝试保持原页面焦点');
+            // 立即尝试将焦点恢复到原页面
+            // 使用 setTimeout 确保在新窗口打开后执行
+            setTimeout(() => {
+                try {
+                    window.focus();
+                    // 额外的保障：如果当前页面是活动的，重新激活它
+                    if (document.hasFocus()) {
+                        window.blur();
+                        window.focus();
+                    }
+                } catch (e) {
+                    // 忽略焦点设置错误，这是正常的浏览器安全限制
+                    GM_log('无法强制设置窗口焦点，受浏览器安全策略限制');
+                }
+            }, 100);
+            return;
+        }
+        
+        // 策略3: 使用临时链接作为最终兜底（这种方式通常会切换焦点）
+        GM_log('window.open 被阻止，使用临时链接兜底');
+        const tempLink = document.createElement('a');
+        tempLink.href = link.href;
+        tempLink.target = '_blank';
+        tempLink.rel = 'noopener noreferrer';
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        GM_log('已通过临时链接在新标签页打开（可能切换焦点）');
+        
+        // 尝试恢复焦点（尽管可能无效）
+        setTimeout(() => {
+            try {
+                window.focus();
+            } catch (e) {
+                // 忽略错误
+            }
+        }, 100);
+        
+    } catch (error) {
+        GM_log(`模拟点击时出错: ${error.message}`);
+        // 最终兜底：直接使用 window.open
+        try {
+            const newWindow = window.open(link.href, '_blank', 'noopener,noreferrer');
+            if (newWindow) {
+                GM_log('兜底方案：已成功在新标签页打开链接');
+                setTimeout(() => {
+                    try {
+                        window.focus();
+                    } catch (e) {
+                        // 忽略焦点设置错误
+                    }
+                }, 100);
+            }
+        } catch (openError) {
+            GM_log(`所有方法均失败: ${openError.message}`);
+        }
+    }
+}
+
+/**
  * 检查并启动任务
  */
 function checkAndStartTask() {
     const startParam = utils.getRandomStartParam();
+    const urlParams = new URLSearchParams(window.location.search);
+    // 检查是否有当天的启动参数标记
+    const hasStartParam = urlParams.has(startParam);
+    
     console.log(`检查并启动任务: ${startParam}`);
-    if (new URLSearchParams(window.location.search).has(startParam)) {
+    
+    if (hasStartParam) {
+        // 有启动参数，准备执行搜索任务
         setTimeout(executeSearch, 2000);
+        randomScrollAfterPageLoad();
         console.log(`启动任务: ${startParam}`);
     } else {
         // createStatusPanel();
