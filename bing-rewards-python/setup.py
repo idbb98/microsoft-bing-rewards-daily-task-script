@@ -1,5 +1,5 @@
 from cx_Freeze import setup, Executable
-import os
+import json
 
 # 定义包含的文件
 include_files = [
@@ -17,21 +17,26 @@ options = {
     }
 }
 
+# 从 about_config.json 读取项目信息
+with open('about_config.json', 'r', encoding='utf-8') as f:
+    config = json.load(f)
+    project_info = config['project']
+
 # 定义可执行文件
 executables = [
     Executable(
         script='main.py',
         base='gui',  # 使用GUI基础，避免命令行窗口
-        target_name='BingRewardsAutomation.exe',
-        icon=None  # 可以指定图标文件，如果有的话
+        target_name=f"{project_info['name']}-{project_info['author']}Tool.exe",
+        icon='asset/favicon.ico'  # 图标文件路径（注意：cx_Freeze 通常需要 .ico 格式）
     )
 ]
 
 # 执行打包
 setup(
-    name='微软必应奖励每日任务脚本',
-    version='26.3.13.1',
-    description='微软必应奖励每日任务脚本 - keepa',
+    name='BingRewardsAutomation',
+    version=project_info['version'],
+    description=f"{project_info['name']}-{project_info['author']}",
     options=options,
     executables=executables
 )

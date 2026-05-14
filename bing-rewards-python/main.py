@@ -1,19 +1,12 @@
 import tkinter as tk
 import threading
 import time
-import os
 import sys
-import requests
 import random
-import webbrowser
-import pyautogui
-import win32api
-import win32con
-import win32gui
 import json
 import win32event
-import win32process
-import win32security
+import win32api
+import tkinter.messagebox
 
 # 导入自定义模块
 from ui import UIManager
@@ -178,7 +171,6 @@ if __name__ == "__main__":
     # 检查是否已经存在实例
     if win32api.GetLastError() == 183:  # ERROR_ALREADY_EXISTS = 183
         # 已经存在实例，显示提示并退出
-        import tkinter.messagebox
         root = tk.Tk()
         root.withdraw()  # 隐藏主窗口
         tkinter.messagebox.showinfo("提示", "程序已经在运行中！")

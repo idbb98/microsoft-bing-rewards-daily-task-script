@@ -72,7 +72,7 @@ class UIManager:
         # 添加窗口标题
         project_name = self.about_config.get("project", {}).get("name", "Bing Rewards 自动化工具")
         version = self.about_config.get("project", {}).get("version", "1.0")
-        author = self.about_config.get("project", {}).get("author", "keepa")
+        author = self.about_config.get("project", {}).get("author", "Brian")
         title_text = f"{project_name} v{version} - {author}"
         title_label = ttk.Label(self.title_frame, text=title_text, font= ("Microsoft YaHei", 10))
         title_label.pack(side=tk.LEFT, padx=10, pady=5)
@@ -116,7 +116,7 @@ class UIManager:
         self.exit_button.pack(side=tk.RIGHT, padx=5)
         
         # 添加作者信息
-        self.author_label = ttk.Label(self.button_frame, text="keepa", font=("Microsoft YaHei", 8))
+        self.author_label = ttk.Label(self.button_frame, text="Brian", font=("Microsoft YaHei", 8))
         self.author_label.pack(side=tk.RIGHT, padx=10)
         
         # 创建日志区域
@@ -136,12 +136,13 @@ class UIManager:
         
         # 浏览器路径配置
         ttk.Label(self.config_frame, text="浏览器路径：").grid(row=1, column=0, sticky=tk.W, pady=5)
-        self.browser_var = tk.StringVar(value=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+        self.browser_var = tk.StringVar(value="（自动检测默认浏览器）")
         # 添加变量变化监听，自动保存配置
         self.browser_var.trace_add('write', lambda *args: self.save_config())
         
         # 常用浏览器路径
         self.common_browser_paths = [
+            "（自动检测默认浏览器）",
             r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",  # Chrome
             r"D:\\development\\PortableTool\\CentBrowserPortable\\chrome.exe",
             r"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",  # Edge
@@ -211,7 +212,7 @@ class UIManager:
         
         # 版本信息
         version = self.about_config.get("project", {}).get("version", "1.0")
-        author = self.about_config.get("project", {}).get("author", "keepa")
+        author = self.about_config.get("project", {}).get("author", "Brian")
         ttk.Label(about_frame, text=f"版本: {version}", font=("Microsoft YaHei", 10)).pack(pady=2)
         ttk.Label(about_frame, text=f"作者: {author}", font=("Microsoft YaHei", 10)).pack(pady=2)
         
@@ -282,7 +283,11 @@ class UIManager:
     
     def get_browser_selection(self):
         """获取用户选择的浏览器"""
-        return self.browser_var.get()
+        browser_path = self.browser_var.get()
+        # 如果选择的是"自动检测默认浏览器"，返回空字符串
+        if "自动检测" in browser_path or browser_path == "":
+            return ""
+        return browser_path
     
     def get_search_count(self):
         """获取用户配置的搜索词搜索次数"""
@@ -366,7 +371,7 @@ class UIManager:
     def reset_config(self):
         """重置配置到默认值"""
         # 恢复默认值
-        self.browser_var.set(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+        self.browser_var.set("（自动检测默认浏览器）")
         self.topmost_var.set(True)
         self.root.attributes('-topmost', True)
         self.search_count_var.set("20")
@@ -386,7 +391,7 @@ class UIManager:
             "project": {
                 "name": "Bing Rewards 自动化工具",
                 "version": "1.0",
-                "author": "keepa",
+                "author": "Brian",
                 "is_open_source": True,
             "is_free": True,
                 "repository_url": "https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script"

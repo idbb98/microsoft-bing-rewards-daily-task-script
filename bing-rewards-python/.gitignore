@@ -1,0 +1,71 @@
+# Python 编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python 分发文件
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 日志文件
+*.log
+logs/
+
+# 配置文件（包含敏感信息）
+config.local.json
+*.local.json
+.env
+.env.local
+
+# 测试覆盖率
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+*.cover
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyinstaller
+*.manifest
+*.spec.backup
+
+# cx_Freeze 和其他打包工具
+build/
+dist/
+
+# Windows 特定文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS 特定文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 临时文件
+*.tmp
+*.temp
+~$*

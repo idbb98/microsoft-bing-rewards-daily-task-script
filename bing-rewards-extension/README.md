@@ -227,4 +227,4 @@ bing-rewards-extension/
 
 ## 致谢
 
-感谢 [keepa](https://gitee.com/idbb98) 的原始油猴脚本项目，本项目在此基础上进行了扩展化和功能增强。
+感谢 [Brian](https://gitee.com/idbb98) 的原始油猴脚本项目，本项目在此基础上进行了扩展化和功能增强。

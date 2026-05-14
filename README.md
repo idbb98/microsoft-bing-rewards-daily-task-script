@@ -17,8 +17,8 @@
 
 | 版本 | 技术栈 | 适用场景 | 特点 |
 |------|--------|----------|------|
-| 🖥️ **桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
-| 🪟 **桌面程序** | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
+| 🖥️ **Python 桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
+| 🪟 ~~**.NET 桌面程序**~~（停止维护） | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
 | 🌐 **浏览器脚本** | JavaScript + Tampermonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 
 ### 🐍 Python 桌面版
@@ -27,7 +27,7 @@
 
 👉 **[查看 Python 版本文档](bing-rewards-python/README.md)**
 
-### 🪟 .NET 桌面版
+### 🪟 ~~.NET 桌面版~~（停止维护）
 
 > 基于 .NET Framework 开发的 Windows 桌面程序，运行稳定，操作简单。
 

@@ -1,3 +1,6 @@
 requests
 pyautogui
 pywin32
+psutil
+pyperclip
+cx_Freeze

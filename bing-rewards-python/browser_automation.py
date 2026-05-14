@@ -7,7 +7,10 @@ import pyperclip
 import win32gui
 import win32process
 import win32con
+import win32api
 import psutil
+import winreg
+import ctypes
 
 class BrowserAutomation:
     def __init__(self, browser_path=None, log_manager=None):
@@ -23,6 +26,91 @@ class BrowserAutomation:
         else:
             # 回退到print
             print(f"[{level}] {message}")
+    
+    def get_default_browser_path(self):
+        """
+        获取Windows系统默认浏览器路径
+        
+        Returns:
+            str: 默认浏览器可执行文件路径，失败返回None
+        """
+        try:
+            # 方法1: 通过注册表获取HTTP协议关联的应用
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                                r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice")
+            prog_id = winreg.QueryValueEx(key, "ProgId")[0]
+            winreg.CloseKey(key)
+            
+            if prog_id:
+                # 根据ProgID获取浏览器路径
+                browser_paths = {
+                    "ChromeHTML": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                    "MSEdgeHTM": r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                    "FirefoxURL": r"C:\Program Files\Mozilla Firefox\firefox.exe",
+                    "IE.HTTP": r"C:\Program Files\Internet Explorer\iexplore.exe",
+                }
+                
+                # 检查常见的浏览器路径
+                for browser_key, default_path in browser_paths.items():
+                    if browser_key in prog_id:
+                        if os.path.exists(default_path):
+                            self.log("信息", f"检测到默认浏览器: {os.path.basename(default_path)}")
+                            return default_path
+                        break
+                
+                # 方法2: 尝试从App Paths注册表项获取
+                try:
+                    app_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                           f"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\{prog_id.split('.')[0]}.exe")
+                    browser_path = winreg.QueryValueEx(app_key, "")[0]
+                    winreg.CloseKey(app_key)
+                    if os.path.exists(browser_path):
+                        self.log("信息", f"从App Paths获取到默认浏览器路径: {browser_path}")
+                        return browser_path
+                except:
+                    pass
+            
+            # 方法3: 通过查询注册表获取默认应用
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                                    r"Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.html\UserChoice")
+                prog_id = winreg.QueryValueEx(key, "ProgId")[0]
+                winreg.CloseKey(key)
+                
+                # 尝试常见浏览器名称
+                browser_names = ["chrome", "msedge", "firefox", "opera", "brave"]
+                for name in browser_names:
+                    if name in prog_id.lower():
+                        # 在PATH中搜索
+                        import shutil
+                        exe_name = f"{name}.exe" if name != "msedge" else "msedge.exe"
+                        path = shutil.which(exe_name)
+                        if path:
+                            self.log("信息", f"通过PATH找到默认浏览器: {path}")
+                            return path
+            except:
+                pass
+            
+            # 方法4: 返回常见浏览器的默认路径（按优先级）
+            common_browsers = [
+                r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files\Mozilla Firefox\firefox.exe",
+            ]
+            
+            for path in common_browsers:
+                if os.path.exists(path):
+                    self.log("信息", f"使用找到的浏览器: {os.path.basename(path)}")
+                    return path
+            
+            self.log("警告", "无法自动检测默认浏览器路径")
+            return None
+            
+        except Exception as e:
+            self.log("错误", f"获取默认浏览器路径时出错: {e}")
+            return None
     
     def open_browser(self, custom_browser_title=None, custom_browser_process=None):
         """打开浏览器
@@ -50,11 +138,27 @@ class BrowserAutomation:
                     # Firefox支持-title参数
                     args.extend(["-title", custom_browser_title])
             
+            self.log("信息", f"启动浏览器: {self.browser_path}")
             process = subprocess.Popen(args)
         else:
-            # 使用系统默认浏览器
-            import webbrowser
-            webbrowser.open("https://www.bing.com")
+            # 使用系统默认浏览器 - 改进的实现
+            self.log("信息", "未指定浏览器路径，尝试检测默认浏览器...")
+            default_browser_path = self.get_default_browser_path()
+            
+            if default_browser_path:
+                self.log("信息", f"使用检测到的默认浏览器: {default_browser_path}")
+                args = [default_browser_path, "https://www.bing.com"]
+                process = subprocess.Popen(args)
+            else:
+                # 回退到webbrowser模块
+                self.log("警告", "无法检测默认浏览器，尝试使用webbrowser模块...")
+                import webbrowser
+                try:
+                    webbrowser.open("https://www.bing.com")
+                    self.log("信息", "已通过webbrowser打开URL，等待窗口出现...")
+                except Exception as e:
+                    self.log("错误", f"webbrowser.open失败: {e}")
+                    return False
         
         # 等待浏览器窗口加载完成并激活
         success = self.wait_for_browser_window(
@@ -63,6 +167,65 @@ class BrowserAutomation:
             custom_browser_process=custom_browser_process
         )
         return success
+    
+    def activate_window(self, hwnd):
+        """
+        激活窗口到前台
+        
+        Args:
+            hwnd: 窗口句柄
+            
+        Returns:
+            bool: 成功激活返回True
+        """
+        try:
+            # 使用AttachThreadInput解除前台锁定限制
+            foreground_thread = win32process.GetWindowThreadProcessId(win32gui.GetForegroundWindow())[0]
+            current_thread = win32api.GetCurrentThreadId()
+            
+            if foreground_thread != current_thread:
+                win32process.AttachThreadInput(foreground_thread, current_thread, True)
+            
+            try:
+                # 尝试多种激活方法
+                win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+                win32gui.SetForegroundWindow(hwnd)
+                
+                # 验证是否成功
+                time.sleep(0.3)
+                if win32gui.GetForegroundWindow() == hwnd:
+                    return True
+                
+                # 如果SetForegroundWindow失败，模拟Alt键绕过前台锁定
+                win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+                win32gui.BringWindowToTop(hwnd)
+                
+                # 模拟Alt键按下以允许设置前台窗口
+                ctypes.windll.user32.keybd_event(0x12, 0, 0, 0)  # Alt down
+                time.sleep(0.1)
+                win32gui.SetForegroundWindow(hwnd)
+                ctypes.windll.user32.keybd_event(0x12, 0, 2, 0)  # Alt up
+                
+                time.sleep(0.3)
+                if win32gui.GetForegroundWindow() == hwnd:
+                    return True
+                    
+            finally:
+                if foreground_thread != current_thread:
+                    win32process.AttachThreadInput(foreground_thread, current_thread, False)
+            
+            # 最后尝试最小化再恢复
+            win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
+            time.sleep(0.2)
+            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+            win32gui.SetForegroundWindow(hwnd)
+            
+            time.sleep(0.3)
+            return win32gui.GetForegroundWindow() == hwnd
+            
+        except Exception as e:
+            self.log("错误", f"窗口激活失败: {e}")
+            return False
     
     def ensure_browser_focus(self, timeout=10, check_interval=0.5):
         """
@@ -91,24 +254,14 @@ class BrowserAutomation:
                         # 尝试激活窗口
                         self.log("信息", "尝试激活浏览器窗口...")
                         try:
-                            # 方法1: SetForegroundWindow
-                            win32gui.SetForegroundWindow(self.browser_window_handle)
-                            # 方法2: ShowWindow 确保窗口可见
-                            win32gui.ShowWindow(self.browser_window_handle, win32con.SW_RESTORE)
-                            # 方法3: SetForegroundWindow 再次尝试
-                            win32gui.SetForegroundWindow(self.browser_window_handle)
+                            # 使用窗口激活方法
+                            if self.activate_window(self.browser_window_handle):
+                                self.log("信息", "成功恢复浏览器窗口焦点")
+                                return True
+                            else:
+                                self.log("警告", "无法激活浏览器窗口")
                         except Exception as e:
                             self.log("错误", f"激活窗口时出错: {e}")
-                            
-                        # 确保窗口被激活
-                        time.sleep(0.5)
-                        
-                        # 验证窗口是否在前台
-                        if win32gui.GetForegroundWindow() == self.browser_window_handle:
-                            self.log("信息", "成功恢复浏览器窗口焦点")
-                            return True
-                        else:
-                            self.log("警告", "无法激活浏览器窗口")
                     else:
                         self.log("警告", "存储的浏览器窗口句柄无效或不可见")
                         # 尝试重新查找浏览器窗口
@@ -307,22 +460,8 @@ class BrowserAutomation:
                 try:
                     # 检查窗口是否响应
                     if win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindow(hwnd):
-                        # 激活窗口 - 尝试多种方法确保激活
-                        try:
-                            # 方法1: SetForegroundWindow
-                            win32gui.SetForegroundWindow(hwnd)
-                            # 方法2: ShowWindow 确保窗口可见
-                            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
-                            # 方法3: SetForegroundWindow 再次尝试
-                            win32gui.SetForegroundWindow(hwnd)
-                        except Exception as e:
-                            self.log("错误", f"激活窗口时出错: {e}")
-                            
-                        # 确保窗口被激活
-                        time.sleep(0.5)
-                        
-                        # 验证窗口是否在前台
-                        if win32gui.GetForegroundWindow() == hwnd:
+                        # 使用窗口激活方法
+                        if self.activate_window(hwnd):
                             self.log("信息", f"成功激活浏览器窗口: {title}")
                             self.browser_window_handle = hwnd  # 保存窗口句柄
                             return True
@@ -376,16 +515,56 @@ class BrowserAutomation:
         time.sleep(3)  # 等待搜索结果加载
         return True
     
-    def scroll_page(self, times=3, amount=-200):
-        """滚动页面"""
+    def scroll_page(self, times=None, min_amount=200, max_amount=400):
+        """滚动页面（随机上下滚动2-5次，滚动距离随机）"""
         # 确保浏览器窗口有焦点
         if not self.ensure_browser_focus():
             self.log("错误", "无法获得浏览器窗口焦点，无法滚动页面")
             return False
         
-        for _ in range(times):
-            pyautogui.scroll(amount)  # 向下滚动
+        # 如果没有指定次数，随机生成2-5次
+        if times is None:
+            times = random.randint(2, 5)
+        
+        self.log("信息", f"开始滚动页面，共{times}次")
+        
+        # 将鼠标移动到浏览器窗口中心区域，确保滚动事件能正确接收
+        try:
+            if self.browser_window_handle:
+                # 获取窗口位置
+                left, top, right, bottom = win32gui.GetWindowRect(self.browser_window_handle)
+                center_x = (left + right) // 2
+                center_y = (top + bottom) // 2
+                # 移动鼠标到窗口中心
+                pyautogui.moveTo(center_x, center_y, duration=0.3)
+                time.sleep(0.3)
+                self.log("信息", f"鼠标已移动到窗口中心位置: ({center_x}, {center_y})")
+        except Exception as e:
+            self.log("警告", f"移动鼠标到窗口中心失败: {e}")
+        
+        for i in range(times):
+            # 随机决定向上或向下滚动
+            scroll_direction = random.choice([-1, 1])
+            # 随机生成滚动距离（在min_amount和max_amount之间）
+            scroll_distance = random.randint(min_amount, max_amount)
+            scroll_amount = scroll_distance * scroll_direction
+            direction_text = "向下" if scroll_amount < 0 else "向上"
+            
+            self.log("信息", f"第{i+1}/{times}次滚动：{direction_text} {abs(scroll_amount)}像素")
+            
+            # 方法1: 使用pyautogui滚动
+            pyautogui.scroll(scroll_amount)
+            time.sleep(0.2)
+            
+            # 方法2: 同时使用Page Up/Page Down键作为补充（更可靠）
+            if scroll_amount < 0:  # 向下滚动
+                pyautogui.press('pagedown')
+            else:  # 向上滚动
+                pyautogui.press('pageup')
+            
             time.sleep(random.uniform(0.5, 1.5))
+        
+        self.log("信息", "页面滚动完成")
         return True
     
     def close_tab(self):
