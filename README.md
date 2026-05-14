@@ -17,9 +17,9 @@
 
 | 版本 | 技术栈 | 适用场景 | 特点 |
 |------|--------|----------|------|
+| 🌐 **浏览器脚本**（推荐使用） | JavaScript + Tampermonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 | 🖥️ **Python 桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
 | 🪟 ~~**.NET 桌面程序**~~（停止维护） | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
-| 🌐 **浏览器脚本** | JavaScript + Tampermonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 
 ### 🐍 Python 桌面版
 
