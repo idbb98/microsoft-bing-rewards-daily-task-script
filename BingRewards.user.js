@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.5.1.1
+// @version      26.6.18.1
 // @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
@@ -27,14 +27,14 @@
 // 配置参数
 const CONFIG = {
     // ==================== 脚本基础信息 ====================
-    
+
     // 版本号（动态从GM_info获取）
     get version() {
         return GM_info?.script?.version || '1.0.0';
     },
-    
+
     // ==================== 用户可配置参数 (通过设置页面/GM_value持久化) ====================
-    
+
     // 搜索form参数，⚠️ 手动进入https://cn.bing.com，确保登录后执行几次搜索，根据实际地址栏的form=xxx修改
     get searchFormParam() {
         return GM_getValue('customSearchFormParam', 'QBLH');
@@ -66,7 +66,7 @@ const CONFIG = {
     set randomAddSearchWords(value) {
         GM_setValue('customRandomAddSearchWords', value);
     },
-    
+
     // 随机加词因子，控制加词的概率（0-1之间的小数），默认为0.3即30%概率添加字符
     get randomAddSearchWordsFactor() {
         return GM_getValue('customRandomAddSearchWordsFactor', 0.3);
@@ -82,7 +82,7 @@ const CONFIG = {
     set randomCutSearchWords(value) {
         GM_setValue('customRandomCutSearchWords', value);
     },
-    
+
     // 随机截词因子，控制截取的概率（0-1之间的小数），默认为0.2即20%概率截取字符
     get randomCutSearchWordsFactor() {
         return GM_getValue('customRandomCutSearchWordsFactor', 0.2);
@@ -101,13 +101,13 @@ const CONFIG = {
 
     // 暂停间隔范围：每执行多少次搜索后暂停一次的区间
     get pauseIntervalMin() {
-        return GM_getValue('customPauseIntervalMin', 3);
+        return GM_getValue('customPauseIntervalMin', 2);
     },
     set pauseIntervalMin(value) {
         GM_setValue('customPauseIntervalMin', value);
     },
     get pauseIntervalMax() {
-        return GM_getValue('customPauseIntervalMax', 5);
+        return GM_getValue('customPauseIntervalMax', 3);
     },
     set pauseIntervalMax(value) {
         GM_setValue('customPauseIntervalMax', value);
@@ -115,7 +115,7 @@ const CONFIG = {
 
     // 暂停时间范围（毫秒）：每次暂停的持续时间区间
     get pauseTimeMin() {
-        return GM_getValue('customPauseTimeMin', 10 * 60 * 1000);
+        return GM_getValue('customPauseTimeMin', 20 * 60 * 1000);
     },
     set pauseTimeMin(value) {
         GM_setValue('customPauseTimeMin', value);
@@ -142,10 +142,10 @@ const CONFIG = {
     },
 
     // ==================== 内部固定参数 (不建议修改) ====================
-    
+
     // 小数部分延迟（随机延迟的基础值）
     decimalDelay: 3 * 1000,
-    
+
     // 网络请求超时时间（毫秒）：获取热门搜索词的最大等待时间
     requestTimeout: 20 * 1000,
 
@@ -154,6 +154,14 @@ const CONFIG = {
 
     // ==================== 更新日志 (便于提取和展示) ====================
     changeLog: [
+        {
+            version: '26.6.18.1',
+            date: '2026-06-18',
+            changes: [
+                '功能优化：优化搜索结果链接获取及点击逻辑',
+                '默认参数调整：暂停时间范围调整为20-30分钟；随机暂停间隔调整为2-3次搜索'
+            ]
+        },
         {
             version: '26.5.1.1',
             date: '2026-04-29',
@@ -625,7 +633,7 @@ function createStatusPanel() {
                 transform: scale(1.2);
             }
         }
-        
+
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -638,7 +646,7 @@ function createStatusPanel() {
                 max-height: 1000px;
             }
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -649,7 +657,7 @@ function createStatusPanel() {
                 transform: translateY(0);
             }
         }
-        
+
         /* 响应式布局 - 主面板 */
         #bing-rewards-panel {
             /* 移动端适配 */
@@ -660,7 +668,7 @@ function createStatusPanel() {
                 max-width: calc(100vw - 60px) !important;
                 border-radius: 16px !important;
             }
-            
+
             @media (max-width: 480px) {
                 right: 8px !important;
                 bottom: 16px !important;
@@ -668,11 +676,11 @@ function createStatusPanel() {
                 min-width: calc(100vw - 46px) !important;
                 max-width: calc(100vw - 46px) !important;
             }
-            
+
             /* 确保面板有最大宽度限制 */
             width: auto !important;
         }
-        
+
         /* 面板头部响应式 */
         #bing-rewards-panel #panel-header {
             @media (max-width: 480px) {
@@ -680,20 +688,20 @@ function createStatusPanel() {
                 gap: 6px !important;
             }
         }
-        
+
         /* 面板头部标题容器 */
         #bing-rewards-panel #panel-title-container h3 {
             @media (max-width: 480px) {
                 font-size: 14px !important;
             }
         }
-        
+
         #bing-rewards-panel #panel-title-container div {
             @media (max-width: 480px) {
                 font-size: 10px !important;
             }
         }
-        
+
         /* 倒计时响应式 */
         #bing-rewards-panel #panel-countdown {
             @media (max-width: 480px) {
@@ -702,7 +710,7 @@ function createStatusPanel() {
                 margin-left: 8px !important;
             }
         }
-        
+
         /* 按钮响应式 */
         #bing-rewards-panel #panel-toggle-btn,
         #bing-rewards-panel #panel-settings-btn,
@@ -713,7 +721,7 @@ function createStatusPanel() {
                 font-size: 14px !important;
             }
         }
-        
+
         /* 面板底部状态栏响应式 */
         #bing-rewards-panel #panel-body > div:last-child {
             @media (max-width: 480px) {
@@ -723,7 +731,7 @@ function createStatusPanel() {
                 margin-top: 12px !important;
             }
         }
-        
+
         /* 进度条区域响应式 */
         #bing-rewards-panel #panel-content > div {
             @media (max-width: 480px) {
@@ -786,7 +794,7 @@ function createStatusPanel() {
         border: `1px solid ${theme['--panel-border']}`,
         borderRadius: '20px',
         padding: defaultCollapsed ? '16px 20px' : '24px',
-        boxShadow: defaultCollapsed 
+        boxShadow: defaultCollapsed
             ? `0 8px 24px ${theme['--panel-shadow']}, 0 0 0 1px ${theme['--panel-border']}30`
             : `0 16px 48px ${theme['--panel-shadow']}, 0 0 0 1px ${theme['--panel-border']}40, 0 0 80px ${theme['--panel-primary-color']}10`,
         zIndex: '10000',
@@ -1087,7 +1095,7 @@ function showSettingsDialog(theme) {
                     <div style="display:flex;align-items:center;gap:12px;">
                         <!-- 搜索框 -->
                         <div id="search-wrapper" style="position:relative;flex:1;max-width:280px;">
-                            <input type="text" id="settings-search-input" 
+                            <input type="text" id="settings-search-input"
                                 style="width:100%;box-sizing:border-box;padding:10px 14px 10px 40px;border:2px solid ${theme['--panel-border']};border-radius:10px;font-size:13px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:42px;"
                                 placeholder="搜索设置项...">
                             <span id="search-icon" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:${theme['--panel-text-muted']};font-size:14px;">🔍</span>
@@ -1102,7 +1110,7 @@ function showSettingsDialog(theme) {
                                 ℹ️ 关于
                             </button>
                         </div>
-                        
+
                         <div id="settings-close-btn" class="dialog-close-btn" style="cursor:pointer;font-size:20px;color:${theme['--panel-text-secondary']};width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);background:transparent;user-select:none;" title="关闭设置">
                             ✕
                         </div>
@@ -1284,7 +1292,7 @@ function showSettingsDialog(theme) {
                                     <div style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;background:${theme['--panel-bg']};padding:12px 14px;border-radius:8px;border:1px solid ${theme['--panel-border']};">
                                         <div style="margin-bottom:8px;">搜索完成后自动点击（非100%）一个搜索结果链接，模拟真实用户行为。</div>
                                         <div style="color:${theme['--panel-warning-color']};font-weight:500;padding:6px 8px;background:${theme['--panel-warning-bg']};border-radius:6px;border-left:3px solid ${theme['--panel-warning-color']};">
-                                            ⚠️ 注意：新打开的标签页无法自动关闭，需手动关闭
+                                            ⚠️ 注意：首次运行请允许弹出窗口。新打开的标签页无法自动关闭，需手动关闭。
                                         </div>
                                     </div>
                                 </div>
@@ -1331,7 +1339,7 @@ function showSettingsDialog(theme) {
                             </div>
                             <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">📝</span>
-                                <span>默认每完成 <strong style="color:${theme['--panel-primary-color']};">3-5次</strong> 搜索后随机暂停一次，模拟人类工作节奏</span>
+                                <span>默认每完成 <strong style="color:${theme['--panel-primary-color']};">2-3次</strong> 搜索后随机暂停一次，模拟人类工作节奏</span>
                             </div>
                         </div>
 
@@ -1356,7 +1364,7 @@ function showSettingsDialog(theme) {
                             </div>
                             <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">⚠️</span>
-                                <span>建议设置为 <strong style="color:${theme['--panel-warning-text']};">10-30分钟</strong>，有效模拟人类休息间隔，显著降低账号被封风险</span>
+                                <span>建议设置为 <strong style="color:${theme['--panel-warning-text']};">20-30分钟</strong>，有效模拟人类休息间隔，显著降低账号被封风险</span>
                             </div>
                         </div>
                         </div>
@@ -1599,7 +1607,7 @@ function showSettingsDialog(theme) {
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-track { background: transparent; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb { background: ${theme['--panel-border']}; border-radius: 4px; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb:hover { background: ${theme['--panel-text-muted']}; }
-            
+
             /* 搜索框样式 */
             #search-wrapper {
                 position: relative;
@@ -1611,7 +1619,7 @@ function showSettingsDialog(theme) {
             .help-icon:hover {
                 color: ${theme['--panel-primary-color']} !important;
             }
-            
+
             /* 响应式布局 - 设置对话框 */
             @media (max-width: 768px) {
                 #settings-dialog .dialog-container {
@@ -1745,7 +1753,7 @@ function showSettingsDialog(theme) {
                     justify-content: flex-end !important;
                 }
             }
-            
+
             @media (max-width: 480px) {
                 #settings-dialog .dialog-container {
                     width: 96vw !important;
@@ -1874,11 +1882,11 @@ function showSettingsDialog(theme) {
     const pauseTimeMaxInput = document.getElementById('pause-time-max-input');
     const minDelayInput = document.getElementById('min-delay-input');
     const maxDelayInput = document.getElementById('max-delay-input');
-    
+
     // 搜索相关元素
     const searchInput = document.getElementById('settings-search-input');
     const clearSearchBtn = document.getElementById('clear-search-btn');
-    
+
     // 配置管理相关元素
     const exportConfigBtn = document.getElementById('export-config-btn');
     const importConfigBtn = document.getElementById('import-config-btn');
@@ -1902,17 +1910,17 @@ function showSettingsDialog(theme) {
     const performSearch = (keyword) => {
         const sections = dialog.querySelectorAll('.config-section');
         let foundCount = 0;
-        
+
         sections.forEach(section => {
             const sectionTitle = section.getAttribute('data-section');
             const searchTags = section.querySelectorAll('[data-search-tags]');
             let shouldShow = false;
-            
+
             // 检查section标题是否匹配
             if (sectionTitle && sectionTitle.toLowerCase().includes(keyword.toLowerCase())) {
                 shouldShow = true;
             }
-            
+
             // 检查各个设置项的搜索标签
             searchTags.forEach(tagElement => {
                 const tags = tagElement.getAttribute('data-search-tags');
@@ -1920,7 +1928,7 @@ function showSettingsDialog(theme) {
                     shouldShow = true;
                 }
             });
-            
+
             // 检查section内的文本内容
             if (!shouldShow) {
                 const textContent = section.textContent.toLowerCase();
@@ -1928,7 +1936,7 @@ function showSettingsDialog(theme) {
                     shouldShow = true;
                 }
             }
-            
+
             if (shouldShow) {
                 section.style.display = 'block';
                 foundCount++;
@@ -1946,7 +1954,7 @@ function showSettingsDialog(theme) {
                 section.style.display = 'none';
             }
         });
-        
+
         // 显示搜索结果提示
         const searchResultsHint = document.getElementById('search-results-hint');
         if (keyword.trim()) {
@@ -1989,12 +1997,12 @@ function showSettingsDialog(theme) {
         navAboutBtn.classList.remove('active');
         navAboutBtn.style.background = 'transparent';
         navAboutBtn.style.color = theme['--panel-text-secondary'];
-        
+
         settingsContent.style.display = 'block';
         aboutContent.style.display = 'none';
         searchWrapper.style.display = 'block';
         dialogFooter.style.display = 'flex';
-        
+
         // 清除搜索
         searchInput.value = '';
         clearSearchBtn.style.display = 'none';
@@ -2008,7 +2016,7 @@ function showSettingsDialog(theme) {
         navSettingsBtn.classList.remove('active');
         navSettingsBtn.style.background = 'transparent';
         navSettingsBtn.style.color = theme['--panel-text-secondary'];
-        
+
         aboutContent.style.display = 'block';
         settingsContent.style.display = 'none';
         searchWrapper.style.display = 'none';
@@ -2021,7 +2029,7 @@ function showSettingsDialog(theme) {
     searchInput.addEventListener('input', (e) => {
         const keyword = e.target.value;
         performSearch(keyword);
-        
+
         // 显示/隐藏清除按钮
         clearSearchBtn.style.display = keyword.trim() ? 'block' : 'none';
     });
@@ -2039,7 +2047,7 @@ function showSettingsDialog(theme) {
             const section = header.closest('.config-section');
             const content = section.querySelector('.section-content');
             const toggle = section.querySelector('.section-toggle');
-            
+
             if (content.style.maxHeight === '0px' || !content.style.maxHeight) {
                 content.style.maxHeight = '1000px';
                 content.style.opacity = '1';
@@ -2072,7 +2080,7 @@ function showSettingsDialog(theme) {
             exportTime: new Date().toISOString(),
             version: CONFIG.version
         };
-        
+
         const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -2082,7 +2090,7 @@ function showSettingsDialog(theme) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         GM_notification({
             title: '配置导出成功',
             text: '配置文件已保存到本地',
@@ -2099,17 +2107,17 @@ function showSettingsDialog(theme) {
     configFileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
                 const config = JSON.parse(event.target.result);
-                
+
                 // 确认导入
                 if (!confirm(`⚠️ 确认导入配置文件？\n\n这将覆盖当前所有设置。\n\n导入时间: ${config.exportTime || '未知'}\n版本: ${config.version || '未知'}`)) {
                     return;
                 }
-                
+
                 // 保存配置
                 if (config.searchFormParam !== undefined) GM_setValue('customSearchFormParam', config.searchFormParam);
                 if (config.panelDefaultCollapsed !== undefined) GM_setValue('customPanelDefaultCollapsed', config.panelDefaultCollapsed);
@@ -2125,17 +2133,17 @@ function showSettingsDialog(theme) {
                 if (config.pauseTimeMax !== undefined) GM_setValue('customPauseTimeMax', config.pauseTimeMax);
                 if (config.minDelay !== undefined) GM_setValue('customMinDelay', config.minDelay);
                 if (config.maxDelay !== undefined) GM_setValue('customMaxDelay', config.maxDelay);
-                
+
                 GM_notification({
                     title: '配置导入成功',
                     text: '配置已成功导入，页面将刷新',
                     icon: '📤',
                     timeout: 3000
                 });
-                
+
                 closeDialog();
                 setTimeout(() => window.location.reload(), 2000);
-                
+
             } catch (error) {
                 alert('❌ 配置文件格式错误，请确保导入的是有效的JSON配置文件');
                 console.error('配置导入失败:', error);
@@ -2237,38 +2245,38 @@ function showSettingsDialog(theme) {
     // Radio按钮样式更新
     Array.from(panelStateRadios).forEach(radio => {
         const label = radio.closest('label');
-        
+
         // 初始化：为已选中的 radio 添加勾选标记
         if (radio.checked) {
             const isExpanded = radio.value === 'expanded';
             label.style.borderColor = theme['--panel-primary-color'];
             label.style.background = isExpanded ? `linear-gradient(135deg,${theme['--panel-success-bg']},${theme['--panel-hover-bg']})` : `linear-gradient(135deg,${theme['--panel-info-bg']},${theme['--panel-hover-bg']})`;
-            
+
             const checkmark = document.createElement('div');
             checkmark.className = 'checkmark';
             checkmark.style.cssText = `position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:${theme['--panel-primary-color']};display:flex;align-items:center;justify-content:center;pointer-events:none;`;
             checkmark.innerHTML = '<span style="color:#fff;font-size:12px;font-weight:bold;line-height:1;">✓</span>';
             label.appendChild(checkmark);
         }
-        
+
         radio.addEventListener('change', () => {
             // 遍历所有radio，更新它们的样式和勾选标记
             Array.from(panelStateRadios).forEach(r => {
                 const lbl = r.closest('label');
                 if (!lbl) return;
-                
+
                 // 先移除旧的勾选标记
                 const oldCheckmark = lbl.querySelector('.checkmark');
                 if (oldCheckmark) {
                     oldCheckmark.remove();
                 }
-                
+
                 if (r.checked) {
                     // 选中状态：更新样式并添加勾选标记
                     const isExpanded = r.value === 'expanded';
                     lbl.style.borderColor = theme['--panel-primary-color'];
                     lbl.style.background = isExpanded ? `linear-gradient(135deg,${theme['--panel-success-bg']},${theme['--panel-hover-bg']})` : `linear-gradient(135deg,${theme['--panel-info-bg']},${theme['--panel-hover-bg']})`;
-                    
+
                     // 添加新的勾选标记
                     const checkmark = document.createElement('div');
                     checkmark.className = 'checkmark';
@@ -2346,7 +2354,7 @@ function showSettingsDialog(theme) {
         if (!confirm('⚠️ 确认恢复所有设置为默认值？\n\n此操作将清除您所有的自定义设置，请确保已备份配置。')) {
             return;
         }
-        
+
         searchFormInput.value = 'QBLH';
         // 设置面板状态为展开
         Array.from(panelStateRadios).forEach(r => {
@@ -2509,7 +2517,7 @@ function updateStatusPanel(data = {}) {
     // 更新页面状态指示器
     const pageStatusText = document.getElementById('page-status-text');
     const taskRunningStatus = document.getElementById('task-running-status');
-    
+
     if (utils.isPageVisible()) {
         pageStatus.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#107c10;box-shadow:0 0 6px rgba(16,124,16,0.5);animation:pulse 2s ease-in-out infinite;"></span> <span id="page-status-text">页面活跃</span>';
         pageStatus.style.color = 'var(--panel-success-text,#107c10)';
@@ -2574,7 +2582,7 @@ function updateStatusPanel(data = {}) {
                     ${taskStatus.currentCount}/${taskStatus.maxCount}
                 </span>
             </div>
-            
+
             <!-- 进度条 -->
             <div style="position:relative;">
                 <div style="height:12px;background:var(--panel-progress-bg,#f0f0f0);border-radius:6px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">
@@ -2583,14 +2591,14 @@ function updateStatusPanel(data = {}) {
                     </div>
                 </div>
             </div>
-            
+
             ${taskStatus.isCompleted ? `
                 <div style="padding:12px;background:var(--panel-success-bg,#f0f9f0);border-radius:8px;border-left:3px solid var(--panel-success-text,#107c10);display:flex;align-items:center;gap:8px;">
                     <span style="font-size:18px;">✅</span>
                     <span style="color:var(--panel-success-text,#107c10);font-size:12px;font-weight:500;">今日任务已完成</span>
                 </div>
             ` : ''}
-            
+
             ${pauseTimeLeft !== null ? `
                 <div style="padding:12px;background:var(--panel-warning-bg,#fff8e6);border-radius:8px;border-left:3px solid var(--panel-warning-border,#ffb900);display:flex;align-items:center;gap:8px;">
                     <span style="font-size:18px;">⏸️</span>
@@ -2600,7 +2608,7 @@ function updateStatusPanel(data = {}) {
                     </div>
                 </div>
             ` : ''}
-            
+
             ${!pauseTimeLeft && currentWord && remainingTime > 0 ? `
                 <div style="padding:12px;background:var(--panel-info-bg,#f0f7ff);border-radius:8px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -2881,10 +2889,10 @@ function randomScrollAfterPageLoad() {
                 setTimeout(() => {
                     // 随机决定滚动方向：true=下滑，false=上滑
                     const scrollDown = Math.random() > 0.2;
-                    
+
                     // 随机生成滚动距离（100-800px）
                     const scrollDistance = Math.floor(Math.random() * 700) + 100;
-                    
+
                     // 计算新的滚动位置
                     let newScrollPosition;
                     if (scrollDown) {
@@ -2894,26 +2902,26 @@ function randomScrollAfterPageLoad() {
                         // 上滑：当前位置 - 随机距离，不小于0
                         newScrollPosition = Math.max(currentScroll - scrollDistance, 0);
                     }
-                    
+
                     // 执行滚动
                     window.scrollTo({
                         top: newScrollPosition,
                         behavior: 'smooth'
                     });
-                    
+
                     // 更新当前位置
                     currentScroll = newScrollPosition;
-                    
+
                     const direction = scrollDown ? '下滑' : '上滑';
                     GM_log(`第${i + 1}次滚动: ${direction} ${scrollDistance}px，目标位置: ${newScrollPosition}px`);
-                    
+
                     // 如果是最后一次滚动，滚动结束后检查并点击链接
                     if (i === scrollCount - 1) {
                         setTimeout(() => {
                             checkAndClickSearchResult();
                         }, 1500); // 等待滚动动画完成
                     }
-                    
+
                 }, i * 1000); // 每次滚动间隔1秒，模拟真实用户操作
             }
         } else {
@@ -2928,111 +2936,70 @@ function randomScrollAfterPageLoad() {
  */
 function checkAndClickSearchResult() {
     try {
-        // 检查是否启用了点击搜索结果功能
-        if (!CONFIG.clickSearchResults) {
-            GM_log('未启用点击搜索结果功能，跳过点击');
-            return;
-        }
-        
-        // 检查是否在搜索结果页面（使用正则表达式提高性能）
-        const isSearchPage = /\/search/.test(window.location.pathname) && /[?&]q=/.test(window.location.search);
-        if (!isSearchPage) {
-            GM_log('当前不是搜索结果页面，跳过点击');
-            return;
-        }
+        // 前置检查
+        if (!CONFIG.clickSearchResults) return;
 
-        // 获取当天的启动参数并检查URL
+        const isSearchPage = /\/search/.test(window.location.pathname) && /[?&]q=/.test(window.location.search);
+        if (!isSearchPage) return;
+
         const startParam = utils.getRandomStartParam();
         const urlParams = new URLSearchParams(window.location.search);
-        
-        if (!urlParams.has(startParam)) {
-            GM_log(`URL中未包含启动参数标记: ${startParam}，跳过点击`);
-            return;
-        }
+        if (!urlParams.has(startParam)) return;
 
-        GM_log(`检测到搜索结果页且包含启动参数: ${startParam}，准备点击搜索结果`);
+        GM_log(`检测到搜索结果页，准备点击链接`);
 
-        // 获取搜索结果（缓存查询结果）
-        const searchResults = document.querySelectorAll('li.b_algo');
-        
-        // 筛选出可见的搜索结果
-        const visibleResults = Array.from(searchResults).filter(result => isElementVisible(result));
-        const visibleResultsCount = visibleResults.length;
-        
-        if (visibleResultsCount === 0) {
-            GM_log('未找到可见的搜索结果项');
-            return;
-        }
+        // 尝试从标准搜索结果中查找链接
+        let targetLink = findLinkFromSearchResults();
 
-        GM_log(`找到 ${visibleResultsCount} 个可见的搜索结果`);
-
-        // 尝试多次选择搜索结果
-        const maxAttempts = 3;
-        let attempt = 0;
-        let targetLink = null;
-        
-        while (attempt < maxAttempts && !targetLink) {
-            // 随机选择一个可见的搜索结果
-            const randomIndex = Math.floor(Math.random() * visibleResultsCount);
-            const selectedResult = visibleResults[randomIndex];
-            GM_log(`从 ${visibleResultsCount} 个可见结果中随机选择第 ${randomIndex + 1} 个结果（尝试 ${attempt + 1}/${maxAttempts}）`);
-            
-            // 查找可点击的链接
-            const link = findClickableLink(selectedResult);
-            
-            // 验证链接有效性和可见性
-            if (link && validateLink(link) && isElementVisible(link)) {
-                targetLink = link;
-            } else {
-                GM_log('链接无效或不可见，尝试选择其他结果');
-                attempt++;
-            }
+        // 降级策略：如果未找到，查找页面全部链接
+        if (!targetLink) {
+            GM_log('未找到标准搜索结果，尝试查找页面全部链接');
+            targetLink = findAnyValidLinkOnPage();
         }
 
         if (!targetLink) {
-            GM_log('未找到有效的可点击链接');
+            GM_log('未找到可点击的有效链接');
             return;
         }
 
-        GM_log(`找到目标链接: ${targetLink.href}`);
-
-        // 尝试打开链接
+        GM_log(`点击链接: ${targetLink.href}`);
         simulateHumanClick(targetLink);
-        
+
     } catch (error) {
-        GM_log(`检查并点击搜索结果时出错: ${error.message}`);
-        console.error('checkAndClickSearchResult error:', error);
+        GM_log(`点击搜索结果时出错: ${error.message}`);
+        console.error(error);
     }
 }
 
 /**
- * 验证链接是否有效
- * @param {HTMLAnchorElement} link - 要验证的链接元素
- * @returns {boolean} - 链接是否有效
+ * 从标准搜索结果中查找可点击的链接
+ * @returns {HTMLAnchorElement|null}
  */
-function validateLink(link) {
-    try {
-        if (!link || !link.href) {
-            return false;
-        }
-        
-        const url = new URL(link.href);
-        
-        // 排除内部链接和无效链接
-        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-            return false;
-        }
-        
-        // 排除bing自身的链接（可选）
-        if (url.hostname.includes('bing.com')) {
-            return false;
-        }
-        
-        return true;
-    } catch (error) {
-        GM_log(`验证链接时出错: ${error.message}`);
-        return false;
+function findLinkFromSearchResults() {
+    const searchResults = Array.from(document.querySelectorAll('li.b_algo'))
+        .filter(result => isElementVisible(result));
+
+    if (searchResults.length === 0) {
+        return null;
     }
+
+    GM_log(`找到 ${searchResults.length} 个可见的搜索结果`);
+
+    // 最多尝试5次
+    const maxAttempts = Math.min(5, searchResults.length);
+
+    for (let i = 0; i < maxAttempts; i++) {
+        const randomIndex = Math.floor(Math.random() * searchResults.length);
+        const result = searchResults[randomIndex];
+        const link = findClickableLink(result);
+
+        if (link && isElementVisible(link)) {
+            GM_log(`成功找到有效链接`);
+            return link;
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -3045,11 +3012,11 @@ function isElementVisible(element) {
         if (!element) {
             return false;
         }
-        
+
         const rect = element.getBoundingClientRect();
         const windowHeight = window.innerHeight || document.documentElement.clientHeight;
         const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-        
+
         // 检查元素是否在视口内
         return (
             rect.top >= 0 &&
@@ -3066,38 +3033,87 @@ function isElementVisible(element) {
 /**
  * 从搜索结果中查找可点击的链接
  * @param {Element} result - 搜索结果元素
- * @returns {HTMLAnchorElement|null} - 找到的链接元素或null
+ * @returns {HTMLAnchorElement|null}
  */
 function findClickableLink(result) {
-    try {
-        if (!result) {
-            GM_log('查找链接失败：搜索结果元素为null');
-            return null;
-        }
-        
-        // 优先查找 h2 中的链接（主标题链接）
-        const h2Link = result.querySelector('h2 a');
-        if (h2Link && h2Link.href) {
-            return h2Link;
-        }
-        
-        // 备选：查找 .tilk 类的链接
-        const tilkLink = result.querySelector('a.tilk');
-        if (tilkLink && tilkLink.href) {
-            return tilkLink;
-        }
-        
-        // 备选：查找其他可能的链接
-        const otherLink = result.querySelector('a[href]');
-        if (otherLink && otherLink.href) {
-            return otherLink;
-        }
-        
-        return null;
-    } catch (error) {
-        GM_log(`查找链接时出错: ${error.message}`);
-        return null;
+    if (!result) return null;
+
+    // 策略1: h2 中的链接（优先直接子元素，其次嵌套）
+    for (const h2 of result.querySelectorAll('h2')) {
+        const link = h2.querySelector(':scope > a[href]') ||
+                     Array.from(h2.querySelectorAll('a[href]')).find(isValidResultLink);
+        if (link) return link;
     }
+
+    // 策略2: 排除辅助链接后的第一个有效链接
+    const allLinks = result.querySelectorAll('a[href]');
+    for (const link of allLinks) {
+        if (!link.classList.contains('tilk') &&
+            !link.closest('.b_tpcn, .b_attribution, .b_meta') &&
+            isValidResultLink(link)) {
+            return link;
+        }
+    }
+
+    // 策略3: 任意有效链接（保底）
+    return Array.from(allLinks).find(isValidResultLink) || null;
+}
+
+/**
+ * 验证链接是否为有效的搜索结果链接
+ * @param {HTMLAnchorElement} link
+ * @returns {boolean}
+ */
+function isValidResultLink(link) {
+    if (!link || !link.href) return false;
+
+    const href = link.href;
+
+    // 必须是 http/https 协议
+    if (!href.startsWith('http://') && !href.startsWith('https://')) {
+        return false;
+    }
+
+    // 排除内部链接和伪链接
+    if (href.includes('bing.com') ||
+        href.includes('msn.com') ||
+        href.includes('microsoft.com') ||
+        href.startsWith('javascript:') ||
+        href === '#') {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * 在页面中查找任意有效的外部链接（降级策略）
+ * @returns {HTMLAnchorElement|null}
+ */
+function findAnyValidLinkOnPage() {
+    const allLinks = Array.from(document.querySelectorAll('a[href]'));
+
+    if (allLinks.length === 0) return null;
+
+    // 过滤出可见的有效外部链接
+    const validLinks = allLinks.filter(link => {
+        if (!isValidResultLink(link)) return false;
+
+        // 排除导航、页脚、侧边栏、广告等区域
+        if (link.closest('nav, footer, header, #b_header, #b_footer, .b_nav, .b_footer, .b_sideBlade, .ads, .advertisement, #b_context')) {
+            return false;
+        }
+
+        return isElementVisible(link);
+    });
+
+    // 如果没有可见链接，尝试任意有效链接
+    const candidates = validLinks.length > 0 ? validLinks : allLinks.filter(isValidResultLink);
+
+    if (candidates.length === 0) return null;
+
+    // 随机选择一个
+    return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 /**
@@ -3106,63 +3122,29 @@ function findClickableLink(result) {
  */
 function simulateHumanClick(link) {
     try {
-        // 策略1: 优先使用 ctrlKey + click 事件（最佳的后台打开方式，不会切换焦点）
-        GM_log('尝试使用 Ctrl+Click 在新标签页打开链接（保持原页面焦点）');
-        
-        // 保存原始属性
-        const originalTarget = link.target;
-        const originalRel = link.rel;
-        
-        // 设置链接属性以确保在新标签页打开且安全
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        
-        // 模拟 Ctrl+Click（后台打开新标签页，不会切换焦点）
-        // 不包含 view 参数以避免沙盒环境中的类型转换错误
-        const clickEvent = new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            ctrlKey: true,  // 关键：模拟按住Ctrl键，实现后台打开
-            button: 0       // 左键
-        });
-        
-        const eventResult = link.dispatchEvent(clickEvent);
-        
-        // 恢复原始属性
-        link.target = originalTarget;
-        link.rel = originalRel;
-        
-        if (eventResult) {
-            GM_log('已使用 Ctrl+Click 成功在后台打开链接，焦点保持在原页面');
+        // 防止重复点击：添加标记
+        if (link.dataset.clicked === 'true') {
+            GM_log('链接已被点击，跳过重复操作');
             return;
         }
-        
-        // 策略2: Ctrl+Click 失败，尝试 window.open 并立即恢复焦点
-        GM_log('Ctrl+Click 未生效，尝试 window.open 并恢复焦点');
-        const newWindow = window.open(link.href, '_blank', 'noopener,noreferrer');
-        
-        if (newWindow) {
-            GM_log('已使用 window.open 打开链接，尝试保持原页面焦点');
-            // 立即尝试将焦点恢复到原页面
-            // 使用 setTimeout 确保在新窗口打开后执行
-            setTimeout(() => {
-                try {
-                    window.focus();
-                    // 额外的保障：如果当前页面是活动的，重新激活它
-                    if (document.hasFocus()) {
-                        window.blur();
-                        window.focus();
-                    }
-                } catch (e) {
-                    // 忽略焦点设置错误，这是正常的浏览器安全限制
-                    GM_log('无法强制设置窗口焦点，受浏览器安全策略限制');
-                }
-            }, 100);
-            return;
-        }
-        
-        // 策略3: 使用临时链接作为最终兜底（这种方式通常会切换焦点）
-        GM_log('window.open 被阻止，使用临时链接兜底');
+        link.dataset.clicked = 'true';
+
+        // 策略1: 使用 window.open 打开新标签页
+//         const newWindow = window.open(link.href, '_blank', 'noopener,noreferrer');
+
+//         if (newWindow) {
+//             GM_log('已使用 window.open 打开链接');
+//             setTimeout(() => {
+//                 try {
+//                     window.focus();
+//                 } catch (e) {
+//                     // 忽略焦点错误
+//                 }
+//             }, 100);
+//             return;
+//         }
+
+        // 策略2: window.open 被阻止，使用临时链接兜底
         const tempLink = document.createElement('a');
         tempLink.href = link.href;
         tempLink.target = '_blank';
@@ -3171,35 +3153,11 @@ function simulateHumanClick(link) {
         document.body.appendChild(tempLink);
         tempLink.click();
         document.body.removeChild(tempLink);
-        GM_log('已通过临时链接在新标签页打开（可能切换焦点）');
-        
-        // 尝试恢复焦点（尽管可能无效）
-        setTimeout(() => {
-            try {
-                window.focus();
-            } catch (e) {
-                // 忽略错误
-            }
-        }, 100);
-        
+        GM_log('已通过临时链接打开');
+
     } catch (error) {
-        GM_log(`模拟点击时出错: ${error.message}`);
-        // 最终兜底：直接使用 window.open
-        try {
-            const newWindow = window.open(link.href, '_blank', 'noopener,noreferrer');
-            if (newWindow) {
-                GM_log('兜底方案：已成功在新标签页打开链接');
-                setTimeout(() => {
-                    try {
-                        window.focus();
-                    } catch (e) {
-                        // 忽略焦点设置错误
-                    }
-                }, 100);
-            }
-        } catch (openError) {
-            GM_log(`所有方法均失败: ${openError.message}`);
-        }
+        GM_log(`点击出错: ${error.message}`);
+        console.error(error);
     }
 }
 
@@ -3211,9 +3169,9 @@ function checkAndStartTask() {
     const urlParams = new URLSearchParams(window.location.search);
     // 检查是否有当天的启动参数标记
     const hasStartParam = urlParams.has(startParam);
-    
+
     console.log(`检查并启动任务: ${startParam}`);
-    
+
     if (hasStartParam) {
         // 有启动参数，准备执行搜索任务
         setTimeout(executeSearch, 2000);
