@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.6.18.1
+// @version      26.7.6.1
 // @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
@@ -154,6 +154,13 @@ const CONFIG = {
 
     // ==================== 更新日志 (便于提取和展示) ====================
     changeLog: [
+        {
+            version: '26.7.6.1',
+            date: '2026-07-06',
+            changes: [
+                '功能增强：新增每周首次运行提示弹窗'
+            ]
+        },
         {
             version: '26.6.18.1',
             date: '2026-06-18',
@@ -455,6 +462,21 @@ const utils = {
                 callback();
             }
         });
+    },
+
+    // 获取ISO周数（返回1-53）
+    getWeekNumber(d) {
+        const date = new Date(d);
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        const week1 = new Date(date.getFullYear(), 0, 4);
+        return 1 + Math.round(((date - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    },
+
+    // 获取当前年份和ISO周数组成的字符串，如 "2026-W27"
+    getWeekString() {
+        const now = new Date();
+        return now.getFullYear() + '-W' + String(this.getWeekNumber(now)).padStart(2, '0');
     }
 };
 
@@ -564,6 +586,140 @@ function buildSearchUrl(searchWord) {
 
     const startParam = utils.getRandomStartParam();
     return `${domain}/search?${urlParams.toString()}&${startParam}=1`;
+}
+
+/**
+ * 每周首次执行时显示提示（优化UI版 + 道歉语）
+ */
+function showWeeklyTip() {
+    const currentWeek = utils.getWeekString();
+    const storedWeek = GM_getValue('lastWeeklyTipWeek', '');
+    if (currentWeek === storedWeek) return;
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.55);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(6px);
+        animation: fadeIn 0.3s ease;
+    `;
+
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 0;
+        max-width: 440px;
+        width: 92%;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+        position: relative;
+        overflow: hidden;
+        animation: dialogSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    `;
+
+    const header = document.createElement('div');
+    header.style.cssText = `
+        background: linear-gradient(135deg, #0067b8, #00bcf2);
+        padding: 28px 28px 20px;
+        color: #fff;
+        text-align: center;
+    `;
+    header.innerHTML = `
+        <div style="font-size: 48px; line-height: 1; margin-bottom: 8px;">⭐</div>
+        <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">支持作者</div>
+        <div style="font-size: 13px; opacity: 0.85; margin-top: 4px;">您的 Star 是我持续更新的动力</div>
+    `;
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.style.cssText = `
+        padding: 24px 28px 80px 28px;
+        position: relative;
+    `;
+    body.innerHTML = `
+        <p style="font-size: 15px; color: #333; line-height: 1.7; margin: 0 0 8px 0;">
+            本脚本完全免费，如果对你有帮助，请给作者一个 <strong style="color: #0067b8;">Star</strong> 支持一下！
+        </p>   
+        <div style="font-size: 12px; color: #bbb; margin-top: 8px; text-align: center;">
+            〒 本通知一周弹一次，如有打扰，非常抱歉。
+        </div>
+    `;
+    card.appendChild(body);
+
+    const btn = document.createElement('button');
+    btn.textContent = '前往支持';
+    btn.style.cssText = `
+        position: absolute;
+        bottom: 24px;
+        right: 28px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #0067b8, #00bcf2);
+        color: #fff;
+        border: none;
+        border-radius: 40px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 6px 20px rgba(0, 103, 184, 0.35);
+        letter-spacing: 0.3px;
+    `;
+    btn.onmouseenter = () => {
+        btn.style.transform = 'scale(1.05)';
+        btn.style.boxShadow = '0 8px 28px rgba(0, 103, 184, 0.5)';
+    };
+    btn.onmouseleave = () => {
+        btn.style.transform = 'scale(1)';
+        btn.style.boxShadow = '0 6px 20px rgba(0, 103, 184, 0.35)';
+    };
+    btn.onmousedown = () => { btn.style.transform = 'scale(0.95)'; };
+    btn.onmouseup = () => { btn.style.transform = 'scale(1.05)'; };
+    btn.onclick = () => {
+        window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script', '_blank');
+        overlay.remove();
+    };
+    body.appendChild(btn);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 18px;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    closeBtn.onmouseenter = () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.35)';
+        closeBtn.style.transform = 'scale(1.1)';
+    };
+    closeBtn.onmouseleave = () => {
+        closeBtn.style.background = 'rgba(255,255,255,0.2)';
+        closeBtn.style.transform = 'scale(1)';
+    };
+    closeBtn.onclick = () => overlay.remove();
+    header.appendChild(closeBtn);
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    GM_setValue('lastWeeklyTipWeek', currentWeek);
 }
 
 /**
@@ -3225,6 +3381,9 @@ GM_registerMenuCommand('👨‍💻 关于作者', () => {
     alert('作者：Brian\n版本：' + GM_info.script.version + '\n\n这是一个自动化完成微软必应每日搜索任务的脚本，帮助您轻松积累奖励积分。\n\n如果您觉得这个脚本有用，欢迎给作者点个Star！');
     window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script', '_blank');
 });
+
+// 每周首次提示
+showWeeklyTip();
 
 // 启动脚本
 if (document.readyState === 'loading') {
