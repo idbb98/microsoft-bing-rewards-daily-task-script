@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.7.16.1
+// @version      26.7.16.2
 // @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
 // @match        https://rewards.bing.com/earn
 // @match        https://rewards.bing.com/earn/*
+// @match        https://rewards.bing.com/dashboard
+// @match        https://rewards.bing.com/dashboard/*
 // @license      MIT
 // @icon         https://www.bing.com/favicon.ico
 // @connect      top.baidu.com
@@ -23,6 +25,7 @@
 // @grant        GM_getTab
 // @grant        GM_saveTab
 // @grant        GM_closeTab
+// @grant        GM_deleteValue
 // @downloadURL  https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js
 // @updateURL    https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js
 // ==/UserScript==
@@ -157,34 +160,45 @@ const CONFIG = {
     // 启动参数标记数组
     startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch'],
 
-    // 日常任务点击相关配置
-    get earnTasksScrollDelay() {
-        return GM_getValue('customEarnTasksScrollDelay', 3000);
+    // 任务点击相关配置（日常任务 + 每日活动共用）
+    get tasksScrollDelay() {
+        return GM_getValue('customTasksScrollDelay', 3000);
     },
-    set earnTasksScrollDelay(value) {
-        GM_setValue('customEarnTasksScrollDelay', value);
+    set tasksScrollDelay(value) {
+        GM_setValue('customTasksScrollDelay', value);
     },
-    get earnTasksMaxRetries() {
-        return GM_getValue('customEarnTasksMaxRetries', 3);
+    get tasksMaxRetries() {
+        return GM_getValue('customTasksMaxRetries', 0);
     },
-    set earnTasksMaxRetries(value) {
-        GM_setValue('customEarnTasksMaxRetries', value);
+    set tasksMaxRetries(value) {
+        GM_setValue('customTasksMaxRetries', value);
     },
-    get earnTasksRetryDelay() {
-        return GM_getValue('customEarnTasksRetryDelay', 2000);
+    get tasksRetryDelay() {
+        return GM_getValue('customTasksRetryDelay', 2000);
     },
-    set earnTasksRetryDelay(value) {
-        GM_setValue('customEarnTasksRetryDelay', value);
+    set tasksRetryDelay(value) {
+        GM_setValue('customTasksRetryDelay', value);
     },
-    get earnTasksCloseTabDelay() {
-        return GM_getValue('customEarnTasksCloseTabDelay', 5000);
+    get tasksCloseTabDelay() {
+        return GM_getValue('customTasksCloseTabDelay', 1500);
     },
-    set earnTasksCloseTabDelay(value) {
-        GM_setValue('customEarnTasksCloseTabDelay', value);
+    set tasksCloseTabDelay(value) {
+        GM_setValue('customTasksCloseTabDelay', value);
     },
 
     // ==================== 更新日志 (便于提取和展示) ====================
     changeLog: [
+        {
+            version: '26.7.16.2',
+            date: '2026-07-16',
+            changes: [
+                '功能增强：新增 dashboard 每日活动区域未完成任务自动点击功能，在执行 earn 跳转前先处理 rewards.bing.com/dashboard 页面 #dailyset 区域的未完成任务',
+                '错误处理：针对页面元素加载延迟、DOM 结构变化等异常情况增加重试与兜底机制',
+                '架构优化：日常任务点击与每日活动任务点击的时序参数合并为统一的 tasks* 参数体系，简化配置',
+                '向后兼容：新增旧参数迁移逻辑，自动将 earnTasks* / dashboardTasks* 迁移到 tasks*',
+                '配置导入兼容：支持从旧版本导出的配置文件（含 earnTasks* / dashboardTasks* 格式）自动映射到新格式'
+            ]
+        },
         {
             version: '26.7.16.1',
             date: '2026-07-14',
@@ -346,8 +360,52 @@ const state = {
     // 日常任务点击相关状态
     earnTasksClicked: new Set(),
     earnTasksRetryCount: 0,
-    isEarnTasksProcessing: false
+    isEarnTasksProcessing: false,
+    // dashboard 每日活动区域任务点击相关状态
+    dashboardTasksClicked: new Set(),
+    dashboardTasksRetryCount: 0,
+    isDashboardTasksProcessing: false
 };
+
+// 旧参数迁移逻辑（一次性执行）：将 earnTasks* 和 dashboardTasks* 参数合并为统一的 tasks* 参数
+// 优先级规则：优先使用 earnTasks* 的值（它存在更早，更可能反映用户意图），若未设置则使用 dashboardTasks*，最后使用默认值
+function migrateOldTaskParams() {
+    const params = ['ScrollDelay', 'MaxRetries', 'RetryDelay', 'CloseTabDelay'];
+    let migrated = false;
+
+    params.forEach(param => {
+        const newKey = 'customTasks' + param;
+        const oldEarnKey = 'customEarnTasks' + param;
+        const oldDashboardKey = 'customDashboardTasks' + param;
+
+        if (GM_getValue(newKey, undefined) !== undefined) {
+            return;
+        }
+
+        const earnVal = GM_getValue(oldEarnKey, undefined);
+        const dashboardVal = GM_getValue(oldDashboardKey, undefined);
+
+        if (earnVal !== undefined) {
+            GM_setValue(newKey, earnVal);
+            migrated = true;
+        } else if (dashboardVal !== undefined) {
+            GM_setValue(newKey, dashboardVal);
+            migrated = true;
+        }
+
+        try {
+            GM_deleteValue(oldEarnKey);
+            GM_deleteValue(oldDashboardKey);
+        } catch (e) {
+            console.log(`[Migration] 清理旧参数失败（非致命）: ${e.message}`);
+        }
+    });
+
+    if (migrated) {
+        console.log('[Migration] 已完成任务点击参数迁移');
+    }
+}
+migrateOldTaskParams();
 
 // 工具函数
 const utils = {
@@ -1231,16 +1289,16 @@ function showSettingsDialog(theme) {
     const savedRandomCut = GM_getValue('customRandomCutSearchWords', false);
     const savedRandomCutFactor = GM_getValue('customRandomCutSearchWordsFactor', 0.2);
     const savedClickSearchResults = GM_getValue('customClickSearchResults', false);
-    const savedPauseIntervalMin = GM_getValue('customPauseIntervalMin', 3);
-    const savedPauseIntervalMax = GM_getValue('customPauseIntervalMax', 5);
-    const savedPauseTimeMin = GM_getValue('customPauseTimeMin', 10 * 60 * 1000) / 60000; // 转换为分钟
+    const savedPauseIntervalMin = GM_getValue('customPauseIntervalMin', 2);
+    const savedPauseIntervalMax = GM_getValue('customPauseIntervalMax', 3);
+    const savedPauseTimeMin = GM_getValue('customPauseTimeMin', 20 * 60 * 1000) / 60000; // 转换为分钟
     const savedPauseTimeMax = GM_getValue('customPauseTimeMax', 30 * 60 * 1000) / 60000; // 转换为分钟
     const savedMinDelay = GM_getValue('customMinDelay', 15 * 1000) / 1000; // 转换为秒
     const savedMaxDelay = GM_getValue('customMaxDelay', 30 * 1000) / 1000; // 转换为秒
-    const savedEarnTasksScrollDelay = GM_getValue('customEarnTasksScrollDelay', 3000); // 毫秒
-    const savedEarnTasksMaxRetries = GM_getValue('customEarnTasksMaxRetries', 3);
-    const savedEarnTasksRetryDelay = GM_getValue('customEarnTasksRetryDelay', 2000); // 毫秒
-    const savedEarnTasksCloseTabDelay = GM_getValue('customEarnTasksCloseTabDelay', 5000); // 毫秒
+    const savedTasksScrollDelay = GM_getValue('customTasksScrollDelay', 3000); // 毫秒
+    const savedTasksMaxRetries = GM_getValue('customTasksMaxRetries', 0);
+    const savedTasksRetryDelay = GM_getValue('customTasksRetryDelay', 2000); // 毫秒
+    const savedTasksCloseTabDelay = GM_getValue('customTasksCloseTabDelay', 1500); // 毫秒
 
     console.log('📋 加载最新设置:', {
         searchFormParam: savedSearchFormParam,
@@ -1617,65 +1675,65 @@ function showSettingsDialog(theme) {
                         </div>
                     </div>
 
-                    <!-- 日常任务点击配置 -->
-                    <div class="config-section" style="margin-bottom:24px;" data-section="日常任务点击">
+                    <!-- 任务点击配置（日常任务 + 每日活动共用） -->
+                    <div class="config-section" style="margin-bottom:24px;" data-section="任务点击">
                         <div class="section-header" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid ${theme['--panel-primary-color']}20;cursor:pointer;" title="点击展开/收起">
                             <div class="section-icon" style="width:36px;height:36px;border-radius:10px;background:${theme['--panel-info-bg']};display:flex;align-items:center;justify-content:center;font-size:18px;">
                                 🎯
                             </div>
                             <div style="flex:1;">
                                 <h4 class="section-title" style="margin:0;font-size:16px;color:${theme['--panel-primary-color']};font-weight:700;letter-spacing:-0.3px;">
-                                    日常任务点击
+                                    任务点击
                                 </h4>
                                 <p class="section-desc" style="margin:2px 0 0;font-size:11px;color:${theme['--panel-text-muted']};font-weight:500;">
-                                    自动点击 rewards.bing.com/earn 页面未完成的有积分任务
+                                    自动点击 earn 日常任务与 dashboard 每日活动区域未完成任务（共用配置）
                                 </p>
                             </div>
                             <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
                         <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
-                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="滚动等待时间 日常任务滚动等待">
+                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="滚动等待时间 任务滚动等待">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">⏳</span>
                                 滚动后等待时间
-                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="滚动到日常任务区域后等待页面加载的时间">❓</span>
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="滚动到任务区域后等待页面加载的时间">❓</span>
                             </label>
                             <div style="position:relative;">
-                                <input type="number" id="earn-tasks-scroll-delay-input" class="form-input" value="${savedEarnTasksScrollDelay}" min="1000" max="10000" step="500"
+                                <input type="number" id="tasks-scroll-delay-input" class="form-input" value="${savedTasksScrollDelay}" min="1000" max="10000" step="500"
                                     style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
                                 <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">毫秒</span>
                             </div>
                             <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
-                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">3000毫秒</strong>（3秒），滚动到日常任务区域后等待页面加载的时间</span>
+                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">3000毫秒</strong>（3秒），滚动到任务区域后等待页面加载的时间</span>
                             </div>
                         </div>
 
-                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="最大重试次数 日常任务重试">
+                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="最大重试次数 任务重试">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">🔄</span>
                                 最大重试次数
-                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="未找到任务时的最大重试次数">❓</span>
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="未找到任务时的最大重试次数，0表示不重试">❓</span>
                             </label>
                             <div style="position:relative;">
-                                <input type="number" id="earn-tasks-max-retries-input" class="form-input" value="${savedEarnTasksMaxRetries}" min="1" max="10" step="1"
+                                <input type="number" id="tasks-max-retries-input" class="form-input" value="${savedTasksMaxRetries}" min="0" max="3" step="1"
                                     style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:50px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
                                 <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">次</span>
                             </div>
                             <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
-                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">3次</strong>，未找到任务时等待页面加载后重试的次数</span>
+                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">0次</strong>（不重试），未找到任务时等待页面加载后重试的次数</span>
                             </div>
                         </div>
 
-                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="重试延迟 日常任务重试延迟">
+                        <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="重试延迟 任务重试延迟">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">⏱️</span>
                                 重试延迟
                                 <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="每次重试之间的等待时间">❓</span>
                             </label>
                             <div style="position:relative;">
-                                <input type="number" id="earn-tasks-retry-delay-input" class="form-input" value="${savedEarnTasksRetryDelay}" min="500" max="10000" step="500"
+                                <input type="number" id="tasks-retry-delay-input" class="form-input" value="${savedTasksRetryDelay}" min="500" max="10000" step="500"
                                     style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
                                 <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">毫秒</span>
                             </div>
@@ -1685,20 +1743,20 @@ function showSettingsDialog(theme) {
                             </div>
                         </div>
 
-                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="关闭标签页延迟 日常任务关闭延迟">
+                        <div class="form-card" style="padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="关闭标签页延迟 任务关闭延迟">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">🚪</span>
                                 完成后关闭延迟
                                 <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="任务处理完成后关闭标签页前的等待时间">❓</span>
                             </label>
                             <div style="position:relative;">
-                                <input type="number" id="earn-tasks-close-tab-delay-input" class="form-input" value="${savedEarnTasksCloseTabDelay}" min="1000" max="30000" step="1000"
+                                <input type="number" id="tasks-close-tab-delay-input" class="form-input" value="${savedTasksCloseTabDelay}" min="1000" max="30000" step="1000"
                                     style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
                                 <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">毫秒</span>
                             </div>
                             <div class="form-hint" style="margin-top:10px;font-size:12px;color:${theme['--panel-text-muted']};line-height:1.7;display:flex;align-items:flex-start;gap:6px;">
                                 <span style="flex-shrink:0;">💡</span>
-                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">5000毫秒</strong>（5秒），任务处理完成后等待一段时间再关闭标签页</span>
+                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">1500毫秒</strong>（1.5秒），任务处理完成后等待一段时间再关闭标签页</span>
                             </div>
                         </div>
                         </div>
@@ -2172,10 +2230,10 @@ function showSettingsDialog(theme) {
     const pauseTimeMaxInput = document.getElementById('pause-time-max-input');
     const minDelayInput = document.getElementById('min-delay-input');
     const maxDelayInput = document.getElementById('max-delay-input');
-    const earnTasksScrollDelayInput = document.getElementById('earn-tasks-scroll-delay-input');
-    const earnTasksMaxRetriesInput = document.getElementById('earn-tasks-max-retries-input');
-    const earnTasksRetryDelayInput = document.getElementById('earn-tasks-retry-delay-input');
-    const earnTasksCloseTabDelayInput = document.getElementById('earn-tasks-close-tab-delay-input');
+    const tasksScrollDelayInput = document.getElementById('tasks-scroll-delay-input');
+    const tasksMaxRetriesInput = document.getElementById('tasks-max-retries-input');
+    const tasksRetryDelayInput = document.getElementById('tasks-retry-delay-input');
+    const tasksCloseTabDelayInput = document.getElementById('tasks-close-tab-delay-input');
 
     // 搜索相关元素
     const searchInput = document.getElementById('settings-search-input');
@@ -2365,16 +2423,16 @@ function showSettingsDialog(theme) {
             randomCutSearchWords: GM_getValue('customRandomCutSearchWords', false),
             randomCutSearchWordsFactor: GM_getValue('customRandomCutSearchWordsFactor', 0.2),
             clickSearchResults: GM_getValue('customClickSearchResults', false),
-            pauseIntervalMin: GM_getValue('customPauseIntervalMin', 3),
-            pauseIntervalMax: GM_getValue('customPauseIntervalMax', 5),
-            pauseTimeMin: GM_getValue('customPauseTimeMin', 10 * 60 * 1000),
+            pauseIntervalMin: GM_getValue('customPauseIntervalMin', 2),
+            pauseIntervalMax: GM_getValue('customPauseIntervalMax', 3),
+            pauseTimeMin: GM_getValue('customPauseTimeMin', 20 * 60 * 1000),
             pauseTimeMax: GM_getValue('customPauseTimeMax', 30 * 60 * 1000),
             minDelay: GM_getValue('customMinDelay', 15 * 1000),
             maxDelay: GM_getValue('customMaxDelay', 30 * 1000),
-            earnTasksScrollDelay: GM_getValue('customEarnTasksScrollDelay', 3000),
-            earnTasksMaxRetries: GM_getValue('customEarnTasksMaxRetries', 3),
-            earnTasksRetryDelay: GM_getValue('customEarnTasksRetryDelay', 2000),
-            earnTasksCloseTabDelay: GM_getValue('customEarnTasksCloseTabDelay', 5000),
+            tasksScrollDelay: GM_getValue('customTasksScrollDelay', 3000),
+            tasksMaxRetries: GM_getValue('customTasksMaxRetries', 0),
+            tasksRetryDelay: GM_getValue('customTasksRetryDelay', 2000),
+            tasksCloseTabDelay: GM_getValue('customTasksCloseTabDelay', 1500),
             exportTime: new Date().toISOString(),
             version: CONFIG.version
         };
@@ -2431,10 +2489,29 @@ function showSettingsDialog(theme) {
                 if (config.pauseTimeMax !== undefined) GM_setValue('customPauseTimeMax', config.pauseTimeMax);
                 if (config.minDelay !== undefined) GM_setValue('customMinDelay', config.minDelay);
                 if (config.maxDelay !== undefined) GM_setValue('customMaxDelay', config.maxDelay);
-                if (config.earnTasksScrollDelay !== undefined) GM_setValue('customEarnTasksScrollDelay', config.earnTasksScrollDelay);
-                if (config.earnTasksMaxRetries !== undefined) GM_setValue('customEarnTasksMaxRetries', config.earnTasksMaxRetries);
-                if (config.earnTasksRetryDelay !== undefined) GM_setValue('customEarnTasksRetryDelay', config.earnTasksRetryDelay);
-                if (config.earnTasksCloseTabDelay !== undefined) GM_setValue('customEarnTasksCloseTabDelay', config.earnTasksCloseTabDelay);
+                if (config.tasksScrollDelay !== undefined) GM_setValue('customTasksScrollDelay', config.tasksScrollDelay);
+                if (config.tasksMaxRetries !== undefined) GM_setValue('customTasksMaxRetries', config.tasksMaxRetries);
+                if (config.tasksRetryDelay !== undefined) GM_setValue('customTasksRetryDelay', config.tasksRetryDelay);
+                if (config.tasksCloseTabDelay !== undefined) GM_setValue('customTasksCloseTabDelay', config.tasksCloseTabDelay);
+
+                // 向后兼容：从旧配置格式（earnTasks* / dashboardTasks*）迁移到新统一格式（tasks*）
+                // 优先级：新格式 tasks* > 旧格式 earnTasks* > 旧格式 dashboardTasks*
+                if (config.tasksScrollDelay === undefined) {
+                    if (config.earnTasksScrollDelay !== undefined) GM_setValue('customTasksScrollDelay', config.earnTasksScrollDelay);
+                    else if (config.dashboardTasksScrollDelay !== undefined) GM_setValue('customTasksScrollDelay', config.dashboardTasksScrollDelay);
+                }
+                if (config.tasksMaxRetries === undefined) {
+                    if (config.earnTasksMaxRetries !== undefined) GM_setValue('customTasksMaxRetries', config.earnTasksMaxRetries);
+                    else if (config.dashboardTasksMaxRetries !== undefined) GM_setValue('customTasksMaxRetries', config.dashboardTasksMaxRetries);
+                }
+                if (config.tasksRetryDelay === undefined) {
+                    if (config.earnTasksRetryDelay !== undefined) GM_setValue('customTasksRetryDelay', config.earnTasksRetryDelay);
+                    else if (config.dashboardTasksRetryDelay !== undefined) GM_setValue('customTasksRetryDelay', config.dashboardTasksRetryDelay);
+                }
+                if (config.tasksCloseTabDelay === undefined) {
+                    if (config.earnTasksCloseTabDelay !== undefined) GM_setValue('customTasksCloseTabDelay', config.earnTasksCloseTabDelay);
+                    else if (config.dashboardTasksCloseTabDelay !== undefined) GM_setValue('customTasksCloseTabDelay', config.dashboardTasksCloseTabDelay);
+                }
 
                 GM_notification({
                     title: '配置导入成功',
@@ -2669,16 +2746,16 @@ function showSettingsDialog(theme) {
         randomCutCheckbox.checked = false;
         randomCutFactorInput.value = 0.2;
         clickSearchResultsCheckbox.checked = false;
-        pauseIntervalMinInput.value = 3;
-        pauseIntervalMaxInput.value = 5;
-        pauseTimeMinInput.value = 10;
+        pauseIntervalMinInput.value = 2;
+        pauseIntervalMaxInput.value = 3;
+        pauseTimeMinInput.value = 20;
         pauseTimeMaxInput.value = 30;
         minDelayInput.value = 15;
         maxDelayInput.value = 30;
-        earnTasksScrollDelayInput.value = 3000;
-        earnTasksMaxRetriesInput.value = 3;
-        earnTasksRetryDelayInput.value = 2000;
-        earnTasksCloseTabDelayInput.value = 5000;
+        tasksScrollDelayInput.value = 3000;
+        tasksMaxRetriesInput.value = 0;
+        tasksRetryDelayInput.value = 2000;
+        tasksCloseTabDelayInput.value = 1500;
 
         // 触发checkbox样式更新
         randomAddCheckbox.dispatchEvent(new Event('change'));
@@ -2703,10 +2780,10 @@ function showSettingsDialog(theme) {
                parseFloat(pauseTimeMaxInput.value) !== savedPauseTimeMax ||
                parseFloat(minDelayInput.value) !== savedMinDelay ||
                parseFloat(maxDelayInput.value) !== savedMaxDelay ||
-               parseInt(earnTasksScrollDelayInput.value) !== savedEarnTasksScrollDelay ||
-               parseInt(earnTasksMaxRetriesInput.value) !== savedEarnTasksMaxRetries ||
-               parseInt(earnTasksRetryDelayInput.value) !== savedEarnTasksRetryDelay ||
-               parseInt(earnTasksCloseTabDelayInput.value) !== savedEarnTasksCloseTabDelay;
+               parseInt(tasksScrollDelayInput.value) !== savedTasksScrollDelay ||
+               parseInt(tasksMaxRetriesInput.value) !== savedTasksMaxRetries ||
+               parseInt(tasksRetryDelayInput.value) !== savedTasksRetryDelay ||
+               parseInt(tasksCloseTabDelayInput.value) !== savedTasksCloseTabDelay;
     };
 
     saveBtn.addEventListener('click', () => {
@@ -2724,10 +2801,10 @@ function showSettingsDialog(theme) {
         const pauseTimeMax = parseFloat(pauseTimeMaxInput.value) * 60 * 1000; // 转换为毫秒
         const minDelay = parseFloat(minDelayInput.value) * 1000; // 转换为毫秒
         const maxDelay = parseFloat(maxDelayInput.value) * 1000; // 转换为毫秒
-        const earnTasksScrollDelay = parseInt(earnTasksScrollDelayInput.value);
-        const earnTasksMaxRetries = parseInt(earnTasksMaxRetriesInput.value);
-        const earnTasksRetryDelay = parseInt(earnTasksRetryDelayInput.value);
-        const earnTasksCloseTabDelay = parseInt(earnTasksCloseTabDelayInput.value);
+        const tasksScrollDelay = parseInt(tasksScrollDelayInput.value);
+        const tasksMaxRetries = parseInt(tasksMaxRetriesInput.value);
+        const tasksRetryDelay = parseInt(tasksRetryDelayInput.value);
+        const tasksCloseTabDelay = parseInt(tasksCloseTabDelayInput.value);
 
         // 验证
         if (!searchFormParam) {
@@ -2758,20 +2835,20 @@ function showSettingsDialog(theme) {
             alert('❌ 搜索延迟设置不合理!');
             return;
         }
-        if (earnTasksScrollDelay < 1000 || earnTasksScrollDelay > 10000) {
-            alert('❌ 日常任务滚动等待时间应在 1000-10000 毫秒之间!');
+        if (tasksScrollDelay < 1000 || tasksScrollDelay > 10000) {
+            alert('❌ 任务滚动等待时间应在 1000-10000 毫秒之间!');
             return;
         }
-        if (earnTasksMaxRetries < 1 || earnTasksMaxRetries > 10) {
-            alert('❌ 日常任务最大重试次数应在 1-10 之间!');
+        if (tasksMaxRetries < 0 || tasksMaxRetries > 3) {
+            alert('❌ 任务最大重试次数应在 0-3 之间!');
             return;
         }
-        if (earnTasksRetryDelay < 500 || earnTasksRetryDelay > 10000) {
-            alert('❌ 日常任务重试延迟应在 500-10000 毫秒之间!');
+        if (tasksRetryDelay < 500 || tasksRetryDelay > 10000) {
+            alert('❌ 任务重试延迟应在 500-10000 毫秒之间!');
             return;
         }
-        if (earnTasksCloseTabDelay < 1000 || earnTasksCloseTabDelay > 30000) {
-            alert('❌ 日常任务关闭延迟应在 1000-30000 毫秒之间!');
+        if (tasksCloseTabDelay < 1000 || tasksCloseTabDelay > 30000) {
+            alert('❌ 任务关闭延迟应在 1000-30000 毫秒之间!');
             return;
         }
 
@@ -2795,10 +2872,10 @@ function showSettingsDialog(theme) {
         GM_setValue('customPauseTimeMax', pauseTimeMax);
         GM_setValue('customMinDelay', minDelay);
         GM_setValue('customMaxDelay', maxDelay);
-        GM_setValue('customEarnTasksScrollDelay', earnTasksScrollDelay);
-        GM_setValue('customEarnTasksMaxRetries', earnTasksMaxRetries);
-        GM_setValue('customEarnTasksRetryDelay', earnTasksRetryDelay);
-        GM_setValue('customEarnTasksCloseTabDelay', earnTasksCloseTabDelay);
+        GM_setValue('customTasksScrollDelay', tasksScrollDelay);
+        GM_setValue('customTasksMaxRetries', tasksMaxRetries);
+        GM_setValue('customTasksRetryDelay', tasksRetryDelay);
+        GM_setValue('customTasksCloseTabDelay', tasksCloseTabDelay);
 
         console.log('💾 保存设置:', {
             searchFormParam,
@@ -2812,11 +2889,11 @@ function showSettingsDialog(theme) {
             pauseInterval: `${pauseIntervalMin}-${pauseIntervalMax}`,
             pauseTime: `${pauseTimeMin/60000}-${pauseTimeMax/60000}分钟`,
             delay: `${minDelay/1000}-${maxDelay/1000}秒`,
-            earnTasks: {
-                scrollDelay: `${earnTasksScrollDelay}ms`,
-                maxRetries: earnTasksMaxRetries,
-                retryDelay: `${earnTasksRetryDelay}ms`,
-                closeTabDelay: `${earnTasksCloseTabDelay}ms`
+            tasks: {
+                scrollDelay: `${tasksScrollDelay}ms`,
+                maxRetries: tasksMaxRetries,
+                retryDelay: `${tasksRetryDelay}ms`,
+                closeTabDelay: `${tasksCloseTabDelay}ms`
             }
         });
 
@@ -3476,7 +3553,7 @@ function simulateHumanClick(link) {
             });
             GM_log('已通过 GM_openInTab 打开链接');
 
-            const closeDelay = CONFIG.earnTasksCloseTabDelay || 5000;
+            const closeDelay = CONFIG.tasksCloseTabDelay || 1500;
             setTimeout(() => {
                 try {
                     if (newTab && typeof newTab.close === 'function') {
@@ -3708,7 +3785,7 @@ async function clickEarnTask(task) {
     
     try {
         task.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 50));
         
         const rect = task.element.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
@@ -3730,13 +3807,12 @@ async function clickEarnTask(task) {
                 clientY: y
             });
             task.element.dispatchEvent(event);
-            await new Promise(resolve => setTimeout(resolve, 50));
         }
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         state.earnTasksClicked.add(task.taskId);
         console.log(`[EarnTasks] 成功点击任务: ${task.taskId}`);
-        
-        await new Promise(resolve => setTimeout(resolve, 5000));
         
         try {
             const taskWindow = window.open('', windowName);
@@ -3754,8 +3830,6 @@ async function clickEarnTask(task) {
             task.element.removeAttribute('target');
         }
         
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
         return true;
     } catch (error) {
         console.log(`[EarnTasks] 模拟点击失败: ${error.message}`);
@@ -3766,8 +3840,7 @@ async function clickEarnTask(task) {
             state.earnTasksClicked.add(task.taskId);
             console.log(`[EarnTasks] 备用方案成功: ${task.taskId}`);
             
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 50));
             
             return true;
         } catch (fallbackError) {
@@ -3791,17 +3864,17 @@ async function processEarnTasks() {
     
     scrollToDailyTasks();
     
-    await new Promise(resolve => setTimeout(resolve, CONFIG.earnTasksScrollDelay));
+    await new Promise(resolve => setTimeout(resolve, CONFIG.tasksScrollDelay));
     
     const tasks = findIncompleteTaskCards();
     
     if (tasks.length === 0) {
         console.log('[EarnTasks] 没有找到未完成的有积分任务');
         
-        if (state.earnTasksRetryCount < CONFIG.earnTasksMaxRetries) {
+        if (state.earnTasksRetryCount < CONFIG.tasksMaxRetries) {
             state.earnTasksRetryCount++;
-            console.log(`[EarnTasks] 等待 ${CONFIG.earnTasksRetryDelay}ms 后重试 (${state.earnTasksRetryCount}/${CONFIG.earnTasksMaxRetries})`);
-            await new Promise(resolve => setTimeout(resolve, CONFIG.earnTasksRetryDelay));
+            console.log(`[EarnTasks] 等待 ${CONFIG.tasksRetryDelay}ms 后重试 (${state.earnTasksRetryCount}/${CONFIG.tasksMaxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, CONFIG.tasksRetryDelay));
             state.isEarnTasksProcessing = false;
             return processEarnTasks();
         }
@@ -3812,7 +3885,7 @@ async function processEarnTasks() {
         
         state.isEarnTasksProcessing = false;
         
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 50));
         
         if (typeof GM_closeTab !== 'undefined') {
             console.log('[EarnTasks] 关闭当前标签页');
@@ -3841,12 +3914,445 @@ async function processEarnTasks() {
         });
     }
     
-    await new Promise(resolve => setTimeout(resolve, CONFIG.earnTasksCloseTabDelay));
+    await new Promise(resolve => setTimeout(resolve, CONFIG.tasksCloseTabDelay));
     
     if (typeof GM_closeTab !== 'undefined') {
         console.log('[EarnTasks] 关闭当前标签页');
         GM_closeTab();
     }
+}
+
+/**
+ * 判断当前页面是否为 rewards.bing.com/dashboard 页面
+ */
+function isDashboardPage() {
+    return window.location.hostname === 'rewards.bing.com' &&
+           window.location.pathname.startsWith('/dashboard');
+}
+
+/**
+ * 等待 #dailyset 区域加载完成（应对页面元素加载延迟）
+ * 通过轮询 + MutationObserver 双重机制检测，超时后返回 null
+ * 不仅等待 #dailyset 区域出现，还要等待任务卡片实际加载完成
+ */
+function waitForDashboardDailySet(timeout = 25000) {
+    return new Promise((resolve) => {
+        const selectors = [
+            '#dailyset',
+            'section[id="dailyset"]',
+            'section[id*="dailyset"]',
+            '[data-section="dailyset"]'
+        ];
+
+        const findDailySet = () => selectors.reduce((found, sel) => found || document.querySelector(sel), null);
+
+        let dailySetSection = findDailySet();
+
+        // 检查是否还有 loading 占位符（React 服务端渲染的骨架屏）
+        const hasLoadingPlaceholders = () => {
+            if (!dailySetSection) return true;
+            const placeholders = dailySetSection.querySelectorAll('.animate-pulse, [class*="pulse"], [class*="skeleton"], [class*="placeholder"]');
+            return placeholders.length > 0;
+        };
+
+        // 检查是否有实际的任务链接
+        const hasTaskLinks = () => {
+            if (!dailySetSection) return false;
+            const links = dailySetSection.querySelectorAll('a[href]:not([href="/earn"])');
+            return links.length > 0;
+        };
+
+        // 立即检查
+        if (dailySetSection && !hasLoadingPlaceholders()) {
+            console.log('[DashboardTasks] #dailyset 区域已加载完成');
+            resolve(dailySetSection);
+            return;
+        }
+
+        let observer = null;
+        const startTime = Date.now();
+
+        const checkAndResolve = () => {
+            dailySetSection = findDailySet();
+            
+            if (dailySetSection) {
+                // 如果没有 loading 占位符，或者有实际任务链接，说明加载完成
+                if (!hasLoadingPlaceholders() || hasTaskLinks()) {
+                    console.log('[DashboardTasks] #dailyset 区域及任务卡片已加载完成');
+                    if (observer) observer.disconnect();
+                    resolve(dailySetSection);
+                    return true;
+                }
+            }
+
+            // 检查超时
+            if (Date.now() - startTime >= timeout) {
+                console.log('[DashboardTasks] 等待 #dailyset 区域超时');
+                if (observer) observer.disconnect();
+                resolve(dailySetSection || findDailySet());
+                return true;
+            }
+
+            return false;
+        };
+
+        // 立即检查一次
+        if (checkAndResolve()) return;
+
+        // 设置轮询检查（每 500ms 检查一次）
+        const pollInterval = setInterval(() => {
+            if (checkAndResolve()) {
+                clearInterval(pollInterval);
+            }
+        }, 500);
+
+        observer = new MutationObserver(() => {
+            if (checkAndResolve()) {
+                clearInterval(pollInterval);
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+}
+
+/**
+ * 滚动到 dashboard 每日活动区域（#dailyset）
+ */
+function scrollToDashboardDailySet(dailySetSection) {
+    console.log('[DashboardTasks] 正在滚动到每日活动区域...');
+
+    if (!dailySetSection) {
+        console.log('[DashboardTasks] 未传入 #dailyset 区域，尝试重新查找');
+        return false;
+    }
+
+    try {
+        dailySetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        console.log('[DashboardTasks] 已滚动到 #dailyset 每日活动区域');
+        return true;
+    } catch (error) {
+        console.log(`[DashboardTasks] 滚动失败: ${error.message}`);
+        return false;
+    }
+}
+
+/**
+ * 查找 #dailyset 区域内未完成的任务卡片
+ * 复用 earn 页面任务识别逻辑，针对 dashboard 的 DOM 结构与状态文案进行调整
+ */
+function findIncompleteDashboardTasks(dailySetSection) {
+    console.log('[DashboardTasks] 正在查找未完成的任务卡片...');
+
+    if (!dailySetSection) {
+        console.log('[DashboardTasks] #dailyset 区域不存在');
+        return [];
+    }
+
+    // 检查是否还有 loading 占位符
+    const placeholders = dailySetSection.querySelectorAll('.animate-pulse, [class*="pulse"], [class*="skeleton"], [class*="placeholder"]');
+    if (placeholders.length > 0) {
+        console.log('[DashboardTasks] 任务卡片仍在加载中（检测到 loading 占位符），返回空数组');
+        return [];
+    }
+
+    // 支持多种任务卡片选择器：a[href] 链接以及可能的其他卡片结构
+    const taskCards = dailySetSection.querySelectorAll('a[href], [role="button"], .card, [class*="card"]');
+    console.log(`[DashboardTasks] 在 #dailyset 区域找到 ${taskCards.length} 个可能的任务元素`);
+
+    const incompleteTasks = [];
+    const processedHrefs = new Set();
+    const processedElements = new Set();
+
+    // dashboard 的完成状态文案（来自 ActivityCard.Status 国际化资源）
+    // completed=已完成, inProgress=正在进行, notStarted=未开始, activated=已激活, locked=已锁定
+    const completedPattern = /已完成|complete|completed|✓|✔|done|finished/i;
+    const lockedPattern = /已锁定|locked/i;
+    const progressPattern = /(\d+)\/(\d+)/;
+
+    taskCards.forEach((taskElement) => {
+        // 跳过已处理的元素
+        if (processedElements.has(taskElement)) return;
+        processedElements.add(taskElement);
+
+        const href = taskElement.getAttribute('href');
+        
+        // 如果是链接元素，检查是否需要跳过
+        if (href) {
+            if (href === '/earn' || href.startsWith('#') || processedHrefs.has(href)) {
+                return;
+            }
+            processedHrefs.add(href);
+        }
+
+        const taskText = taskElement.textContent || taskElement.innerText || '';
+        const taskHtml = taskElement.outerHTML;
+        const ariaLabel = taskElement.getAttribute('aria-label') || '';
+        const role = taskElement.getAttribute('role') || '';
+
+        // 跳过文本内容太少的元素（可能是图标或装饰元素）
+        if (taskText.trim().length < 2) return;
+
+        // 完成状态检测：文本、子元素 class、aria-label 多重判定
+        const isCompleted = completedPattern.test(taskText) ||
+                           completedPattern.test(ariaLabel) ||
+                           taskElement.querySelector('[class*="complete"]') ||
+                           taskElement.querySelector('[class*="Complete"]') ||
+                           taskElement.querySelector('[class*="done"]') ||
+                           taskElement.querySelector('[class*="Done"]');
+
+        if (isCompleted) {
+            console.log(`[DashboardTasks] 任务已完成，跳过: ${taskText.substring(0, 30)}...`);
+            return;
+        }
+
+        // 锁定状态任务不可点击，跳过
+        const isLocked = lockedPattern.test(taskText) ||
+                         lockedPattern.test(ariaLabel) ||
+                         taskElement.querySelector('[class*="lock"]') ||
+                         taskElement.getAttribute('aria-disabled') === 'true';
+
+        if (isLocked) {
+            console.log(`[DashboardTasks] 任务已锁定，跳过: ${taskText.substring(0, 30)}...`);
+            return;
+        }
+
+        // 通过进度条判断未完成任务（格式如 "X/Y"）
+        const progressMatch = taskText.match(progressPattern);
+        let isIncompleteByProgress = false;
+        if (progressMatch && progressMatch[1] !== progressMatch[2]) {
+            isIncompleteByProgress = true;
+        }
+
+        // 积分识别：+N 形式
+        const pointsMatch = taskText.match(/\+(\d+)/) || taskHtml.match(/\+(\d+)/);
+        const points = pointsMatch ? parseInt(pointsMatch[1]) : 0;
+
+        // 只有当有积分或通过进度识别为未完成时，才视为可点击任务
+        if (points > 0 || isIncompleteByProgress || (href && href.includes('task'))) {
+            const taskId = href || taskElement.id || taskElement.className || Date.now().toString(36);
+
+            incompleteTasks.push({
+                element: taskElement,
+                href: href,
+                points: points,
+                taskId: taskId,
+                text: taskText.substring(0, 100)
+            });
+
+            console.log(`[DashboardTasks] 找到未完成任务: ${taskText.substring(0, 50)}...${points > 0 ? ` (+${points}分)` : ''}`);
+        }
+    });
+
+    console.log(`[DashboardTasks] 共找到 ${incompleteTasks.length} 个未完成任务`);
+    return incompleteTasks;
+}
+
+/**
+ * 点击 dashboard 任务（复用 earn 页面点击逻辑）
+ */
+async function clickDashboardTask(task) {
+    if (state.dashboardTasksClicked.has(task.taskId)) {
+        console.log(`[DashboardTasks] 任务 ${task.taskId} 已点击过，跳过`);
+        return false;
+    }
+
+    console.log(`[DashboardTasks] 正在点击任务: ${task.text.substring(0, 50)}...`);
+
+    try {
+        task.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const rect = task.element.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        console.log(`[DashboardTasks] 模拟点击任务元素，位置: (${Math.round(x)}, ${Math.round(y)})`);
+
+        const originalTarget = task.element.getAttribute('target');
+        const windowName = 'dashboardTask_' + Date.now();
+        task.element.setAttribute('target', windowName);
+
+        const mouseEvents = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'];
+        for (const eventType of mouseEvents) {
+            const event = new MouseEvent(eventType, {
+                bubbles: true,
+                cancelable: true,
+                view: unsafeWindow,
+                clientX: x,
+                clientY: y
+            });
+            task.element.dispatchEvent(event);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        state.dashboardTasksClicked.add(task.taskId);
+        console.log(`[DashboardTasks] 成功点击任务: ${task.taskId}`);
+
+        try {
+            const taskWindow = window.open('', windowName);
+            if (taskWindow && !taskWindow.closed) {
+                taskWindow.close();
+                console.log(`[DashboardTasks] 已关闭任务标签页: ${task.taskId}`);
+            }
+        } catch (e) {
+            console.log(`[DashboardTasks] 关闭任务标签页失败: ${e.message}`);
+        }
+
+        if (originalTarget) {
+            task.element.setAttribute('target', originalTarget);
+        } else {
+            task.element.removeAttribute('target');
+        }
+
+        return true;
+    } catch (error) {
+        console.log(`[DashboardTasks] 模拟点击失败: ${error.message}`);
+
+        try {
+            console.log('[DashboardTasks] 尝试备用方案: element.click()');
+            task.element.click();
+            state.dashboardTasksClicked.add(task.taskId);
+            console.log(`[DashboardTasks] 备用方案成功: ${task.taskId}`);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            return true;
+        } catch (fallbackError) {
+            console.log(`[DashboardTasks] 备用方案也失败: ${fallbackError.message}`);
+            return false;
+        }
+    }
+}
+
+/**
+ * 处理 dashboard 每日活动区域任务点击
+ */
+async function processDashboardTasks() {
+    if (state.isDashboardTasksProcessing) {
+        console.log('[DashboardTasks] 正在处理中，跳过');
+        return;
+    }
+
+    state.isDashboardTasksProcessing = true;
+    console.log('[DashboardTasks] 开始处理每日活动区域任务...');
+
+    // 等待 #dailyset 区域加载，应对页面元素加载延迟
+    const dailySetSection = await waitForDashboardDailySet();
+
+    if (!dailySetSection) {
+        console.log('[DashboardTasks] DOM 结构变化，未找到 #dailyset 区域，结束处理');
+        GM_setValue('dashboardTasksCompleted', true);
+        state.isDashboardTasksProcessing = false;
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (typeof GM_closeTab !== 'undefined') {
+            GM_closeTab();
+        }
+        return;
+    }
+
+    scrollToDashboardDailySet(dailySetSection);
+    await new Promise(resolve => setTimeout(resolve, CONFIG.tasksScrollDelay));
+
+    const tasks = findIncompleteDashboardTasks(dailySetSection);
+
+    if (tasks.length === 0) {
+        console.log('[DashboardTasks] 没有找到未完成任务');
+
+        if (state.dashboardTasksRetryCount < CONFIG.tasksMaxRetries) {
+            state.dashboardTasksRetryCount++;
+            console.log(`[DashboardTasks] 等待 ${CONFIG.tasksRetryDelay}ms 后重试 (${state.dashboardTasksRetryCount}/${CONFIG.tasksMaxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, CONFIG.tasksRetryDelay));
+            state.isDashboardTasksProcessing = false;
+            return processDashboardTasks();
+        }
+
+        console.log('[DashboardTasks] 已达到最大重试次数，确认没有未完成任务');
+        GM_setValue('dashboardTasksCompleted', true);
+        console.log('[DashboardTasks] 已设置完成标记');
+
+        state.isDashboardTasksProcessing = false;
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        if (typeof GM_closeTab !== 'undefined') {
+            console.log('[DashboardTasks] 关闭当前标签页');
+            GM_closeTab();
+        }
+        return;
+    }
+
+    console.log(`[DashboardTasks] 找到 ${tasks.length} 个任务，开始逐个处理...`);
+
+    for (const task of tasks) {
+        await clickDashboardTask(task);
+    }
+
+    GM_setValue('dashboardTasksCompleted', true);
+    console.log('[DashboardTasks] 已设置完成标记');
+
+    state.isDashboardTasksProcessing = false;
+    console.log('[DashboardTasks] 每日活动区域任务处理完成');
+
+    if (typeof GM_notification !== 'undefined') {
+        GM_notification({
+            text: `已完成 ${state.dashboardTasksClicked.size} 个 dashboard 每日活动任务点击`,
+            title: 'Bing Rewards 每日活动',
+            timeout: 3000
+        });
+    }
+
+    await new Promise(resolve => setTimeout(resolve, CONFIG.tasksCloseTabDelay));
+
+    if (typeof GM_closeTab !== 'undefined') {
+        console.log('[DashboardTasks] 关闭当前标签页');
+        GM_closeTab();
+    }
+}
+
+/**
+ * 检查是否需要执行 dashboard 每日活动任务点击
+ * 在执行 earn 跳转前调用：打开 dashboard 页面并处理 #dailyset 区域未完成任务
+ */
+async function checkAndExecuteDashboardTasks() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastDashboardTasksDate = GM_getValue('lastDashboardTasksDate', '');
+    const dashboardTasksCompleted = GM_getValue('dashboardTasksCompleted', false);
+
+    if (lastDashboardTasksDate === today && dashboardTasksCompleted) {
+        console.log('今日 dashboard 每日活动任务点击已完成，跳过');
+        return true;
+    }
+
+    console.log('准备执行 dashboard 每日活动任务点击...');
+
+    return new Promise((resolve) => {
+        const dashboardTab = GM_openInTab('https://rewards.bing.com/dashboard?autoProcess=1', {
+            active: true,
+            insert: true,
+            setParent: true
+        });
+
+        const checkInterval = setInterval(() => {
+            const completed = GM_getValue('dashboardTasksCompleted', false);
+            if (completed) {
+                clearInterval(checkInterval);
+                GM_setValue('lastDashboardTasksDate', today);
+                console.log('dashboard 每日活动任务点击已完成');
+                resolve(true);
+            }
+        }, 1000);
+
+        // 超时兜底：防止页面卡死导致主流程阻塞
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            if (dashboardTab && typeof dashboardTab.close === 'function') {
+                try {
+                    dashboardTab.close();
+                } catch (e) {
+                    console.log('关闭 dashboard 标签页失败:', e);
+                }
+            }
+            resolve(true);
+        }, 30000);
+    });
 }
 
 /**
@@ -3858,12 +4364,23 @@ async function checkAndStartTask() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('autoProcess')) {
             console.log('[EarnTasks] 检测到自动处理标记，开始执行日常任务点击');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 50));
             await processEarnTasks();
         }
         return;
     }
-    
+
+    // 如果是 rewards.bing.com/dashboard 页面，执行每日活动区域任务点击
+    if (isDashboardPage()) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('autoProcess')) {
+            console.log('[DashboardTasks] 检测到自动处理标记，开始执行每日活动区域任务点击');
+            await new Promise(resolve => setTimeout(resolve, 50));
+            await processDashboardTasks();
+        }
+        return;
+    }
+
     // 搜索页面的处理逻辑
     const startParam = utils.getRandomStartParam();
     const urlParams = new URLSearchParams(window.location.search);
@@ -3873,9 +4390,12 @@ async function checkAndStartTask() {
     console.log(`检查并启动任务: ${startParam}`);
 
     if (hasStartParam) {
-        // 先执行日常任务点击
+        // 先执行 dashboard 每日活动区域任务点击（在 earn 跳转前）
+        await checkAndExecuteDashboardTasks();
+
+        // 再执行 earn 页面日常任务点击
         await checkAndExecuteEarnTasks();
-        
+
         // 有启动参数，准备执行搜索任务
         setTimeout(executeSearch, 2000);
         randomScrollAfterPageLoad();
@@ -3894,6 +4414,8 @@ GM_registerMenuCommand('🚀 开始任务', () => {
     GM_setValue('cache_search_words', undefined);
     // 重置日常任务完成标记
     GM_setValue('earnTasksCompleted', false);
+    // 重置 dashboard 每日活动任务完成标记
+    GM_setValue('dashboardTasksCompleted', false);
     // 获取当天的启动参数
     const startParam = utils.getRandomStartParam();
     window.location.href = 'https://www.bing.com/?' + startParam + '=1';
