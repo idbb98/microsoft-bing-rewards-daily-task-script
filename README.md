@@ -17,7 +17,7 @@
 
 | 版本 | 技术栈 | 适用场景 | 特点 |
 |------|--------|----------|------|
-| 🌐 **浏览器脚本**（推荐使用） | JavaScript + Tampermonkey | 全平台浏览器 | 轻量便捷，无需安装 |
+| 🌐 **浏览器脚本**（推荐使用） | JavaScript + Violentmonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 | 🖥️ **Python 桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
 | 🪟 ~~**.NET 桌面程序**~~（停止维护） | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
 
@@ -33,7 +33,7 @@
 
 👉 **[查看 .NET 版本文档](bing-rewards-simulator/README.md)**
 
-### 🌐 Tampermonkey 浏览器脚本版
+### 🌐 Violentmonkey 浏览器脚本版
 
 > 纯粹的前端用户脚本，运行于浏览器沙盒环境中，跨平台支持，轻量便捷。
 
@@ -82,17 +82,17 @@
 
 #### 步骤 1：安装脚本管理器
 
-本脚本需要用户脚本管理器扩展运行，推荐使用 **Tampermonkey**：
+本脚本需要用户脚本管理器扩展运行，推荐使用 **Edge 浏览器** 和开源的 **Violentmonkey**：
 
-- **Microsoft Edge**：[Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
-- **Firefox**：[Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/tampermonkey/)
-- **Chrome/其他浏览器**：[Tampermonkey 官网](https://www.tampermonkey.net/)
+- **Microsoft Edge**：[Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
+- **Firefox**：[Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/)
+- **Chrome/其他浏览器**：[Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 
 > ⚠️ **注意**：若非从官方商店安装，请在浏览器扩展管理页面开启**"开发者模式"**。
 
 #### 步骤 2：安装脚本
 
-点击以下链接，Tampermonkey 将自动提示安装：
+点击以下链接，Violentmonkey 将自动提示安装：
 
 👉 **[一键安装脚本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)**
 
@@ -121,7 +121,7 @@
 
 1. **打开 Bing**：访问 [https://www.bing.com](https://www.bing.com) 并**确保已登录微软账户**
 2. **启动任务**：
-   - 点击浏览器工具栏的 **Tampermonkey** 图标
+   - 点击浏览器工具栏的 **Violentmonkey** 图标
    - 在菜单中找到 **"开始Bing任务"** 并点击
 3. **等待完成**：
    - 页面顶部将显示进度面板
@@ -161,7 +161,7 @@
 **脚本未运行？**
 
 1. **确认脚本已启用**
-   - 点击 Tampermonkey 图标 → "仪表盘"
+   - 点击 Violentmonkey 图标 → "仪表盘"
    - 检查 `BingRewards` 脚本是否在列表中且开关为绿色
 
 2. **检查访问网址**
@@ -169,11 +169,11 @@
    - 注意：`rewards.bing.com` 已被排除
 
 3. **检查扩展状态**
-   - 确认 Tampermonkey 扩展已启用
+   - 确认 Violentmonkey 扩展已启用
    - 如无法使用，请检查浏览器是否开启"开发者模式"
 
 4. **重新安装**
-   - 从 Tampermonkey 仪表盘移除旧脚本
+   - 从 Violentmonkey 仪表盘移除旧脚本
    - 重新点击安装链接进行安装
 
 ---
@@ -186,7 +186,7 @@
 |------|--------|----------|
 | **Python 桌面版** | Python + 浏览器自动化 | 跨平台支持，配置灵活，适合高级用户 |
 | **.NET 桌面版** | .NET Framework + C# | Windows 原生应用，运行稳定，开箱即用 |
-| **浏览器脚本版** | JavaScript + Tampermonkey | 纯前端实现，跨浏览器，轻量便捷 |
+| **浏览器脚本版** | JavaScript + Violentmonkey | 纯前端实现，跨浏览器，轻量便捷 |
 
 **共同特点**：
 - 🎯 模拟人工搜索行为，完成 Bing Rewards 每日任务
