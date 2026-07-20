@@ -4,7 +4,8 @@ import json
 # 定义包含的文件
 include_files = [
     ('config.json', 'config.json'),
-    ('about_config.json', 'about_config.json')
+    ('about_config.json', 'about_config.json'),
+    ('asset', 'asset')  # 包含asset目录及其中的所有文件（包括engineering.png）
 ]
 
 # 定义打包选项

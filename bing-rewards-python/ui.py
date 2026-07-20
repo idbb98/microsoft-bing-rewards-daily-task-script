@@ -9,23 +9,7 @@ class UIManager:
         self.root = root
         self.automation_instance = automation_instance
         # 配置文件路径
-        # 处理打包后的路径问题
-        # 尝试多种方法来确定正确的运行目录
-        try:
-            # 方法1: 检查是否是cx-Freeze打包
-            if hasattr(sys, 'frozen') and sys.frozen:
-                # cx-Freeze打包后的运行目录
-                base_path = os.path.dirname(sys.executable)
-            # 方法2: 检查是否是PyInstaller打包
-            elif hasattr(sys, '_MEIPASS'):
-                # PyInstaller打包后的运行目录
-                base_path = os.path.dirname(sys.executable)
-            else:
-                # 未打包时的运行目录
-                base_path = os.path.dirname(__file__)
-        except Exception as e:
-            # 如果以上方法都失败，使用当前工作目录
-            base_path = os.getcwd()
+        base_path = self._get_base_path()
         self.config_file = os.path.join(base_path, "config.json")
         self.about_config_file = os.path.join(base_path, "about_config.json")
         # 加载关于页面配置
@@ -34,11 +18,38 @@ class UIManager:
         self.setup_ui()
         self.load_config()
     
+    def _get_base_path(self):
+        """统一获取基础路径，处理打包后的路径问题"""
+        try:
+            # 检查是否是cx-Freeze打包
+            if hasattr(sys, 'frozen') and sys.frozen:
+                return os.path.dirname(sys.executable)
+            # 检查是否是PyInstaller打包
+            elif hasattr(sys, '_MEIPASS'):
+                return os.path.dirname(sys.executable)
+            else:
+                # 未打包时的运行目录
+                return os.path.dirname(__file__)
+        except Exception:
+            # 如果以上方法都失败，使用当前工作目录
+            return os.getcwd()
+    
     def setup_ui(self):
         """设置用户界面"""
         self.root.geometry("750x500")
         self.root.resizable(False, False)
         self.root.attributes('-topmost', True)  # 默认置顶
+        
+        # 设置窗口图标
+        try:
+            base_path = self._get_base_path()
+            icon_path = os.path.join(base_path, "asset", "engineering.png")
+            if os.path.exists(icon_path):
+                icon = tk.PhotoImage(file=icon_path)
+                self.root.iconphoto(True, icon)
+        except Exception:
+            # 如果图标加载失败，不影响程序运行
+            pass
         
         # 获取窗口尺寸
         window_width = 750
@@ -49,38 +60,27 @@ class UIManager:
             work_area = self.root.winfo_workarea()
             work_width = work_area[2]
             work_height = work_area[3]
-            # 计算右下角位置
-            x = work_width - window_width
-            y = work_height - window_height
+            # 计算居中位置
+            x = (work_width - window_width) // 2
+            y = (work_height - window_height) // 2
         except AttributeError:
             # 兼容不支持winfo_workarea的环境
             screen_width = self.root.winfo_screenwidth()
             screen_height = self.root.winfo_screenheight()
-            # 计算右下角位置，留出任务栏空间
-            x = screen_width - window_width
-            y = screen_height - window_height - 60  # 减去任务栏高度的估计值
+            # 计算居中位置
+            x = (screen_width - window_width) // 2
+            y = (screen_height - window_height) // 2
         
         # 设置窗口位置
         self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
-        # 禁用窗口装饰，使窗口不可移动
-        self.root.overrideredirect(True)
-        
-        # 创建自定义标题栏
-        self.title_frame = ttk.Frame(self.root, relief=tk.RAISED, borderwidth=1)
-        self.title_frame.pack(fill=tk.X, side=tk.TOP)
-        
-        # 添加窗口标题
+                
+        # 设置系统标题栏
         project_name = self.about_config.get("project", {}).get("name", "Bing Rewards 自动化工具")
         version = self.about_config.get("project", {}).get("version", "1.0")
         author = self.about_config.get("project", {}).get("author", "Brian")
         title_text = f"{project_name} v{version} - {author}"
-        title_label = ttk.Label(self.title_frame, text=title_text, font= ("Microsoft YaHei", 10))
-        title_label.pack(side=tk.LEFT, padx=10, pady=5)
-        
-        # 添加关闭按钮
-        self.close_button = ttk.Button(self.title_frame, text="关闭", width=5, command=self.automation_instance.exit_program)
-        self.close_button.pack(side=tk.RIGHT, padx=10, pady=5)
-        
+        self.root.title(title_text)
+                
         # 创建主框架
         self.main_frame = ttk.Frame(self.root, padding="10")
         self.main_frame.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
@@ -402,6 +402,7 @@ class UIManager:
             "disclaimer": "本工具仅用于学习和研究目的，请勿用于任何违反微软服务条款的行为。使用本工具产生的一切后果由使用者自行承担。"
         }
     
+
     def open_url(self, url):
         """打开指定的URL"""
         import webbrowser
