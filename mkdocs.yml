@@ -1,0 +1,99 @@
+# ============================================================
+# Microsoft Bing Rewards 自动化工具集 - 文档网站配置
+# 部署: GitHub Pages + GitHub Actions (免费)
+#
+# ⚠️ 部署前必改: site_url 替换为你的实际地址
+#   https://<GitHub用户名>.github.io/microsoft-bing-rewards-daily-task-script/
+# ============================================================
+site_name: Bing Rewards 自动化工具集
+site_description: 自动化完成微软必应每日搜索任务，智能积累奖励积分
+site_url: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
+repo_url: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
+repo_name: Gitee 仓库
+
+# ---------- 主题 ----------
+theme:
+  name: material
+  language: zh
+  icon:
+    logo: material/microsoft-bing
+  favicon: assets/panel.png
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+
+# ---------- 插件 ----------
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+# ---------- Markdown 扩展 ----------
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# ---------- 导航结构 ----------
+nav:
+  - 首页: index.md
+  - 快速开始: quickstart.md
+  - 版本文档:
+      - 浏览器脚本版: scripts/userscript.md
+      - Python 桌面版: python/desktop.md
+      - 浏览器扩展版: extension/browser-extension.md
+      - .NET 桌面版: dotnet/desktop.md
+  - 更新日志: changelog.md
+  - 常见问题: faq.md
+
+# ---------- 页脚 ----------
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/git-alt
+      link: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
+      name: Gitee 仓库
+copyright: Copyright &copy; 2026 Brian. 基于 MIT 许可证开源，仅供学习与交流自动化技术之用。

@@ -217,6 +217,35 @@
 
 ---
 
+## 📖 文档网站
+
+本项目提供了在线说明文档网站，采用 **MkDocs Material** 构建，免费部署于 **GitHub Pages**：
+
+- 🌐 在线访问：[https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/](https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/)
+
+### 本地预览
+
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 本地预览
+mkdocs serve
+```
+
+访问 `http://127.0.0.1:8000` 即可预览。
+
+### 自动部署
+
+1. 将项目同步到 GitHub 仓库（如 `microsoft-bing-rewards-daily-task-script`）
+2. 在 `mkdocs.yml` 中将 `site_url` 修改为你的实际地址
+3. 推送代码后，GitHub Actions 自动构建并发布到 GitHub Pages
+4. 在仓库 `Settings → Pages` 中选择部署源为 **GitHub Actions**
+
+之后每次修改 `docs/` 目录内容并推送，网站即自动更新。
+
+---
+
 ## 🤝 贡献与支持
 
 我们欢迎所有形式的贡献，让这个项目变得更好！

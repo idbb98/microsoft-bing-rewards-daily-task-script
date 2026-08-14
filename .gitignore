@@ -5,6 +5,16 @@ publish/
 __pycache__/
 build/
 
+# MkDocs 文档站构建产物
+site/
+.cache/
+
+<<<<<<< HEAD
+# CodeBuddy 本地数据（不纳入版本控制）
+.codebuddy/
+
+=======
+>>>>>>> 9c7e588cc54129e259dcb5c7f41b7e37c5007e1e
 # 日志文件
 logs/
 
