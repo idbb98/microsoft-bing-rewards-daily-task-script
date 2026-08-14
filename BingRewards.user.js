@@ -782,7 +782,7 @@ function showWeeklyTip() {
     btn.onmousedown = () => { btn.style.transform = 'scale(0.95)'; };
     btn.onmouseup = () => { btn.style.transform = 'scale(1.05)'; };
     btn.onclick = () => {
-        window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script', '_blank');
+        window.open('https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/', '_blank');
         overlay.remove();
     };
     body.appendChild(btn);
@@ -1810,7 +1810,7 @@ function showSettingsDialog(theme) {
                             </div>
                             <div style="flex:1;">
                                 <h2 style="margin:0;font-size:28px;color:${theme['--panel-primary-color']};font-weight:800;letter-spacing:-0.5px;">
-                                    <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script" target="_blank" style="color:inherit;text-decoration:none;">Brian Tool</a>
+                                    <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" target="_blank" style="color:inherit;text-decoration:none;">Brian Tool</a>
                                 </h2>
                                 <p style="margin:6px 0 0;font-size:14px;color:${theme['--panel-text-muted']};font-weight:500;">
                                     Bing Rewards 自动任务脚本
@@ -1884,9 +1884,9 @@ function showSettingsDialog(theme) {
                             </h3>
                         </div>
                         <div style="display:flex;flex-wrap:gap:16px;">
-                            <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                            <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
                                 <span style="font-size:18px;">💎</span>
-                                <span>Gitee</span>
+                                <span>项目主页</span>
                             </a>
                             <a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/issues" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
                                 <span style="font-size:18px;">📮</span>
@@ -4445,12 +4445,12 @@ GM_registerMenuCommand('📊 查看/隐藏面板', () => {
 
 GM_registerMenuCommand('⚙️ 配置脚本参数', () => {
     alert('请配置以下参数：\n\n1. searchFormParam: 登录Bing后手动搜索几次，从地址栏获取实际的form参数值\n2. maxSearches: 设置每日最大搜索次数\n3. 其他高级参数可根据需要调整\n\n配置完成后刷新页面开始使用。');
-    window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script#-%e5%ae%89%e8%a3%85%e4%b8%8e%e4%bd%bf%e7%94%a8', '_blank');
+    window.open('https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/quickstart/', '_blank');
 });
 
 GM_registerMenuCommand('👨‍💻 关于作者', () => {
     alert('作者：Brian\n版本：' + GM_info.script.version + '\n\n这是一个自动化完成微软必应每日搜索任务的脚本，帮助您轻松积累奖励积分。\n\n如果您觉得这个脚本有用，欢迎给作者点个Star！');
-    window.open('https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script', '_blank');
+    window.open('https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/', '_blank');
 });
 
 // 每周首次提示

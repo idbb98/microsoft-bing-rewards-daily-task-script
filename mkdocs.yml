@@ -8,8 +8,8 @@
 site_name: Bing Rewards 自动化工具集
 site_description: 自动化完成微软必应每日搜索任务，智能积累奖励积分
 site_url: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
-repo_url: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
-repo_name: Gitee 仓库
+repo_url: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
+repo_name: 项目主页
 
 # ---------- 主题 ----------
 theme:
@@ -93,7 +93,7 @@ nav:
 extra:
   generator: false
   social:
-    - icon: fontawesome/brands/git-alt
-      link: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
-      name: Gitee 仓库
+    - icon: fontawesome/solid/globe
+      link: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
+      name: 项目主页
 copyright: Copyright &copy; 2026 Brian. 基于 MIT 许可证开源，仅供学习与交流自动化技术之用。
