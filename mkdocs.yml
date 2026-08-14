@@ -17,7 +17,7 @@ theme:
   language: zh
   icon:
     logo: material/microsoft-bing
-  favicon: assets/panel.png
+  favicon: assets/favicon.ico
   font:
     text: Roboto
     code: Roboto Mono
