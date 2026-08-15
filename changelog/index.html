@@ -1,0 +1,1449 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="自动化完成微软必应每日搜索任务，智能积累奖励积分">
+      
+      
+      
+        <link rel="canonical" href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/changelog/">
+      
+      
+        <link rel="prev" href="../dotnet/desktop/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>更新日志 - Bing Rewards 自动化工具集</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="Bing Rewards 自动化工具集" class="md-header__button md-logo" aria-label="Bing Rewards 自动化工具集" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3v16l3.72 2L18 15.82v-4.09L9.77 8.95l1.61 3.89L13.94 14 8.7 16.92V4.27z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Bing Rewards 自动化工具集
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              更新日志
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    项目主页
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  快速开始
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../scripts/userscript/" class="md-tabs__link">
+          
+  
+  
+  版本文档
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  更新日志
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  常见问题
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Bing Rewards 自动化工具集" class="md-nav__button md-logo" aria-label="Bing Rewards 自动化工具集" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3v16l3.72 2L18 15.82v-4.09L9.77 8.95l1.61 3.89L13.94 14 8.7 16.92V4.27z"/></svg>
+
+    </a>
+    Bing Rewards 自动化工具集
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    项目主页
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    版本文档
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    版本文档
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scripts/userscript/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    浏览器脚本版
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/desktop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python 桌面版
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extension/browser-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    浏览器扩展版
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dotnet/desktop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    .NET 桌面版
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    更新日志
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    更新日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        当前版本
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        版本历史
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="版本历史">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#267162-2026-07-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.16.2 — 2026-07-16
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#267161-2026-07-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.16.1 — 2026-07-14
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26761-2026-07-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.6.1 — 2026-07-06
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#266181-2026-06-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.6.18.1 — 2026-06-18
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26511-2026-04-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.5.1.1 — 2026-04-29
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#264131-2026-04-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.4.13.1 — 2026-04-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262131-2026-02-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.2.13.1 — 2026-02-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#261261-2026-01-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.26.1 — 2026-01-26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#261151-2026-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.15.1 — 2026-01-15
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26161-2026-01-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.6.1 — 2026-01-06
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#007-2025-12-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.7 — 2025-12-31
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#006-2025-12-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.6 — 2025-12-24
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#005-2025-10-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.5 — 2025-10-31
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#004-2025-10-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.4 — 2025-10-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#003-2025-10-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.3 — 2025-10-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#002-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.2 — 2025-10-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#001-2025-08-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.1 — 2025-08-22
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        版本号说明
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    常见问题
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        当前版本
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        版本历史
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="版本历史">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#267162-2026-07-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.16.2 — 2026-07-16
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#267161-2026-07-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.16.1 — 2026-07-14
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26761-2026-07-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.7.6.1 — 2026-07-06
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#266181-2026-06-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.6.18.1 — 2026-06-18
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26511-2026-04-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.5.1.1 — 2026-04-29
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#264131-2026-04-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.4.13.1 — 2026-04-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262131-2026-02-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.2.13.1 — 2026-02-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#261261-2026-01-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.26.1 — 2026-01-26
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#261151-2026-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.15.1 — 2026-01-15
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26161-2026-01-06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        26.1.6.1 — 2026-01-06
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#007-2025-12-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.7 — 2025-12-31
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#006-2025-12-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.6 — 2025-12-24
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#005-2025-10-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.5 — 2025-10-31
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#004-2025-10-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.4 — 2025-10-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#003-2025-10-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.3 — 2025-10-30
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#002-2025-10-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.2 — 2025-10-13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#001-2025-08-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.0.1 — 2025-08-22
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        版本号说明
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="_1">📝 更新日志<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>以下版本记录为 <strong>浏览器脚本版</strong> 的更新历史。其他版本（Python / .NET / 扩展）的更新记录请参阅对应文档页。</p>
+</blockquote>
+<h2 id="_2">当前版本<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="admonition success">
+<p class="admonition-title">最新版本：<code>26.7.16.2</code></p>
+<p>2026-07-16 发布 · 一键安装：<a href="https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js">BingRewards.user.js</a></p>
+</div>
+<hr />
+<h2 id="_3">版本历史<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="267162-2026-07-16"><code>26.7.16.2</code> — 2026-07-16<a class="headerlink" href="#267162-2026-07-16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：新增 dashboard 每日活动区域未完成任务自动点击功能，在执行 earn 跳转前先处理 <code>rewards.bing.com/dashboard</code> 页面 <code>#dailyset</code> 区域的未完成任务</li>
+<li><strong>错误处理</strong>：针对页面元素加载延迟、DOM 结构变化等异常情况增加重试与兜底机制</li>
+<li><strong>架构优化</strong>：日常任务点击与每日活动任务点击的时序参数合并为统一的 <code>tasks*</code> 参数体系，简化配置</li>
+<li><strong>向后兼容</strong>：新增旧参数迁移逻辑，自动将 <code>earnTasks*</code> / <code>dashboardTasks*</code> 迁移到 <code>tasks*</code></li>
+<li><strong>配置导入兼容</strong>：支持从旧版本导出的配置文件（含 <code>earnTasks*</code> / <code>dashboardTasks*</code> 格式）自动映射到新格式</li>
+</ul>
+<h3 id="267161-2026-07-14"><code>26.7.16.1</code> — 2026-07-14<a class="headerlink" href="#267161-2026-07-14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：新增日常任务自动点击功能，在执行搜索任务前自动点击待完成且有积分的任务</li>
+<li><strong>功能增强</strong>：搜索打开的标签页自动关闭</li>
+</ul>
+<h3 id="26761-2026-07-06"><code>26.7.6.1</code> — 2026-07-06<a class="headerlink" href="#26761-2026-07-06" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：新增每周首次运行提示弹窗</li>
+</ul>
+<h3 id="266181-2026-06-18"><code>26.6.18.1</code> — 2026-06-18<a class="headerlink" href="#266181-2026-06-18" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能优化</strong>：优化搜索结果链接获取及点击逻辑</li>
+<li><strong>默认参数调整</strong>：暂停时间范围调整为 20-30 分钟；随机暂停间隔调整为 2-3 次搜索</li>
+</ul>
+<h3 id="26511-2026-04-29"><code>26.5.1.1</code> — 2026-04-29<a class="headerlink" href="#26511-2026-04-29" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：新增「点击搜索结果链接」配置选项，默认关闭，用户可在设置页面自行开启</li>
+<li><strong>问题修复</strong>：解决随机滚动功能不生效的问题</li>
+<li><strong>布局优化</strong>：全面支持响应式设计，适配不同屏幕尺寸和分辨率</li>
+</ul>
+<h3 id="264131-2026-04-13"><code>26.4.13.1</code> — 2026-04-13<a class="headerlink" href="#264131-2026-04-13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>UI 全面重构</strong>：现代化设计语言，渐变图标容器、分层阴影、圆角优化</li>
+<li><strong>交互动画增强</strong>：展开/收起面板平滑旋转动画，按钮三态反馈（默认/悬停/按下）</li>
+<li><strong>布局智能适配</strong>：收起模式极致紧凑（200px），展开模式信息完整（380px）</li>
+<li><strong>状态栏优化</strong>：底部三栏布局（页面状态 | 任务执行 | 版本号）</li>
+<li><strong>设置页面升级</strong>：三段式布局、卡片式表单、动态勾选标记</li>
+<li><strong>图标系统优化</strong>：全面采用 Emoji 图标，CSS rotate 实现 180° 平滑翻转</li>
+<li><strong>性能提升</strong>：CSS 变量主题系统，支持系统级暗色模式自动切换，动画 GPU 加速</li>
+</ul>
+<h3 id="262131-2026-02-13"><code>26.2.13.1</code> — 2026-02-13<a class="headerlink" href="#262131-2026-02-13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>搜索 URL 优化</strong>：调整搜索 URL 参数构建，增强脚本行为真实性</li>
+<li><strong>菜单优化</strong>：调整菜单顺序，提升用户体验</li>
+</ul>
+<h3 id="261261-2026-01-26"><code>26.1.26.1</code> — 2026-01-26<a class="headerlink" href="#261261-2026-01-26" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>统一搜索配置</strong>：移除设备类型区分，采用单一最大搜索次数配置</li>
+<li><strong>动态间隔控制</strong>：暂停间隔与暂停时间采用区间随机配置，增强行为真实性</li>
+<li><strong>UI 界面优化</strong>：重构状态面板样式</li>
+<li><strong>行为模拟优化</strong>：实现随机滚动策略，模拟真实用户浏览行为</li>
+<li><strong>参数稳定性</strong>：启动参数采用每日固定机制</li>
+<li><strong>扩展参数池</strong>：扩充启动参数标记数组，增强脚本随机性与安全性</li>
+</ul>
+<h3 id="261151-2026-01-15"><code>26.1.15.1</code> — 2026-01-15<a class="headerlink" href="#261151-2026-01-15" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：增加随机加词和截词功能（默认关闭）</li>
+<li><strong>参数化配置</strong>：实现启动参数标记可配置化</li>
+</ul>
+<h3 id="26161-2026-01-06"><code>26.1.6.1</code> — 2026-01-06<a class="headerlink" href="#26161-2026-01-06" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>热词获取优化</strong>：增加多源热词接口，完善热词补充与过滤机制</li>
+<li><strong>随机算法升级</strong>：改进 Fisher-Yates 洗牌算法，提高随机性质量</li>
+<li><strong>版本管理</strong>：调整版本号格式为年-月-日-版本号格式</li>
+</ul>
+<h3 id="007-2025-12-31"><code>0.0.7</code> — 2025-12-31<a class="headerlink" href="#007-2025-12-31" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>问题修复</strong>：修正剩余时间计算错误及下个搜索词显示异常</li>
+</ul>
+<h3 id="006-2025-12-24"><code>0.0.6</code> — 2025-12-24<a class="headerlink" href="#006-2025-12-24" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>问题修复</strong>：解决面板关闭按钮失效问题</li>
+<li><strong>功能增强</strong>：增加面板显示/隐藏切换功能</li>
+<li><strong>交互优化</strong>：优化关闭按钮悬停效果</li>
+<li><strong>问题修复</strong>：修复倒计时变量引用错误</li>
+</ul>
+<h3 id="005-2025-10-31"><code>0.0.5</code> — 2025-10-31<a class="headerlink" href="#005-2025-10-31" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>UI 优化</strong>：改进状态面板 UI 设计</li>
+<li><strong>功能增强</strong>：添加精确计时器，不受页面可见性影响</li>
+<li><strong>逻辑优化</strong>：改进搜索词获取策略</li>
+</ul>
+<h3 id="004-2025-10-30"><code>0.0.4</code> — 2025-10-30<a class="headerlink" href="#004-2025-10-30" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能增强</strong>：添加搜索任务暂停机制</li>
+<li><strong>显示优化</strong>：改进进度显示方式</li>
+<li><strong>问题修复</strong>：修复移动端搜索数量限制问题</li>
+</ul>
+<h3 id="003-2025-10-30"><code>0.0.3</code> — 2025-10-30<a class="headerlink" href="#003-2025-10-30" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>逻辑优化</strong>：优化搜索 URL 构建逻辑</li>
+<li><strong>参数丰富</strong>：添加更多搜索参数变化</li>
+<li><strong>错误处理</strong>：改进错误处理和重试机制</li>
+</ul>
+<h3 id="002-2025-10-13"><code>0.0.2</code> — 2025-10-13<a class="headerlink" href="#002-2025-10-13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能新增</strong>：添加状态显示面板</li>
+<li><strong>后台支持</strong>：支持后台运行和页面活跃状态显示</li>
+<li><strong>策略优化</strong>：优化搜索词获取策略</li>
+</ul>
+<h3 id="001-2025-08-22"><code>0.0.1</code> — 2025-08-22<a class="headerlink" href="#001-2025-08-22" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>功能发布</strong>：初始版本发布</li>
+<li><strong>设备兼容</strong>：支持 PC 和移动端自动搜索</li>
+<li><strong>进度追踪</strong>：基础进度追踪功能</li>
+</ul>
+<hr />
+<h2 id="_4">版本号说明<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>版本号格式为 <code>年.月.日.修订号</code>（如 <code>26.7.16.2</code>），遵循 <strong>YY.M.D.Revision</strong> 规则：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>26</code></td>
+<td>年份（2026）</td>
+</tr>
+<tr>
+<td><code>7</code></td>
+<td>月份（7 月）</td>
+</tr>
+<tr>
+<td><code>16</code></td>
+<td>日期（16 日）</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>当日修订号（当天第 2 次修订）</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+          
+          <a href="../dotnet/desktop/" class="md-footer__link md-footer__link--prev" aria-label="上一页: .NET 桌面版">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              <div class="md-ellipsis">
+                .NET 桌面版
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../faq/" class="md-footer__link md-footer__link--next" aria-label="下一页: 常见问题">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                常见问题
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Brian. 基于 MIT 许可证开源，仅供学习与交流自动化技术之用。
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" target="_blank" rel="noopener" title="项目主页" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M351.9 280H161c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zm-191-48h190.9c-2.8-64.5-17.1-123.9-37.4-167.4-11.4-24.4-23.7-41.8-35.1-52.4C268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4m-48 0c3.5-85.6 25.6-165.1 57.9-217.3C78.7 47.3 10.9 131.2 1.5 232zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3zm111.4-48C501.9 131.2 434.1 47.3 342 14.7c32.3 52.2 54.4 131.7 57.9 217.3z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
