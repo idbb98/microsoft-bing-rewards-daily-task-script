@@ -76,7 +76,7 @@
 ## 🛠️ 其他版本快速入口
 
 - 🐍 **Python 桌面版**：下载 [Gitee Releases](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/releases) 中带 `python` 后缀的可执行文件，解压后双击运行 → [查看详细文档](python/desktop.md)
-- 🧩 **浏览器扩展版**：拖拽 CRX 文件或加载已解压扩展 → [查看详细文档](extension/browser-extension.md)
+- 🧩 **浏览器扩展版**：已停止维护，历史版本详见文档 → [查看详细文档](extension/browser-extension.md)
 - 🪟 **.NET 桌面版**：已停止维护，历史版本详见文档 → [查看详细文档](dotnet/desktop.md)
 
 ---

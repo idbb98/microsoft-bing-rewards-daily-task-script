@@ -1,5 +1,7 @@
 # BingSearchAutomation
 
+> ⚠️ **该版本已停止维护**，不再提供更新。目前推荐使用 [**浏览器脚本版**](../BingRewards.user.js)（如需桌面程序可选 [**Python 桌面版**](../bing-rewards-python/README.md)）。
+
 BingSearchAutomation 是一个自动化Bing搜索的工具，可帮助用户自动完成Bing搜索任务，适用于Bing Rewards等场景。
 
 > **程序运行期间请勿使用键盘和鼠标进行任何操作，否则可能导致程序行为异常或搜索任务中断！**

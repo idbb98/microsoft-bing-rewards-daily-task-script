@@ -119,13 +119,15 @@
 
 ### 浏览器扩展版
 
+该版本**已停止维护**，问题将不再修复。目前推荐使用 [**浏览器脚本版**](scripts/userscript.md)（如需桌面程序可选 [**Python 桌面版**](python/desktop.md)）。
+
 - **扩展加载失败**：确认选择了包含 `manifest.json` 的正确目录（`bing-rewards-extension`），而非外层项目目录
 - **扩展图标不显示**：点击浏览器工具栏的拼图图标，将扩展固定到工具栏
 - **移动端无法安装扩展**：推荐改用**浏览器脚本版**（配合 Kiwi Browser 等支持扩展的移动浏览器）
 
 ### .NET 桌面版
 
-该版本**已停止维护**，问题将不再修复。建议迁移至 [浏览器脚本版](scripts/userscript.md) 或 [Python 桌面版](python/desktop.md)。
+该版本**已停止维护**，问题将不再修复。目前推荐使用 [**浏览器脚本版**](scripts/userscript.md)（如需桌面程序可选 [**Python 桌面版**](python/desktop.md)）。
 
 ---
 

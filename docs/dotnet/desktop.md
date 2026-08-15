@@ -3,7 +3,7 @@
 > 基于 .NET Framework 开发的 Windows 桌面程序，运行稳定，开箱即用。
 
 !!! danger "已停止维护"
-    该版本**已停止维护**，不再提供更新。建议使用 [**浏览器脚本版**](../scripts/userscript.md) 或 [**Python 桌面版**](../python/desktop.md) 作为替代方案。
+    该版本**已停止维护**，不再提供更新。目前推荐使用 [**浏览器脚本版**](../scripts/userscript.md)（如需桌面程序可选 [**Python 桌面版**](../python/desktop.md)）。
 
 ---
 
@@ -67,7 +67,7 @@ bing-rewards-simulator/
 
 | 替代方案 | 适用场景 | 迁移成本 |
 |----------|----------|----------|
-| [**浏览器脚本版**](../scripts/userscript.md) | 普通用户日常使用 | 极低，一键安装 |
+| [**浏览器脚本版**](../scripts/userscript.md)（目前推荐） | 普通用户日常使用 | 极低，一键安装 |
 | [**Python 桌面版**](../python/desktop.md) | 需要桌面程序、可视化配置 | 低，功能丰富 |
 
 !!! tip "推荐迁移路径"

@@ -10,23 +10,24 @@
 
 ## 📦 版本选择
 
-本项目提供 **3 种实现方式**，满足不同场景需求：
+本项目提供 **多种实现方式**，满足不同场景需求：
 
 | 版本 | 技术栈 | 适用场景 | 特点 |
 |------|--------|----------|------|
 | 🌐 **浏览器脚本**（推荐使用） | JavaScript + Violentmonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 | 🖥️ **Python 桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
+| 🧩 **浏览器扩展**（停止维护） | Chrome Extension (Manifest V3) | 全平台浏览器 | 双端搜索，无需脚本管理器 |
 | 🪟 **.NET 桌面程序**（停止维护） | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
 
 !!! tip "推荐选择"
-    普通用户推荐使用 **浏览器脚本版**：纯前端运行、无需安装依赖、跨浏览器支持，一键安装即可使用。
+    目前**推荐使用浏览器脚本版**：纯前端运行、无需安装依赖、跨浏览器支持，一键安装即可使用。
 
 ### 各版本文档直达
 
 - [🐍 Python 桌面版 →](python/desktop.md) 基于 Python 实现的桌面自动化工具，支持 Windows 系统，配置灵活，功能丰富。
 - [🪟 .NET 桌面版 →](dotnet/desktop.md) 基于 .NET Framework 开发的 Windows 桌面程序（**已停止维护**）。
 - [🌐 浏览器脚本版 →](scripts/userscript.md) 纯粹的前端用户脚本，运行于浏览器沙盒环境中，跨平台支持，轻量便捷。
-- [🧩 浏览器扩展版 →](extension/browser-extension.md) 基于 Manifest V3 的 Chrome 扩展，支持 PC / 移动端双端搜索。
+- [🧩 浏览器扩展版 →](extension/browser-extension.md) 基于 Manifest V3 的 Chrome 扩展，支持 PC / 移动端双端搜索（**已停止维护**）。
 
 ---
 

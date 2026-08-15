@@ -1,5 +1,7 @@
 # Microsoft Bing Rewards Daily Task Script
 
+> ⚠️ **该扩展已停止维护**，不再提供更新。目前推荐使用 [**浏览器脚本版**](../BingRewards.user.js)（如需桌面程序可选 [**Python 桌面版**](../bing-rewards-python/README.md)）。
+
 自动化完成微软必应每日搜索任务，实时显示进度，轻松积累奖励积分。
 
 ## 项目简介

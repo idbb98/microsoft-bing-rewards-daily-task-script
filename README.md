@@ -13,12 +13,13 @@
 
 ## 📦 版本选择
 
-本项目提供 **3 种实现方式**，满足不同场景需求：
+本项目提供 **多种实现方式**，满足不同场景需求：
 
 | 版本 | 技术栈 | 适用场景 | 特点 |
 |------|--------|----------|------|
 | 🌐 **浏览器脚本**（推荐使用） | JavaScript + Violentmonkey | 全平台浏览器 | 轻量便捷，无需安装 |
 | 🖥️ **Python 桌面程序** | Python | Windows 用户 | 功能丰富，配置灵活 |
+| 🧩 ~~**浏览器扩展**~~（停止维护） | Chrome Extension (Manifest V3) | 全平台浏览器 | 双端搜索，无需脚本管理器 |
 | 🪟 ~~**.NET 桌面程序**~~（停止维护） | .NET Framework | Windows 用户 | 运行稳定，开箱即用 |
 
 ### 🐍 Python 桌面版
@@ -32,6 +33,12 @@
 > 基于 .NET Framework 开发的 Windows 桌面程序，运行稳定，操作简单。
 
 👉 **[查看 .NET 版本文档](bing-rewards-simulator/README.md)**
+
+### 🧩 ~~浏览器扩展版~~（停止维护）
+
+> 基于 Manifest V3 的 Chrome 扩展，支持 PC / 移动端双端搜索，无需安装脚本管理器。
+
+👉 **[查看浏览器扩展文档](bing-rewards-extension/README.md)**
 
 ### 🌐 Violentmonkey 浏览器脚本版
 
@@ -185,7 +192,8 @@
 | 版本 | 技术栈 | 核心特性 |
 |------|--------|----------|
 | **Python 桌面版** | Python + 浏览器自动化 | 跨平台支持，配置灵活，适合高级用户 |
-| **.NET 桌面版** | .NET Framework + C# | Windows 原生应用，运行稳定，开箱即用 |
+| ~~**浏览器扩展版**~~（停止维护） | Chrome Extension + JavaScript | 双端搜索，无需脚本管理器 |
+| ~~**.NET 桌面版**~~（停止维护） | .NET Framework + C# | Windows 原生应用，运行稳定，开箱即用 |
 | **浏览器脚本版** | JavaScript + Violentmonkey | 纯前端实现，跨浏览器，轻量便捷 |
 
 **共同特点**：
