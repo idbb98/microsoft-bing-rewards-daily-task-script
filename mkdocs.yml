@@ -8,7 +8,7 @@
 site_name: Bing Rewards 自动化工具集
 site_description: 自动化完成微软必应每日搜索任务，智能积累奖励积分
 site_url: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
-repo_url: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
+repo_url: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
 repo_name: 项目主页
 
 # ---------- 主题 ----------
@@ -17,32 +17,31 @@ theme:
   language: zh
   icon:
     logo: material/microsoft-bing
+    repo: fontawesome/brands/git-alt
   favicon: assets/favicon.ico
-  font:
-    text: Roboto
-    code: Roboto Mono
   features:
-    - navigation.tabs
+    - navigation.instant
+    - navigation.instant.progress
     - navigation.top
     - navigation.footer
     - toc.follow
+    - toc.integrate
     - search.suggest
     - search.highlight
     - search.share
     - content.code.copy
     - content.code.annotate
-    - content.tabs.link
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: teal
+      primary: indigo
       accent: cyan
       toggle:
         icon: material/brightness-7
         name: 切换到深色模式
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
+      primary: indigo
       accent: cyan
       toggle:
         icon: material/brightness-4
@@ -54,6 +53,7 @@ plugins:
       lang:
         - zh
         - en
+  - social
 
 # ---------- Markdown 扩展 ----------
 markdown_extensions:
@@ -80,13 +80,9 @@ markdown_extensions:
 # ---------- 导航结构 ----------
 nav:
   - 首页: index.md
-  - 快速开始: quickstart.md
-  - 版本文档:
-      - 浏览器脚本版: scripts/userscript.md
-      - Python 桌面版: python/desktop.md
-      - 浏览器扩展版: extension/browser-extension.md
-      - .NET 桌面版: dotnet/desktop.md
-  - 更新日志: changelog.md
+  - 浏览器脚本版指南: scripts/userscript.md
+  - 版本历史: changelog.md
+  - 其他版本: other-versions.md
   - 常见问题: faq.md
 
 # ---------- 页脚 ----------
@@ -94,6 +90,6 @@ extra:
   generator: false
   social:
     - icon: fontawesome/solid/globe
-      link: https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/
+      link: https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script
       name: 项目主页
 copyright: Copyright &copy; 2026 Brian. 基于 MIT 许可证开源，仅供学习与交流自动化技术之用。

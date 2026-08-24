@@ -1,70 +1,89 @@
-# 🌐 浏览器脚本版
+# 🌐 浏览器脚本版（推荐）
 
-> 纯粹的前端用户脚本，运行于浏览器沙盒环境中，跨平台支持，轻量便捷。**官方推荐版本。**
-
-## 基本信息
+> 纯粹的前端用户脚本，运行于浏览器沙盒环境，跨平台支持，轻量便捷，**官方推荐版本**。
 
 | 项目 | 说明 |
 |------|------|
 | 技术栈 | JavaScript (ES6+) + Violentmonkey API |
-| 运行环境 | 浏览器沙盒，通过 Violentmonkey 注入到 `https://*.bing.com/*` |
 | 当前版本 | `26.7.16.2` |
-| 安装方式 | 一键安装，无需构建 |
-
-!!! success "核心优势"
-    - **纯前端运行**：不收集、不上传任何 Cookie 或个人信息
-    - **无需安装依赖**：仅需浏览器 + 脚本管理器
-    - **自动更新**：通过 `@updateURL` 自动检查并更新版本
+| 安装方式 | 一键安装，无需构建，自动更新 |
 
 ---
 
 ## ✨ 核心特性
 
-### 🎯 智能自动化
-- **全自动任务执行**：一键启动，自动完成当日所有搜索任务
-- **智能进度管理**：实时显示任务进度与剩余时间，完成情况一目了然
-- **日常任务自动点击**：自动点击待完成且有积分的日常任务
-- **Dashboard 每日活动**：自动处理 `rewards.bing.com/dashboard` 页面 `#dailyset` 区域的未完成任务
-
-### 🔒 安全模拟
-- **动态搜索策略**：内置丰富词库，自动获取并随机使用热搜关键词
-- **行为混淆技术**：支持随机加词/截词、随机滚动，模拟真人行为
-- **随机延迟控制**：可配置搜索延迟范围与暂停间隔，避免短时间大量搜索
-
-### 🎨 现代 UI
-- **实时状态面板**：优雅渐变设计与流畅动画，支持展开/收起切换
-- **可视化配置**：图形化设置界面，参数调整直观便捷
-- **暗色主题支持**：自动适配系统级暗色模式
+- **全自动执行**：一键启动，自动完成当日所有搜索与日常任务，实时显示进度
+- **日常任务自动点击**：自动点击待完成且有积分的日常任务及 Dashboard `#dailyset` 区域未完成任务
+- **安全模拟**：自动获取热搜词并随机使用，支持随机加词/截词、随机滚动、随机延迟
+- **隐私保护**：纯前端运行，**不收集、不上传任何 Cookie 或个人信息**
+- **现代 UI**：实时状态面板、图形化设置、自动适配暗色模式
 
 ---
 
-## 🚀 安装与使用
+## 🚀 快速开始
 
-### 1. 安装脚本管理器
+### 1. 安装脚本管理器（Violentmonkey）
 
-推荐使用 **Violentmonkey** 扩展：
+| 浏览器 | 安装地址 |
+|--------|----------|
+| **Microsoft Edge** | [Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao) |
+| **Firefox** | [Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/) |
+| **Chrome/其他** | [Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) |
 
-- **Microsoft Edge**：[Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
-- **Firefox**：[Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/)
-- **Chrome/其他浏览器**：[Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
+!!! warning "注意"
+    若非从官方商店安装，请在浏览器扩展管理页面开启「开发者模式」。
 
 ### 2. 安装脚本
 
-👉 **[一键安装脚本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)**
+👉 **[一键安装脚本](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)**，在确认页面点击「安装」即可。
 
-### 3. 运行任务
+!!! info "自动更新"
+    脚本通过 `@updateURL` 自动检查更新，后续版本发布后无需手动重装。
 
-1. 打开 [https://www.bing.com](https://www.bing.com) 并登录微软账户
-2. 点击 Violentmonkey 图标 → 菜单中点击 **"开始Bing任务"**
-3. 保持标签页前台激活，任务完成后自动停止
+### 3. 配置参数
+
+!!! warning "必填配置"
+    `searchFormParam`（搜索 form 参数）默认值为 `QBLH`，**必须修改**。
+    获取方法：登录后访问 [cn.bing.com](https://cn.bing.com) 执行几次搜索，查看地址栏 URL 中 `form=xxx` 的值，在脚本设置中替换。
+
+可选配置：
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| 最大搜索次数 | `20` | 根据个人需求调整 |
+| 随机加词/截词 | 关闭 | 开启后增强行为真实性 |
+| 暂停间隔 | 区间随机 | 模拟真人使用习惯 |
+
+### 4. 运行脚本
+
+1. 打开 [www.bing.com](https://www.bing.com) 并**确保已登录微软账户**
+2. 点击工具栏 **Violentmonkey** 图标 → 菜单中点击 **「开始Bing任务」**
+3. 页面顶部显示进度面板，**保持标签页前台激活**，任务完成后自动停止
+
+!!! success "完成"
+    任务执行完成后，Rewards 积分将自动到账，可在 [rewards.bing.com](https://rewards.bing.com) 查看。
+
+### 📸 界面预览
+
+**展开状态 - 完整信息展示**
+
+![面板展开状态](../assets/panel.png)
+
+**收起状态 - 紧凑模式**
+
+![面板收起状态](../assets/panel-collapsed.png)
+
+**设置面板**
+
+![设置面板](../assets/panel-setting.png)
+
+**关于面板**
+
+![关于面板](../assets/panel-about.png)
 
 ---
 
 ## ⚙️ 配置参数详解
-
-!!! warning "必填配置"
-    `searchFormParam`（搜索 form 参数）默认值为 `QBLH`，**必须修改**为你的实际值。
-    获取方法：登录后访问 cn.bing.com 执行几次搜索，查看地址栏 URL 中 `form=xxx` 的值。
 
 ### 搜索配置
 
@@ -107,9 +126,9 @@
 
 ## 🛠️ 技术架构
 
-- **运行环境**：浏览器沙盒（Violentmonkey 注入）
+- **运行环境**：浏览器沙盒（Violentmonkey 注入到 `https://*.bing.com/*`）
 - **核心 API**：`GM_xmlhttpRequest`（热词获取）、`GM_setValue/GM_getValue`（配置持久化）、`GM_registerMenuCommand`（菜单命令）
-- **配置管理**：所有用户可配置项通过 `CONFIG` 对象统一管理，getter/setter 绑定 GM 存储
+- **配置管理**：所有可配置项通过 `CONFIG` 对象统一管理，getter/setter 绑定 GM 存储
 - **数据安全**：纯前端运行，所有数据仅存储在本地浏览器
 
 ---
@@ -118,8 +137,14 @@
 
 - ✅ 使用前必须在 Bing 网页版登录微软账户
 - ✅ 浏览器标签页需保持前台激活状态
-- ✅ 需稳定访问 Bing 国际站 (`www.bing.com`)
-- ⚠️ `rewards.bing.com` 已被排除在脚本注入范围之外
+- ✅ 需稳定访问 Bing 国际站（`www.bing.com`）
+- ⚠️ `rewards.bing.com` 根域名已被排除在脚本注入范围之外
 
 !!! danger "风险提示"
     极短时间内完成全部每日搜索限额、频繁切换网络 IP、每日精准获取满分积分等行为可能增加账号风险，请模拟真人使用习惯，合理使用。
+
+---
+
+## 📌 版本历史
+
+> 完整的更新日志与版本号说明已独立成页，请查看 [**版本历史**](../changelog.md)。
