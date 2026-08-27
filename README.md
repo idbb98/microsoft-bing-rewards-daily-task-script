@@ -5,6 +5,8 @@
 
 **🤖 自动化完成微软必应每日搜索任务，智能积累奖励积分**
 
+📖 **[在线文档](https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/)**：完整使用指南、版本历史与常见问题
+
 ---
 
 ## 📦 版本一览
@@ -64,23 +66,7 @@
 
 ### 📌 版本历史
 
-> 仅记录浏览器脚本版（BingRewards.user.js）变更。
-
-**V26.7.16.2（最新版本）**
-- 功能增强：新增 dashboard 每日活动区域未完成任务自动点击功能，在执行 earn 跳转前先处理 `rewards.bing.com/dashboard` 页面 `#dailyset` 区域的未完成任务
-- 错误处理：针对页面元素加载延迟、DOM 结构变化等异常情况增加重试与兜底机制
-- 架构优化：日常任务点击与每日活动任务点击的时序参数合并为统一的 tasks* 参数体系，简化配置
-- 向后兼容：新增旧参数迁移逻辑，自动将 `earnTasks*` / `dashboardTasks*` 迁移到 `tasks*`
-- 配置导入兼容：支持从旧版本导出的配置文件自动映射到新格式
-
-**V26.7.16.1**
-- 功能增强：新增日常任务自动点击功能，在执行搜索任务前自动点击待完成且有积分的任务
-- 功能增强：搜索打开的标签页自动关闭
-
-**V26.7.6.1**
-- 功能增强：新增每周首次运行提示弹窗
-
-> 📜 查看完整更新说明，请浏览 [BingRewards.user.js](BingRewards.user.js) 文件头部注释。
+> 📜 查看完整更新说明，请浏览 [在线文档 - 版本历史](https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/changelog/)。
 
 ---
 
@@ -88,6 +74,7 @@
 
 **使用前提**
 - 必须登录微软账户；保持标签页前台活动；需稳定访问 Bing 国际站（`www.bing.com`）
+- 建议使用 Edge 浏览器，并进入 `edge://settings/system/managePerformance` 将「内存 - 自动将标签页置于睡眠状态」关闭，避免标签页休眠中断任务
 
 **安全与风险**
 
@@ -108,7 +95,7 @@
 
 ## 📖 文档网站
 
-在线文档：[https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/](https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/)
+[在线文档](https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/)
 
 本地预览：
 
@@ -135,4 +122,4 @@ mkdocs serve   # 访问 http://127.0.0.1:8000
 
 ---
 
-**⭐ 如果这个项目对您有帮助，欢迎 Star 支持！**
+**⭐ 如果这个项目对您有帮助，欢迎 [前往 Gitee 点个 Star](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script) 支持！**

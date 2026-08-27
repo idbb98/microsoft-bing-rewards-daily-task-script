@@ -4,6 +4,8 @@
 
 本项目提供多种实现方式，帮助您自动完成 Microsoft Bing Rewards 的每日搜索任务，节省时间并轻松获取积分奖励。
 
+⭐ 如果这个项目对您有帮助，欢迎 [前往 Gitee 点个 Star](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script) 支持！
+
 <div class="grid cards" markdown>
 
 -   :material-rocket-launch:{ .lg .middle } __一键安装浏览器脚本__
@@ -49,6 +51,7 @@
 - ✅ **必须登录**：使用前请在 Bing 网页版登录微软账户
 - ✅ **保持前台**：浏览器标签页需处于前台激活状态
 - ✅ **网络要求**：需稳定访问 Bing 国际站（`www.bing.com`）
+- ✅ **建议浏览器**：推荐使用 Edge，并进入 `edge://settings/system/managePerformance` 将「内存 - 自动将标签页置于睡眠状态」关闭，避免标签页休眠中断任务
 
 !!! danger "风险提示"
     自动化工具存在理论上的账户风险，请模拟真人使用习惯、合理设置随机间隔，遵守微软必应服务条款。
