@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.7.16.2
+// @version      26.8.27.1
 // @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
@@ -158,7 +158,7 @@ const CONFIG = {
     requestTimeout: 20 * 1000,
 
     // 启动参数标记数组
-    startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch'],
+    startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch', 'bingQuest', 'dailyTask', 'searchFlow', 'rewardsTask', 'bingBrowse', 'autoFlow'],
 
     // 任务点击相关配置（日常任务 + 每日活动共用）
     get tasksScrollDelay() {
@@ -186,8 +186,25 @@ const CONFIG = {
         GM_setValue('customTasksCloseTabDelay', value);
     },
 
+    // 自动点击任务总开关（earn 日常任务 + dashboard 每日活动区域未完成任务共用，默认开启）
+    get autoClickTasks() {
+        return GM_getValue('customAutoClickTasks', true);
+    },
+    set autoClickTasks(value) {
+        GM_setValue('customAutoClickTasks', value);
+    },
+
     // ==================== 更新日志 (便于提取和展示) ====================
     changeLog: [
+        {
+            version: '26.8.27.1',
+            date: '2026-08-26',
+            changes: [
+                '功能增强：设置页新增"自动点击任务"总开关，可一键控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认开启',
+                '架构优化：earn/dashboard 跳转不再使用固定参数 autoProcess，改为复用每日生成的启动参数（与搜索参数保持一致），关闭开关后全部自动点击不再执行',
+                '参数扩充：增补 startParams 启动参数标记数组数量，扩大每日参数池'
+            ]
+        },
         {
             version: '26.7.16.2',
             date: '2026-07-16',
@@ -1299,6 +1316,7 @@ function showSettingsDialog(theme) {
     const savedTasksMaxRetries = GM_getValue('customTasksMaxRetries', 0);
     const savedTasksRetryDelay = GM_getValue('customTasksRetryDelay', 2000); // 毫秒
     const savedTasksCloseTabDelay = GM_getValue('customTasksCloseTabDelay', 1500); // 毫秒
+    const savedAutoClickTasks = GM_getValue('customAutoClickTasks', true);
 
     console.log('📋 加载最新设置:', {
         searchFormParam: savedSearchFormParam,
@@ -1311,7 +1329,8 @@ function showSettingsDialog(theme) {
         clickSearchResults: savedClickSearchResults,
         pauseInterval: `${savedPauseIntervalMin}-${savedPauseIntervalMax}`,
         pauseTime: `${savedPauseTimeMin}-${savedPauseTimeMax}分钟`,
-        delay: `${savedMinDelay}-${savedMaxDelay}秒`
+        delay: `${savedMinDelay}-${savedMaxDelay}秒`,
+        autoClickTasks: savedAutoClickTasks
     });
 
     // 版本号（从CONFIG获取）
@@ -1692,6 +1711,25 @@ function showSettingsDialog(theme) {
                             <span class="section-toggle" style="font-size:14px;color:${theme['--panel-text-muted']};transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);">▼</span>
                         </div>
                         <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
+                        <div class="checkbox-cards" style="margin-bottom:16px;">
+                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedAutoClickTasks ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedAutoClickTasks ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="自动点击任务 任务总开关">
+                                ${savedAutoClickTasks ? '<div class="badge" style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
+                                <input type="checkbox" id="auto-click-tasks-checkbox" ${savedAutoClickTasks ? 'checked' : ''}
+                                    style="width:20px;height:20px;margin-top:2px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:16px;">⚡</span>
+                                        自动点击任务
+                                    </div>
+                                    <div style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;background:${theme['--panel-bg']};padding:12px 14px;border-radius:8px;border:1px solid ${theme['--panel-border']};">
+                                        <div style="margin-bottom:8px;">总开关，控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认开启。</div>
+                                        <div style="color:${theme['--panel-warning-color']};font-weight:500;padding:6px 8px;background:${theme['--panel-warning-bg']};border-radius:6px;border-left:3px solid ${theme['--panel-warning-color']};">
+                                            ⚠️ 关闭后上述自动点击将全部不再执行，仅保留搜索任务。
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
                         <div class="form-card" style="margin-bottom:16px;padding:20px;background:${theme['--panel-hover-bg']};border-radius:14px;border:1px solid ${theme['--panel-border']};" data-search-tags="滚动等待时间 任务滚动等待">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">⏳</span>
@@ -1955,6 +1993,62 @@ function showSettingsDialog(theme) {
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-track { background: transparent; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb { background: ${theme['--panel-border']}; border-radius: 4px; }
             #settings-dialog > div > div > div:nth-child(2)::-webkit-scrollbar-thumb:hover { background: ${theme['--panel-text-muted']}; }
+
+            /* 紧凑多列布局 - 提升信息密度 */
+            #settings-dialog .section-content {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 12px;
+            }
+            #settings-dialog .section-content > .form-card,
+            #settings-dialog .section-content > .checkbox-cards,
+            #settings-dialog .section-content > .form-hint {
+                margin-bottom: 0 !important;
+            }
+            #settings-dialog .section-content > .checkbox-cards,
+            #settings-dialog .section-content > .form-hint {
+                grid-column: 1 / -1;
+            }
+            #settings-dialog .form-card {
+                padding: 14px !important;
+                border-radius: 12px !important;
+            }
+            #settings-dialog .form-card label,
+            #settings-dialog .form-card > label {
+                margin-bottom: 8px !important;
+                font-size: 13px !important;
+            }
+            #settings-dialog .form-card .radio-cards {
+                gap: 10px !important;
+            }
+            #settings-dialog .form-input {
+                height: 40px !important;
+            }
+            #settings-dialog .form-hint {
+                font-size: 11px !important;
+                margin-top: 8px !important;
+                line-height: 1.6 !important;
+            }
+            #settings-dialog .interval-input-card,
+            #settings-dialog .factor-input-card {
+                padding: 10px !important;
+                border-radius: 10px !important;
+            }
+            #settings-dialog .config-section {
+                margin-bottom: 18px !important;
+            }
+            #settings-dialog .section-header {
+                margin-bottom: 10px !important;
+                padding-bottom: 8px !important;
+            }
+            #settings-dialog .section-content > .factor-inputs {
+                grid-column: 1 / -1;
+                gap: 12px !important;
+                margin-bottom: 0 !important;
+            }
+            #settings-dialog [data-search-tags*="面板默认显示状态"] {
+                grid-column: 1 / -1;
+            }
 
             /* 搜索框样式 */
             #search-wrapper {
@@ -2234,6 +2328,7 @@ function showSettingsDialog(theme) {
     const tasksMaxRetriesInput = document.getElementById('tasks-max-retries-input');
     const tasksRetryDelayInput = document.getElementById('tasks-retry-delay-input');
     const tasksCloseTabDelayInput = document.getElementById('tasks-close-tab-delay-input');
+    const autoClickTasksCheckbox = document.getElementById('auto-click-tasks-checkbox');
 
     // 搜索相关元素
     const searchInput = document.getElementById('settings-search-input');
@@ -2433,6 +2528,7 @@ function showSettingsDialog(theme) {
             tasksMaxRetries: GM_getValue('customTasksMaxRetries', 0),
             tasksRetryDelay: GM_getValue('customTasksRetryDelay', 2000),
             tasksCloseTabDelay: GM_getValue('customTasksCloseTabDelay', 1500),
+            autoClickTasks: GM_getValue('customAutoClickTasks', true),
             exportTime: new Date().toISOString(),
             version: CONFIG.version
         };
@@ -2493,6 +2589,7 @@ function showSettingsDialog(theme) {
                 if (config.tasksMaxRetries !== undefined) GM_setValue('customTasksMaxRetries', config.tasksMaxRetries);
                 if (config.tasksRetryDelay !== undefined) GM_setValue('customTasksRetryDelay', config.tasksRetryDelay);
                 if (config.tasksCloseTabDelay !== undefined) GM_setValue('customTasksCloseTabDelay', config.tasksCloseTabDelay);
+                if (config.autoClickTasks !== undefined) GM_setValue('customAutoClickTasks', config.autoClickTasks);
 
                 // 向后兼容：从旧配置格式（earnTasks* / dashboardTasks*）迁移到新统一格式（tasks*）
                 // 优先级：新格式 tasks* > 旧格式 earnTasks* > 旧格式 dashboardTasks*
@@ -2684,7 +2781,7 @@ function showSettingsDialog(theme) {
     });
 
     // Checkbox卡片样式更新
-    [randomAddCheckbox, randomCutCheckbox, clickSearchResultsCheckbox].forEach(checkbox => {
+    [randomAddCheckbox, randomCutCheckbox, clickSearchResultsCheckbox, autoClickTasksCheckbox].forEach(checkbox => {
         if (!checkbox) return;
         const label = checkbox.closest('label');
 
@@ -2695,6 +2792,8 @@ function showSettingsDialog(theme) {
                 if (checkbox.id === 'random-cut-checkbox') {
                     bgColor = theme['--panel-success-bg'];
                 } else if (checkbox.id === 'click-search-results-checkbox') {
+                    bgColor = theme['--panel-success-bg'];
+                } else if (checkbox.id === 'auto-click-tasks-checkbox') {
                     bgColor = theme['--panel-success-bg'];
                 }
                 label.style.background = `linear-gradient(135deg,${bgColor},transparent)`;
@@ -2756,11 +2855,13 @@ function showSettingsDialog(theme) {
         tasksMaxRetriesInput.value = 0;
         tasksRetryDelayInput.value = 2000;
         tasksCloseTabDelayInput.value = 1500;
+        autoClickTasksCheckbox.checked = true;
 
         // 触发checkbox样式更新
         randomAddCheckbox.dispatchEvent(new Event('change'));
         randomCutCheckbox.dispatchEvent(new Event('change'));
         clickSearchResultsCheckbox.dispatchEvent(new Event('change'));
+        autoClickTasksCheckbox.dispatchEvent(new Event('change'));
     });
 
     // 保存按钮事件
@@ -2783,7 +2884,8 @@ function showSettingsDialog(theme) {
                parseInt(tasksScrollDelayInput.value) !== savedTasksScrollDelay ||
                parseInt(tasksMaxRetriesInput.value) !== savedTasksMaxRetries ||
                parseInt(tasksRetryDelayInput.value) !== savedTasksRetryDelay ||
-               parseInt(tasksCloseTabDelayInput.value) !== savedTasksCloseTabDelay;
+               parseInt(tasksCloseTabDelayInput.value) !== savedTasksCloseTabDelay ||
+               autoClickTasksCheckbox.checked !== savedAutoClickTasks;
     };
 
     saveBtn.addEventListener('click', () => {
@@ -2805,6 +2907,7 @@ function showSettingsDialog(theme) {
         const tasksMaxRetries = parseInt(tasksMaxRetriesInput.value);
         const tasksRetryDelay = parseInt(tasksRetryDelayInput.value);
         const tasksCloseTabDelay = parseInt(tasksCloseTabDelayInput.value);
+        const autoClickTasks = autoClickTasksCheckbox.checked;
 
         // 验证
         if (!searchFormParam) {
@@ -2876,6 +2979,7 @@ function showSettingsDialog(theme) {
         GM_setValue('customTasksMaxRetries', tasksMaxRetries);
         GM_setValue('customTasksRetryDelay', tasksRetryDelay);
         GM_setValue('customTasksCloseTabDelay', tasksCloseTabDelay);
+        GM_setValue('customAutoClickTasks', autoClickTasks);
 
         console.log('💾 保存设置:', {
             searchFormParam,
@@ -2894,7 +2998,8 @@ function showSettingsDialog(theme) {
                 maxRetries: tasksMaxRetries,
                 retryDelay: `${tasksRetryDelay}ms`,
                 closeTabDelay: `${tasksCloseTabDelay}ms`
-            }
+            },
+            autoClickTasks
         });
 
         // 显示成功提示
@@ -3605,7 +3710,8 @@ async function checkAndExecuteEarnTasks() {
     console.log('准备执行日常任务点击...');
     
     return new Promise((resolve) => {
-        const earnTab = GM_openInTab('https://rewards.bing.com/earn?autoProcess=1', {
+        const taskParam = utils.getRandomStartParam();
+        const earnTab = GM_openInTab(`https://rewards.bing.com/earn?${taskParam}=1`, {
             active: true,
             insert: true,
             setParent: true
@@ -4324,7 +4430,8 @@ async function checkAndExecuteDashboardTasks() {
     console.log('准备执行 dashboard 每日活动任务点击...');
 
     return new Promise((resolve) => {
-        const dashboardTab = GM_openInTab('https://rewards.bing.com/dashboard?autoProcess=1', {
+        const taskParam = utils.getRandomStartParam();
+        const dashboardTab = GM_openInTab(`https://rewards.bing.com/dashboard?${taskParam}=1`, {
             active: true,
             insert: true,
             setParent: true
@@ -4359,10 +4466,13 @@ async function checkAndExecuteDashboardTasks() {
  * 检查并启动任务
  */
 async function checkAndStartTask() {
-    // 如果是 rewards.bing.com/earn 页面，执行日常任务点击
+    // 使用每日生成的启动参数（earn/dashboard/搜索 保持一致）
+    const startParam = utils.getRandomStartParam();
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // 如果是 rewards.bing.com/earn 页面，执行日常任务点击（开关关闭时不执行）
     if (isEarnPage()) {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('autoProcess')) {
+        if (CONFIG.autoClickTasks && urlParams.has(startParam)) {
             console.log('[EarnTasks] 检测到自动处理标记，开始执行日常任务点击');
             await new Promise(resolve => setTimeout(resolve, 50));
             await processEarnTasks();
@@ -4370,10 +4480,9 @@ async function checkAndStartTask() {
         return;
     }
 
-    // 如果是 rewards.bing.com/dashboard 页面，执行每日活动区域任务点击
+    // 如果是 rewards.bing.com/dashboard 页面，执行每日活动区域任务点击（开关关闭时不执行）
     if (isDashboardPage()) {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('autoProcess')) {
+        if (CONFIG.autoClickTasks && urlParams.has(startParam)) {
             console.log('[DashboardTasks] 检测到自动处理标记，开始执行每日活动区域任务点击');
             await new Promise(resolve => setTimeout(resolve, 50));
             await processDashboardTasks();
@@ -4382,19 +4491,17 @@ async function checkAndStartTask() {
     }
 
     // 搜索页面的处理逻辑
-    const startParam = utils.getRandomStartParam();
-    const urlParams = new URLSearchParams(window.location.search);
     // 检查是否有当天的启动参数标记
     const hasStartParam = urlParams.has(startParam);
 
     console.log(`检查并启动任务: ${startParam}`);
 
     if (hasStartParam) {
-        // 先执行 dashboard 每日活动区域任务点击（在 earn 跳转前）
-        await checkAndExecuteDashboardTasks();
-
-        // 再执行 earn 页面日常任务点击
-        await checkAndExecuteEarnTasks();
+        // 开关开启时，先执行 dashboard 每日活动区域任务点击（在 earn 跳转前），再执行 earn 页面日常任务点击
+        if (CONFIG.autoClickTasks) {
+            await checkAndExecuteDashboardTasks();
+            await checkAndExecuteEarnTasks();
+        }
 
         // 有启动参数，准备执行搜索任务
         setTimeout(executeSearch, 2000);

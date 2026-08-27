@@ -2,8 +2,14 @@
 
 > 仅记录浏览器脚本版（`BingRewards.user.js`）的更新历史。
 
-!!! success "最新版本：`26.7.16.2`"
-    2026-07-16 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+!!! success "最新版本：`26.8.27.1`"
+    2026-08-26 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+
+## `26.8.27.1` — 2026-08-27
+
+- **功能增强**：设置页新增「自动点击任务」总开关，一键控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认开启；关闭后上述自动点击将全部不再执行
+- **架构优化**：earn/dashboard 跳转不再使用固定参数 `autoProcess`，改为复用每日生成的启动参数（与搜索参数保持一致），提升行为真实性与一致性
+- **参数扩充**：增补 `startParams` 启动参数标记数组数量，扩大每日参数池
 
 ## `26.7.16.2` — 2026-07-16
 
