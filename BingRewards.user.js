@@ -186,182 +186,13 @@ const CONFIG = {
         GM_setValue('customTasksCloseTabDelay', value);
     },
 
-    // 自动点击任务总开关（earn 日常任务 + dashboard 每日活动区域未完成任务共用，默认开启）
+    // 自动点击任务总开关（earn 日常任务 + dashboard 每日活动区域未完成任务共用，默认关闭）
     get autoClickTasks() {
-        return GM_getValue('customAutoClickTasks', true);
+        return GM_getValue('customAutoClickTasks', false);
     },
     set autoClickTasks(value) {
         GM_setValue('customAutoClickTasks', value);
-    },
-
-    // ==================== 更新日志 (便于提取和展示) ====================
-    changeLog: [
-        {
-            version: '26.8.27.1',
-            date: '2026-08-26',
-            changes: [
-                '功能增强：设置页新增"自动点击任务"总开关，可一键控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认开启',
-                '架构优化：earn/dashboard 跳转不再使用固定参数 autoProcess，改为复用每日生成的启动参数（与搜索参数保持一致），关闭开关后全部自动点击不再执行',
-                '参数扩充：增补 startParams 启动参数标记数组数量，扩大每日参数池'
-            ]
-        },
-        {
-            version: '26.7.16.2',
-            date: '2026-07-16',
-            changes: [
-                '功能增强：新增 dashboard 每日活动区域未完成任务自动点击功能，在执行 earn 跳转前先处理 rewards.bing.com/dashboard 页面 #dailyset 区域的未完成任务',
-                '错误处理：针对页面元素加载延迟、DOM 结构变化等异常情况增加重试与兜底机制',
-                '架构优化：日常任务点击与每日活动任务点击的时序参数合并为统一的 tasks* 参数体系，简化配置',
-                '向后兼容：新增旧参数迁移逻辑，自动将 earnTasks* / dashboardTasks* 迁移到 tasks*',
-                '配置导入兼容：支持从旧版本导出的配置文件（含 earnTasks* / dashboardTasks* 格式）自动映射到新格式'
-            ]
-        },
-        {
-            version: '26.7.16.1',
-            date: '2026-07-14',
-            changes: [
-                '功能增强：新增日常任务自动点击功能，在执行搜索任务前自动点击待完成且有积分的任务',
-                '功能增强：搜索打开的标签页自动关闭'
-            ]
-        },
-        {
-            version: '26.7.6.1',
-            date: '2026-07-06',
-            changes: [
-                '功能增强：新增每周首次运行提示弹窗'
-            ]
-        },
-        {
-            version: '26.6.18.1',
-            date: '2026-06-18',
-            changes: [
-                '功能优化：优化搜索结果链接获取及点击逻辑',
-                '默认参数调整：暂停时间范围调整为20-30分钟；随机暂停间隔调整为2-3次搜索'
-            ]
-        },
-        {
-            version: '26.5.1.1',
-            date: '2026-04-29',
-            changes: [
-                '功能增强：新增"点击搜索结果链接"配置选项，默认关闭，用户可在设置页面自行开启，提高脚本灵活性',
-                '问题修复：解决随机滚动功能不生效的问题',
-                '布局优化：全面支持响应式设计（Responsive Design），适配不同屏幕尺寸和分辨率',
-            ]
-        },
-        {
-            version: '26.4.13.1',
-            date: '2026-04-13',
-            changes: [
-                'UI全面重构：采用现代化设计语言，渐变图标容器、分层阴影、圆角优化，视觉体验全面升级',
-                '交互动画增强：展开/收起面板添加平滑旋转动画，按钮悬停/点击具备三态反馈（默认/悬停/按下）',
-                '布局智能适配：收起模式极致紧凑（200px），仅保留倒计时与控制按钮；展开模式信息完整（380px）',
-                '状态栏优化：底部三栏布局（页面状态 | 任务执行 | 版本号），信息层次清晰，实时反映运行状态',
-                '设置页面升级：三段式布局（固定头部+可滚动内容+固定底部），卡片式表单，动态勾选标记，交互更直观',
-                '图标系统优化：全面采用 Emoji 图标，展开/收起使用 CSS rotate 实现 180° 平滑翻转，无闪烁',
-                '搜索行为优化：随机加词/截词功能可视化配置，示例代码等宽字体高亮显示，参数调整更便捷',
-                '性能提升：CSS 变量主题系统，支持系统级暗色模式自动切换，动画采用 GPU 加速'
-            ]
-        },
-        {
-            version: '26.2.13.1',
-            date: '2026-02-13',
-            changes: [
-                '搜索URL优化：调整搜索URL参数构建，增强脚本行为真实性',
-                '菜单优化：调整菜单顺序，提升用户体验'
-            ]
-        },
-        {
-            version: '26.1.26.1',
-            date: '2026-01-26',
-            changes: [
-                '统一搜索配置：移除设备类型区分，采用单一最大搜索次数配置',
-                '动态间隔控制：暂停间隔与暂停时间采用区间随机配置，增强行为真实性',
-                'UI界面优化：重构状态面板样式，提升用户体验与信息展示效率',
-                '行为模拟优化：实现随机滚动策略，模拟真实用户浏览行为',
-                '参数稳定性：启动参数采用每日固定机制，增强行为一致性',
-                '扩展参数池：扩充启动参数标记数组，增强脚本随机性与安全性'
-            ]
-        },
-        {
-            version: '26.1.15.1',
-            date: '2026-01-15',
-            changes: [
-                '功能增强：增加随机加词和截词功能（默认关闭）',
-                '参数化配置：实现启动参数标记可配置化'
-            ]
-        },
-        {
-            version: '26.1.6.1',
-            date: '2026-01-06',
-            changes: [
-                '热词获取优化：增加多源热词接口，完善热词补充与过滤机制',
-                '随机算法升级：改进Fisher-Yates洗牌算法，提高随机性质量',
-                '版本管理：调整版本号格式为年-月-日-版本号格式'
-            ]
-        },
-        {
-            version: '0.0.7',
-            date: '2025-12-31',
-            changes: [
-                '问题修复：修正剩余时间计算错误及下个搜索词显示异常'
-            ]
-        },
-        {
-            version: '0.0.6',
-            date: '2025-12-24',
-            changes: [
-                '问题修复：解决面板关闭按钮失效问题',
-                '功能增强：增加面板显示/隐藏切换功能',
-                '交互优化：优化关闭按钮悬停效果',
-                '问题修复：修复倒计时变量引用错误'
-            ]
-        },
-        {
-            version: '0.0.5',
-            date: '2025-10-31',
-            changes: [
-                'UI优化：改进状态面板UI设计',
-                '功能增强：添加精确计时器，不受页面可见性影响',
-                '逻辑优化：改进搜索词获取策略'
-            ]
-        },
-        {
-            version: '0.0.4',
-            date: '2025-10-30',
-            changes: [
-                '功能增强：添加搜索任务暂停机制',
-                '显示优化：改进进度显示方式',
-                '问题修复：修复移动端搜索数量限制问题'
-            ]
-        },
-        {
-            version: '0.0.3',
-            date: '2025-10-30',
-            changes: [
-                '逻辑优化：优化搜索URL构建逻辑',
-                '参数丰富：添加更多搜索参数变化',
-                '错误处理：改进错误处理和重试机制'
-            ]
-        },
-        {
-            version: '0.0.2',
-            date: '2025-10-13',
-            changes: [
-                '功能新增：添加状态显示面板',
-                '后台支持：支持后台运行和页面活跃状态显示',
-                '策略优化：优化搜索词获取策略'
-            ]
-        },
-        {
-            version: '0.0.1',
-            date: '2025-08-22',
-            changes: [
-                '功能发布：初始版本发布',
-                '设备兼容：支持PC和移动端自动搜索',
-                '进度追踪：基础进度追踪功能'
-            ]
-        }
-    ]
+    }
 };
 
 // 状态管理
@@ -1316,7 +1147,7 @@ function showSettingsDialog(theme) {
     const savedTasksMaxRetries = GM_getValue('customTasksMaxRetries', 0);
     const savedTasksRetryDelay = GM_getValue('customTasksRetryDelay', 2000); // 毫秒
     const savedTasksCloseTabDelay = GM_getValue('customTasksCloseTabDelay', 1500); // 毫秒
-    const savedAutoClickTasks = GM_getValue('customAutoClickTasks', true);
+    const savedAutoClickTasks = GM_getValue('customAutoClickTasks', false);
 
     console.log('📋 加载最新设置:', {
         searchFormParam: savedSearchFormParam,
@@ -1335,21 +1166,6 @@ function showSettingsDialog(theme) {
 
     // 版本号（从CONFIG获取）
     const currentVersion = CONFIG.version;
-
-    // 生成更新日志HTML（从CONFIG.changeLog获取）
-    const generateChangeLogHTML = () => {
-        return CONFIG.changeLog.map(item => `
-            <div style="padding-bottom:16px;border-bottom:1px solid ${theme['--panel-border']};margin-bottom:16px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <span style="font-size:14px;font-weight:600;color:${theme['--panel-primary-color']};">V${item.version}</span>
-                    ${item.date ? `<span style="font-size:12px;color:${theme['--panel-text-muted']};">${item.date}</span>` : ''}
-                </div>
-                <ul style="margin:0;padding-left:20px;">
-                    ${item.changes.map(f => `<li style="font-size:13px;color:${theme['--panel-text-secondary']};line-height:1.7;">${f}</li>`).join('')}
-                </ul>
-            </div>
-        `).join('');
-    };
 
     // 创建设置对话框
     const dialog = document.createElement('div');
@@ -1712,7 +1528,7 @@ function showSettingsDialog(theme) {
                         </div>
                         <div class="section-content" style="overflow:hidden;max-height:1000px;transition:max-height 0.3s ease, opacity 0.3s ease;">
                         <div class="checkbox-cards" style="margin-bottom:16px;">
-                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedAutoClickTasks ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedAutoClickTasks ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="自动点击任务 任务总开关">
+                            <label class="checkbox-card" style="flex:1;display:flex;align-items:flex-start;gap:12px;padding:18px;border:2px solid ${savedAutoClickTasks ? theme['--panel-primary-color'] : theme['--panel-border']};border-radius:14px;background:${savedAutoClickTasks ? 'linear-gradient(135deg,' + theme['--panel-success-bg'] + ',transparent)' : theme['--panel-hover-bg']};cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;" data-search-tags="自动点击任务 任务总开关 新版页面">
                                 ${savedAutoClickTasks ? '<div class="badge" style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:6px;background:' + theme['--panel-primary-color'] + ';color:#fff;font-size:10px;font-weight:700;">已启用</div>' : ''}
                                 <input type="checkbox" id="auto-click-tasks-checkbox" ${savedAutoClickTasks ? 'checked' : ''}
                                     style="width:20px;height:20px;margin-top:2px;accent-color:${theme['--panel-primary-color']};cursor:pointer;flex-shrink:0;">
@@ -1722,7 +1538,10 @@ function showSettingsDialog(theme) {
                                         自动点击任务
                                     </div>
                                     <div style="font-size:12px;color:${theme['--panel-text-muted']};line-height:1.8;background:${theme['--panel-bg']};padding:12px 14px;border-radius:8px;border:1px solid ${theme['--panel-border']};">
-                                        <div style="margin-bottom:8px;">总开关，控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认开启。</div>
+                                        <div style="margin-bottom:8px;">总开关，控制 earn 日常任务 与 dashboard 每日活动区域未完成任务的自动点击，默认关闭。</div>
+                                        <div style="color:${theme['--panel-primary-color']};font-weight:500;padding:6px 8px;background:${theme['--panel-info-bg']};border-radius:6px;border-left:3px solid ${theme['--panel-primary-color']};margin-bottom:8px;">
+                                            📌 任务点击仅支持新版 Microsoft Rewards 页面
+                                        </div>
                                         <div style="color:${theme['--panel-warning-color']};font-weight:500;padding:6px 8px;background:${theme['--panel-warning-bg']};border-radius:6px;border-left:3px solid ${theme['--panel-warning-color']};">
                                             ⚠️ 关闭后上述自动点击将全部不再执行，仅保留搜索任务。
                                         </div>
@@ -1866,6 +1685,26 @@ function showSettingsDialog(theme) {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 在线文档 -->
+                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <span style="font-size:20px;">📝</span>
+                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
+                                在线文档
+                            </h3>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                                <span style="font-size:18px;">📚</span>
+                                <span>文档首页</span>
+                            </a>
+                            <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/changelog/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
+                                <span style="font-size:18px;">🗒️</span>
+                                <span>更新日志</span>
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- 功能说明 -->
                     <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
@@ -1921,7 +1760,7 @@ function showSettingsDialog(theme) {
                                 联系与支持
                             </h3>
                         </div>
-                        <div style="display:flex;flex-wrap:gap:16px;">
+                        <div style="display:flex;flex-wrap:wrap;gap:12px;">
                             <a href="https://idbb98.github.io/microsoft-bing-rewards-daily-task-script/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:12px 20px;background:${theme['--panel-bg']};border-radius:12px;border:1px solid ${theme['--panel-border']};color:${theme['--panel-text-primary']};text-decoration:none;font-size:14px;font-weight:600;transition:all 0.25s;">
                                 <span style="font-size:18px;">💎</span>
                                 <span>项目主页</span>
@@ -1940,18 +1779,6 @@ function showSettingsDialog(theme) {
                         </p>
                     </div>
 
-                    <!-- 更新日志 -->
-                    <div class="about-card" style="margin-bottom:24px;padding:24px;background:${theme['--panel-hover-bg']};border-radius:16px;border:1px solid ${theme['--panel-border']};">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-                            <span style="font-size:20px;">📝</span>
-                            <h3 style="margin:0;font-size:18px;color:${theme['--panel-primary-color']};font-weight:700;">
-                                更新日志
-                            </h3>
-                        </div>
-                        <div style="space-y:12px;" id="changelog-container">
-                            ${generateChangeLogHTML()}
-                        </div>
-                    </div>
                 </div>
 
                 <!-- 固定底部按钮区 -->
@@ -2528,7 +2355,7 @@ function showSettingsDialog(theme) {
             tasksMaxRetries: GM_getValue('customTasksMaxRetries', 0),
             tasksRetryDelay: GM_getValue('customTasksRetryDelay', 2000),
             tasksCloseTabDelay: GM_getValue('customTasksCloseTabDelay', 1500),
-            autoClickTasks: GM_getValue('customAutoClickTasks', true),
+            autoClickTasks: GM_getValue('customAutoClickTasks', false),
             exportTime: new Date().toISOString(),
             version: CONFIG.version
         };
