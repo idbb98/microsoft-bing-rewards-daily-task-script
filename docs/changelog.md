@@ -2,8 +2,15 @@
 
 > 仅记录浏览器脚本版（`BingRewards.user.js`）的更新历史。
 
-!!! success "最新版本：`26.8.27.1`"
-    2026-08-26 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+!!! success "最新版本：`26.8.31.6`"
+    2026-08-28 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+
+## `26.8.31.6` — 2026-08-28
+
+- **功能新增**：新增 APP 端每日签到、资讯阅读（上限可配置）与一键授权流程，令牌自动续期
+- **功能增强**：展开面板新增任务完成状态与 APP 阅读 X/Y 进度显示，刷新后实时同步
+- **执行优化**：任务执行顺序调整为 dashboard → earn → APP 签到 → APP 阅读 + 搜索，已完成任务当日自动跳过
+- **问题修复**：修复重试预算误耗、阅读进度计数漂移、进度正则误判日期、旧浏览器 CSS 兼容性等问题
 
 ## `26.8.27.1` — 2026-08-27
 
