@@ -45,7 +45,7 @@ Hard rule: **propose a plan and get confirmation before modifying any code** (�
 
 - Format `YY.M.D.Revision` (e.g. `26.7.16.2`).
 - Versions are maintained **independently per target** and are currently out of sync: userscript `@version` = `26.7.16.2`, extension `manifest.json` version = `26.1.15.1`, simulator `csproj` = `26.2.2.1`.
-- When a feature/behavior change affects a target, bump that target's version in its own file. Root `docs/changelog.md` tracks userscript history only.
+- **Do NOT bump versions automatically on changes.** Only bump a target's version when the user explicitly requests it (版本号仅在用户明确要求时变更). Root `docs/changelog.md` tracks userscript history only.
 
 ## Commands
 
@@ -84,4 +84,4 @@ Hard rule: **propose a plan and get confirmation before modifying any code** (�
 - Extension's `css/bootstrap.min.css` and `js/bootstrap.bundle.min.js` are gitignored but required at runtime (Bootstrap 5.1.0).
 - Screenshots are duplicated: root `asset/` (used by root `README.md`) vs `docs/assets/` (used by the MkDocs site). Update both when screenshots change.
 - Userscript config is persisted via `GM_getValue` keys prefixed `custom*`; the `CONFIG` object getter/setter maps 1:1. `searchFormParam` (default `QBLH`) must be customized per account.
-- `BingRewards.user.js` header has an extensive changelog in comments — append to it for userscript changes.
+- `BingRewards.user.js` header has an extensive changelog in comments — **append to it only when the user explicitly requests it** (changelog 仅在用户明确要求时追加).
