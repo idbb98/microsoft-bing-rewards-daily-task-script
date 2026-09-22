@@ -2,8 +2,16 @@
 
 > 仅记录浏览器脚本版（`BingRewards.user.js`）的更新历史。
 
-!!! success "最新版本：`26.8.31.6`"
-    2026-08-28 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+!!! success "最新版本：`26.9.30.1`"
+    2026-09-30 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+
+## `26.9.30.1` — 2026-09-30
+
+- **架构重构**：APP 端网络请求统一封装为 `request()`，替代原 `appHttpRequest()`，新增 `getAppClient()`、`getAccountProfileUrl()`，提升可读性与复用性
+- **任务流状态机**：新增注入标记、未完成连续失败计数与「当日跳过」记录（含原因）机制，新增 `isTaskTerminatedToday()` 统一收敛「当日放弃」判定
+- **面板状态**：重写 `updateStatusPanel()`，新增 `derivePanelStatus()`、`resetPanelStatus()`、`buildPanelNotice()`，状态推导更清晰、结构更稳健
+- **任务采集**：`collectIncompleteTasks()`/`isIncompleteProgress()` 取代 `findIncompleteTaskCards()`/`findIncompleteDashboardTasks()`，统一 earn 与 dashboard 未完成任务采集逻辑
+- **清理**：下线 `migrateOldTaskParams()` 旧参数迁移逻辑（早期 `earnTasks*`/`dashboardTasks*` 参数已停用）
 
 ## `26.8.31.6` — 2026-08-28
 
