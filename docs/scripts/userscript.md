@@ -25,11 +25,15 @@
 
 ### 1. 安装脚本管理器（Violentmonkey）
 
-| 浏览器 | 安装地址 |
-|--------|----------|
-| **Microsoft Edge** | [Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao) |
-| **Firefox** | [Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/) |
-| **Chrome/其他** | [Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) |
+| 浏览器 | 安装地址 | 说明 |
+|--------|----------|------|
+| **Google Chrome** | [Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) | ✅ 推荐 |
+| **Firefox** | [Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/) | ✅ 可用 |
+| **其他 Chromium 浏览器**（Brave、Cent 等） | 使用上方的 Chrome 网上应用店链接 | ✅ 可用 |
+| ~~**Microsoft Edge**~~ | [Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao) | ⚠️ 不推荐，见下方说明 |
+
+!!! warning "不建议使用 Edge"
+    新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 **dashboard 与 earn 任务不执行**。若遇到任务不执行，请改用 Chrome 等其他浏览器。
 
 !!! warning "注意"
     若非从官方商店安装，请在浏览器扩展管理页面开启「开发者模式」。
@@ -111,7 +115,13 @@
 | `pauseIntervalMin` / `pauseIntervalMax` | `2` / `3` | 每执行多少次搜索后暂停一次 |
 | `pauseTimeMin` / `pauseTimeMax` | `20min` / `30min` | 每次暂停的持续时间区间 |
 
+!!! warning "浏览器选择"
+    新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行。**推荐使用 Chrome 等其他浏览器**。同时建议关闭标签页休眠/内存节省功能（Chrome：`chrome://settings/performance`），避免标签页休眠中断任务。
+
 ### 任务点击配置（日常任务 + 每日活动）
+
+!!! warning "Edge 下任务不执行"
+    若 dashboard 与 earn 任务始终不执行，通常是新版 Edge 在 rewards 页面注入失败所致，请改用 Chrome 等其他浏览器。
 
 !!! note "仅支持新版页面"
     任务点击功能（含「自动点击任务」总开关）仅支持新版 Microsoft Rewards 页面，旧版页面上的任务不会被自动点击。
@@ -161,7 +171,9 @@
 - ✅ 使用前必须在 Bing 网页版登录微软账户
 - ✅ 浏览器标签页需保持前台激活状态
 - ✅ 需稳定访问 Bing 国际站（`www.bing.com`）
+- ✅ 推荐使用 Chrome 等 Chromium 浏览器，并关闭标签页休眠/内存节省功能（`chrome://settings/performance`）
 - ⚠️ `rewards.bing.com` 根域名已被排除在脚本注入范围之外
+- ⚠️ 新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行
 
 !!! danger "风险提示"
     极短时间内完成全部每日搜索限额、频繁切换网络 IP、每日精准获取满分积分等行为可能增加账号风险，请模拟真人使用习惯，合理使用。

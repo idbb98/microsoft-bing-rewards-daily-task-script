@@ -51,7 +51,10 @@
 - ✅ **必须登录**：使用前请在 Bing 网页版登录微软账户
 - ✅ **保持前台**：浏览器标签页需处于前台激活状态
 - ✅ **网络要求**：需稳定访问 Bing 国际站（`www.bing.com`）
-- ✅ **建议浏览器**：推荐使用 Edge，并进入 `edge://settings/system/managePerformance` 将「内存 - 自动将标签页置于睡眠状态」关闭，避免标签页休眠中断任务
+- ✅ **建议浏览器**：推荐使用 Chrome 等 Chromium 浏览器，并关闭标签页休眠/内存节省功能（Chrome：`chrome://settings/performance`），避免标签页休眠中断任务
+
+!!! warning "不建议使用 Edge"
+    新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行。如遇此情况，请改用 Chrome 等其他浏览器。
 
 !!! danger "风险提示"
     自动化工具存在理论上的账户风险，请模拟真人使用习惯、合理设置随机间隔，遵守微软必应服务条款。

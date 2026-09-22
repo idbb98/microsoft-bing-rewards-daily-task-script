@@ -41,9 +41,11 @@
 
 **步骤 1：安装脚本管理器**（Violentmonkey）
 
-- **Edge**：[Edge 加载项商店](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
+- **Chrome**（推荐）：[Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
 - **Firefox**：[Firefox 附加组件商店](https://addons.mozilla.org/firefox/addon/violentmonkey/)
-- **Chrome/其他**：[Chrome 网上应用店](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
+- **其他 Chromium 浏览器**（Brave、Cent 等）：使用上方的 Chrome 网上应用店链接
+
+> ⚠️ **不建议使用 Edge**：新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行。请改用 Chrome 等其他浏览器。
 
 > ⚠️ 若非从官方商店安装，请在浏览器扩展管理页面开启「开发者模式」。
 
@@ -74,7 +76,8 @@
 
 **使用前提**
 - 必须登录微软账户；保持标签页前台活动；需稳定访问 Bing 国际站（`www.bing.com`）
-- 建议使用 Edge 浏览器，并进入 `edge://settings/system/managePerformance` 将「内存 - 自动将标签页置于睡眠状态」关闭，避免标签页休眠中断任务
+- 建议使用 Chrome 等 Chromium 浏览器，并关闭标签页休眠/内存节省功能（Chrome：`chrome://settings/performance`），避免标签页休眠中断任务
+- ⚠️ 新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行，请改用 Chrome 等其他浏览器
 
 **安全与风险**
 
@@ -89,6 +92,7 @@
 - 确认脚本已在 Violentmonkey 仪表盘中启用
 - 确认打开的是 `www.bing.com` 或其子域名（`rewards.bing.com` 已被排除）
 - 无法使用时检查浏览器是否开启「开发者模式」
+- dashboard / earn 任务不执行：新版 Edge 在 rewards 页面注入失败所致，请改用 Chrome 等其他浏览器
 - 仍不行则移除旧脚本后重新安装
 
 ---

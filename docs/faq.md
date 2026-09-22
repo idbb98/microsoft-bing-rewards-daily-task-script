@@ -9,6 +9,7 @@
 - ✅ **必须登录**：使用前请在 Bing 网页版登录微软账户
 - ✅ **保持前台**：浏览器标签页需处于前台活动状态
 - ✅ **网络要求**：需稳定访问 Bing 国际站（`www.bing.com`）
+- ✅ **浏览器选择**：推荐使用 Chrome 等 Chromium 浏览器；**不建议使用新版 Microsoft Edge**（在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行）
 
 !!! info "脚本注入范围"
     - 支持：`https://*.bing.com/*`、`https://rewards.bing.com/earn*`、`https://rewards.bing.com/dashboard*`
@@ -48,6 +49,13 @@
 - 确认标签页处于**前台激活状态**（后台标签页会暂停任务）
 - 检查是否进入了暂停间隔（默认每 2-3 次搜索暂停 20-30 分钟）
 - 刷新页面后重新启动任务
+
+### dashboard / earn 任务不执行？
+
+1. **确认浏览器**：新版 Microsoft Edge 在 `rewards.bing.com` 页面存在脚本注入问题，会导致 dashboard 与 earn 任务不执行，请改用 Chrome 等其他浏览器
+2. **确认总开关**：设置页「自动点击任务」（`autoClickTasks`）需开启，默认关闭
+3. **确认页面版本**：任务点击仅支持新版 Microsoft Rewards 页面，旧版页面任务不会被点击
+4. **刷新页面**：刷新 `rewards.bing.com` 后重新启动任务
 
 ### 任务打开了很多标签页？
 
