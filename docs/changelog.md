@@ -2,8 +2,15 @@
 
 > 仅记录浏览器脚本版（`BingRewards.user.js`）的更新历史。
 
-!!! success "最新版本：`26.9.30.1`"
-    2026-09-30 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+!!! success "最新版本：`26.10.31.1`"
+    2026-10-23 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+
+## `26.10.31.1` — 2026-10-23
+
+- **问题修复**：任务点击改为「点击 → 回读校验 → 补点一次」，回读仍有未完成任务时不写完成标记，修复「面板显示完成但日常任务 / 每日活动实际未完成」；任务区域缺失、卡片未渲染或仍为 loading 骨架屏时同样不写完成标记
+- **执行优化**：点击任务后标签页停留 6 秒再关闭（`taskTabDwell`），避免秒关导致目标页未上报活动；合成点击被弹窗拦截时改用 `GM_openInTab` 打开任务链接，新增卡片点击间隔参数 `tasksClickDelay`
+- **功能新增**：菜单新增「🧹 清除当天任务缓存」，一键清除日常任务 / 每日活动的完成、注入、超时与放弃标记，搜索次数与当日终止标记，APP 签到与阅读进度，并复位内存状态，便于当天重跑
+- **功能新增**：设置页新增 APP 设备标识预设（10 款 Android / iOS 机型可选并预览 UA），`channel` / `version` / UA 构建号联动，切换后无需重新授权
 
 ## `26.9.30.1` — 2026-09-30
 

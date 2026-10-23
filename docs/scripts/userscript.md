@@ -5,7 +5,7 @@
 | 项目 | 说明 |
 |------|------|
 | 技术栈 | JavaScript (ES6+) + Violentmonkey API |
-| 当前版本 | `26.8.31.6` |
+| 当前版本 | `26.10.31.1` |
 | 安装方式 | 一键安装，无需构建，自动更新 |
 
 ---
@@ -64,6 +64,9 @@
 1. 打开 [www.bing.com](https://www.bing.com) 并**确保已登录微软账户**
 2. 点击工具栏 **Violentmonkey** 图标 → 菜单中点击 **「开始Bing任务」**
 3. 页面顶部显示进度面板，**保持标签页前台激活**，任务完成后自动停止
+
+!!! tip "清除当天任务缓存"
+    菜单中的 **「🧹 清除当天任务缓存」** 会清除当天的任务点击标记（日常任务 / 每日活动）、搜索次数与当日终止标记、APP 签到与阅读进度。若出现「面板显示完成但日常任务 / 每日活动实际未完成」，或当天需要重新执行一遍，可先清除缓存再点击「开始任务」。
 
 !!! success "完成"
     任务执行完成后，Rewards 积分将自动到账，可在 [rewards.bing.com](https://rewards.bing.com) 查看。
@@ -133,6 +136,7 @@
 |------|--------|------|
 | `autoClickTasks` | `false` | 「自动点击任务」总开关（设置页勾选项） |
 | `tasksScrollDelay` | `3000` | 任务区滚动延迟（毫秒） |
+| `tasksClickDelay` | `2000` | 卡片滚动定位后的等待与两次点击的间隔（毫秒），过短会导致服务端未记录活动 |
 | `tasksMaxRetries` | `0` | 最大重试次数 |
 | `tasksRetryDelay` | `2000` | 重试间隔（毫秒） |
 | `tasksCloseTabDelay` | `1500` | 任务标签页关闭延迟（毫秒） |
@@ -150,7 +154,10 @@
 | `appCheckInEnabled` | `false` | APP 端每日签到开关 |
 | `appReadEnabled` | `false` | APP 端资讯阅读开关 |
 | `appReadDailyLimit` | `10` | APP 端资讯阅读每日上报上限（篇） |
-| `appRegionLock` | `true` | APP 端区域锁定（开启后请求固定走国区） |
+| `appUaPreset` | `android-16-xiaomi15` | APP 端设备标识预设（Android / iOS 多机型可选） |
+
+!!! tip "设备标识预设"
+    设置页「APP 端任务」区域的「APP 设备标识（UA）」下拉框可切换机型预设，并实时预览 UA。上报异常时先换回默认安卓预设；切换后无需重新授权，保存并刷新页面生效。
 
 !!! tip "执行顺序"
     APP 端任务仅在开启时参与执行，顺序为 dashboard → earn → APP 签到 → APP 阅读 + 搜索；已完成的任务当日自动跳过，阅读进度以 X/Y（已完成/总数）积分形式实时显示在展开面板中。

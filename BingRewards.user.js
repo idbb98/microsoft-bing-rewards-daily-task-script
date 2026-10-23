@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Microsoft Bing Rewards Daily Task Script (微软必应奖励每日任务脚本)
-// @version      26.9.30.1
+// @version      26.10.31.1
 // @description  Brian 自动完成微软必应每日搜索任务，智能积累奖励积分。支持实时进度追踪、热搜关键词、随机行为模拟，安全高效获取 Bing Rewards 积分。
 // @author       Brian
 // @match        https://*.bing.com/*
@@ -62,6 +62,8 @@ const CONFIG_SCHEMA = {
     maxDelay: { key: 'customMaxDelay', default: 30 * 1000 },
     // 任务点击相关配置（日常任务 + 每日活动共用）
     tasksScrollDelay: { key: 'customTasksScrollDelay', default: 3000 },
+    // 卡片点击间隔（毫秒）：卡片滚动定位后的等待时间与两次点击之间的间隔，过短会导致服务端未记录活动
+    tasksClickDelay: { key: 'customTasksClickDelay', default: 2000 },
     tasksMaxRetries: { key: 'customTasksMaxRetries', default: 0 },
     tasksRetryDelay: { key: 'customTasksRetryDelay', default: 2000 },
     tasksCloseTabDelay: { key: 'customTasksCloseTabDelay', default: 1500 },
@@ -93,6 +95,12 @@ const CONFIG = {
     // 任务页「脚本已注入但超时未完成」的连续次数阈值，达到后当天不再跳转该页面
     // （脚本未注入则首次即放弃，不受此阈值影响）
     taskFlowIncompleteLimit: 3,
+
+    // 任务标签页停留时长（毫秒）：点击任务卡片后保持标签页打开，等目标页上报活动后再关闭
+    taskTabDwell: 6000,
+
+    // 主页面等待任务页处理完成的超时（毫秒）：需覆盖多张卡片的点击间隔、停留时长与回读校验
+    taskFlowTimeout: 180 * 1000,
 
     // 启动参数标记数组
     startParams: ['bingTask', 'runSearch', 'initiateSearch', 'bingSearchMode', 'autoSearch', 'startTask', 'executeSearch', 'launchSearch', 'beginSearch', 'processSearch', 'bingQuest', 'dailyTask', 'searchFlow', 'rewardsTask', 'bingBrowse', 'autoFlow']
@@ -191,6 +199,30 @@ const APP_CLIENT_PRESETS = [
         userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 9 Pro Build/AP4A.250105.002; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
     },
     {
+        id: 'android-15-xiaomi14',
+        label: 'Android 15 · Xiaomi 14',
+        note: '国产主流机型，与默认同通道',
+        channel: 'SAAndroid',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (Linux; Android 15; Xiaomi 14 Build/BP1A.250505.005; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
+    },
+    {
+        id: 'android-14-huawei-mate60',
+        label: 'Android 14 · HUAWEI Mate 60 Pro',
+        note: '华为机型，国产 ROM 备用',
+        channel: 'SAAndroid',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (Linux; Android 14; ALN-AL00 Build/HUAWEIALN-AL00; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
+    },
+    {
+        id: 'android-14-oppo-findx7',
+        label: 'Android 14 · OPPO Find X7 Ultra',
+        note: 'OPPO 旗舰机型，国产 ROM 备用',
+        channel: 'SAAndroid',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (Linux; Android 14; PHY110 Build/UKQ1.231003.002; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
+    },
+    {
         id: 'android-14-galaxy-s24',
         label: 'Android 14 · Galaxy S24',
         note: '三星机型，系统版本较低',
@@ -199,12 +231,36 @@ const APP_CLIENT_PRESETS = [
         userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S9210 Build/UP1A.231005.007; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
     },
     {
+        id: 'android-15-galaxy-s25',
+        label: 'Android 15 · Galaxy S25',
+        note: '三星新款旗舰，系统版本较高',
+        channel: 'SAAndroid',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (Linux; Android 15; SM-S9310 Build/AP3A.250105.008; ) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Mobile Safari/537.36 BingSapphire/32.6.2110003560'
+    },
+    {
         id: 'ios-18-iphone16',
         label: 'iOS 18 · iPhone 16 Pro',
         note: 'iOS 通道（SAIOS），个别账号可能不适用',
         channel: 'SAIOS',
         version: '32.6.2110003560',
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 BingSapphire/32.6.2110003560'
+    },
+    {
+        id: 'ios-18-iphone15pro',
+        label: 'iOS 18 · iPhone 15 Pro',
+        note: 'iOS 通道备用，系统版本稍低',
+        channel: 'SAIOS',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1 BingSapphire/32.6.2110003560'
+    },
+    {
+        id: 'ios-17-iphone14pro',
+        label: 'iOS 17 · iPhone 14 Pro',
+        note: 'iOS 通道低版本备用，上报异常时尝试',
+        channel: 'SAIOS',
+        version: '32.6.2110003560',
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.7 Mobile/15E148 Safari/604.1 BingSapphire/32.6.2110003560'
     }
 ];
 
@@ -2227,6 +2283,23 @@ function showSettingsDialog(theme) {
                             </div>
                         </div>
 
+                        <div class="form-card" style="${cardStyle}" data-search-tags="点击间隔 卡片点击间隔">
+                            <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
+                                <span style="font-size:16px;">🖱️</span>
+                                卡片点击间隔
+                                <span class="help-icon" style="margin-left:auto;font-size:14px;color:${theme['--panel-text-muted']};cursor:help;" title="每次点击任务卡片前后的等待时间，设置过短会导致任务未被记录">❓</span>
+                            </label>
+                            <div style="position:relative;">
+                                <input type="number" id="tasks-click-delay-input" class="form-input" value="${saved.tasksClickDelay}" min="500" max="10000" step="500"
+                                    style="width:100%;box-sizing:border-box;padding:14px 16px;padding-right:65px;border:2px solid ${theme['--panel-border']};border-radius:12px;font-size:14px;background:${theme['--panel-bg']};color:${theme['--panel-text-primary']};outline:none;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);height:50px;font-weight:600;">
+                                <span class="input-unit" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:12px;color:${theme['--panel-text-muted']};font-weight:500;">毫秒</span>
+                            </div>
+                            <div class="form-hint" style="${hintStyle}">
+                                <span style="flex-shrink:0;">💡</span>
+                                <span>默认 <strong style="color:${theme['--panel-primary-color']};">2000 毫秒</strong>（2 秒），两次任务点击之间的间隔</span>
+                            </div>
+                        </div>
+
                         <div class="form-card" style="${cardStyle}" data-search-tags="最大重试次数 任务重试">
                             <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:14px;color:${theme['--panel-text-primary']};font-weight:600;">
                                 <span style="font-size:16px;">🔄</span>
@@ -2919,6 +2992,7 @@ function showSettingsDialog(theme) {
     const minDelayInput = document.getElementById('min-delay-input');
     const maxDelayInput = document.getElementById('max-delay-input');
     const tasksScrollDelayInput = document.getElementById('tasks-scroll-delay-input');
+    const tasksClickDelayInput = document.getElementById('tasks-click-delay-input');
     const tasksMaxRetriesInput = document.getElementById('tasks-max-retries-input');
     const tasksRetryDelayInput = document.getElementById('tasks-retry-delay-input');
     const tasksCloseTabDelayInput = document.getElementById('tasks-close-tab-delay-input');
@@ -3443,6 +3517,7 @@ function showSettingsDialog(theme) {
         minDelayInput.value = 15;
         maxDelayInput.value = 30;
         tasksScrollDelayInput.value = 3000;
+        tasksClickDelayInput.value = 2000;
         tasksMaxRetriesInput.value = 0;
         tasksRetryDelayInput.value = 2000;
         tasksCloseTabDelayInput.value = 1500;
@@ -3478,6 +3553,7 @@ function showSettingsDialog(theme) {
         const minDelay = parseFloat(minDelayInput.value) * 1000; // 转换为毫秒
         const maxDelay = parseFloat(maxDelayInput.value) * 1000; // 转换为毫秒
         const tasksScrollDelay = parseInt(tasksScrollDelayInput.value);
+        const tasksClickDelay = parseInt(tasksClickDelayInput.value);
         const tasksMaxRetries = parseInt(tasksMaxRetriesInput.value);
         const tasksRetryDelay = parseInt(tasksRetryDelayInput.value);
         const tasksCloseTabDelay = parseInt(tasksCloseTabDelayInput.value);
@@ -3518,6 +3594,10 @@ function showSettingsDialog(theme) {
         }
         if (tasksScrollDelay < 1000 || tasksScrollDelay > 10000) {
             alert('❌ 任务滚动等待时间应在 1000-10000 毫秒之间!');
+            return;
+        }
+        if (tasksClickDelay < 500 || tasksClickDelay > 10000) {
+            alert('❌ 任务点击间隔应在 500-10000 毫秒之间!');
             return;
         }
         if (tasksMaxRetries < 0 || tasksMaxRetries > 3) {
@@ -3562,6 +3642,7 @@ function showSettingsDialog(theme) {
         CONFIG.minDelay = minDelay;
         CONFIG.maxDelay = maxDelay;
         CONFIG.tasksScrollDelay = tasksScrollDelay;
+        CONFIG.tasksClickDelay = tasksClickDelay;
         CONFIG.tasksMaxRetries = tasksMaxRetries;
         CONFIG.tasksRetryDelay = tasksRetryDelay;
         CONFIG.tasksCloseTabDelay = tasksCloseTabDelay;
@@ -4450,6 +4531,7 @@ const TASK_FLOW_CONFIG = {
         lastDateKey: 'lastEarnTasksDate',
         injectedKey: 'earnTasksInjected',
         injectedDateKey: 'lastEarnTasksInjectedDate',
+        finishedKey: 'earnTasksFinished',
         incompleteKey: 'earnTasksIncompleteStreak',
         incompleteDateKey: 'lastEarnTasksIncompleteDate',
         skipDateKey: 'earnTasksSkipDate',
@@ -4464,6 +4546,7 @@ const TASK_FLOW_CONFIG = {
         lastDateKey: 'lastDashboardTasksDate',
         injectedKey: 'dashboardTasksInjected',
         injectedDateKey: 'lastDashboardTasksInjectedDate',
+        finishedKey: 'dashboardTasksFinished',
         incompleteKey: 'dashboardTasksIncompleteStreak',
         incompleteDateKey: 'lastDashboardTasksIncompleteDate',
         skipDateKey: 'dashboardTasksSkipDate',
@@ -4540,6 +4623,27 @@ function isTaskFlowInjectedToday(flowName) {
 }
 
 /**
+ * 标记本次任务页处理已结束（无论是否完成），供主页面立即恢复搜索流程
+ */
+function markTaskFlowFinished(flowName) {
+    GM_setValue(TASK_FLOW_CONFIG[flowName].finishedKey, true);
+}
+
+/**
+ * 记录「已注入但未完成」的一次尝试：达到阈值后当天放弃跳转
+ */
+function recordTaskFlowIncomplete(flowName) {
+    const conf = TASK_FLOW_CONFIG[flowName];
+    const streak = increaseTaskFlowIncompleteStreak(flowName);
+    if (streak >= CONFIG.taskFlowIncompleteLimit) {
+        markTaskFlowSkippedToday(flowName, 'incomplete');
+        log(`${conf.label}连续 ${streak} 次未完成，当天后续不再跳转该页面`);
+    } else {
+        log(`${conf.label}未完成（${streak}/${CONFIG.taskFlowIncompleteLimit}），下次搜索继续尝试`);
+    }
+}
+
+/**
  * 任务页「脚本已注入但超时未完成」的当日连续次数（日期戳跨天自动归零）
  */
 function getTaskFlowIncompleteStreak(flowName) {
@@ -4612,8 +4716,9 @@ async function checkAndExecuteTasksOnPage(flowName) {
 
     log(`准备执行 ${conf.label}点击...`);
 
-    // 本次跳转的注入证据：目标页脚本注入后置 true，超时时据此判定是否值得再试
+    // 本次跳转的证据：目标页脚本注入后置 injected=true，处理结束（无论是否完成）置 finished=true
     GM_setValue(conf.injectedKey, false);
+    GM_setValue(conf.finishedKey, false);
 
     return new Promise((resolve) => {
         const taskParam = utils.getRandomStartParam();
@@ -4634,9 +4739,11 @@ async function checkAndExecuteTasksOnPage(flowName) {
         };
 
         const checkInterval = setInterval(() => {
-            if (GM_getValue(conf.completedKey, false)) {
+            const completed = GM_getValue(conf.completedKey, false);
+            const finished = GM_getValue(conf.finishedKey, false);
+            if (completed || finished) {
                 if (!settle()) return;
-                log(`${conf.label}点击已完成`);
+                log(`${conf.label}${completed ? '点击已完成' : '本次处理已结束（未标记完成）'}`);
                 resolve(true);
             }
         }, 1000);
@@ -4668,7 +4775,7 @@ async function checkAndExecuteTasksOnPage(flowName) {
             }
 
             resolve(true);
-        }, 30000);
+        }, CONFIG.taskFlowTimeout);
     });
 }
 
@@ -4739,15 +4846,14 @@ function isIncompleteProgress(text) {
  * 从任务容器中收集未完成的任务卡片（earn 日常任务与 dashboard 每日活动共用）
  * 完成态判定、积分识别、去重与任务对象构造统一在此，两处 DOM 差异通过入参注入
  * @param {Element|null} container 任务区域容器
- * @param {object} opts selector 任务元素选择器 / logPrefix 日志前缀 / missingResult 容器缺失时的返回值
+ * @param {object} opts selector 任务元素选择器 / logPrefix 日志前缀
  *                      skipLocked 跳过锁定态 / progressAware 按 X/Y 进度判定未完成 / skipHref 额外 href 过滤
- * @returns {Array<object>|null} 容器缺失时返回 missingResult（null 表示 DOM 结构变化，由调用方直接结束流程）
+ * @returns {{tasks: Array<object>, candidateCount: number}|null} 容器缺失时返回 null（DOM 结构变化，由调用方结束流程）
  */
 function collectIncompleteTasks(container, opts) {
     const {
         selector,
         logPrefix,
-        missingResult = [],
         skipLocked = false,
         progressAware = false,
         skipHref = null
@@ -4755,7 +4861,7 @@ function collectIncompleteTasks(container, opts) {
 
     if (!container) {
         log(`${logPrefix} 未找到任务区域容器`);
-        return missingResult;
+        return null;
     }
 
     const candidates = container.querySelectorAll(selector);
@@ -4822,7 +4928,7 @@ function collectIncompleteTasks(container, opts) {
     });
 
     log(`${logPrefix} 共找到 ${tasks.length} 个未完成任务`);
-    return tasks;
+    return { tasks, candidateCount: candidates.length };
 }
 
 /**
@@ -4841,7 +4947,8 @@ async function clickTask(task, flowName) {
 
     try {
         task.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await sleep(50);
+        // 滚动动画结束、卡片位置稳定后再取坐标点击
+        await sleep(CONFIG.tasksClickDelay);
 
         const rect = task.element.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
@@ -4865,20 +4972,8 @@ async function clickTask(task, flowName) {
             task.element.dispatchEvent(event);
         }
 
-        await sleep(100);
-
-        flowState.clicked.add(task.taskId);
-        log(`${logPrefix} 成功点击任务: ${task.taskId}`);
-
-        try {
-            const taskWindow = window.open('', windowName);
-            if (taskWindow && !taskWindow.closed) {
-                taskWindow.close();
-                log(`${logPrefix} 已关闭任务标签页: ${task.taskId}`);
-            }
-        } catch (e) {
-            log(`${logPrefix} 关闭任务标签页失败: ${e.message}`);
-        }
+        // 等目标标签页创建，再判断是否真的打开了（合成点击可能被浏览器弹窗拦截）
+        await sleep(1000);
 
         if (originalTarget) {
             task.element.setAttribute('target', originalTarget);
@@ -4886,6 +4981,71 @@ async function clickTask(task, flowName) {
             task.element.removeAttribute('target');
         }
 
+        flowState.clicked.add(task.taskId);
+
+        let taskWindow = null;
+        try {
+            taskWindow = window.open('', windowName);
+        } catch (e) {
+            log(`${logPrefix} 获取任务标签页失败: ${e.message}`);
+        }
+
+        // 判断点击是否真的打开了任务页：about:blank 说明只是 window.open 新建的空标签页
+        let openedByClick = false;
+        if (taskWindow && !taskWindow.closed) {
+            try {
+                openedByClick = taskWindow.location.href !== 'about:blank';
+            } catch (e) {
+                // 跨域不可读即说明已导航到目标页
+                openedByClick = true;
+            }
+        }
+
+        if (openedByClick) {
+            // 任务页已打开：停留一段时间等目标页上报活动，避免秒关导致不计分
+            log(`${logPrefix} 任务标签页已打开，停留 ${CONFIG.taskTabDwell}ms 后关闭: ${task.taskId}`);
+            await sleep(CONFIG.taskTabDwell);
+            try {
+                taskWindow.close();
+                log(`${logPrefix} 已关闭任务标签页: ${task.taskId}`);
+            } catch (e) {
+                log(`${logPrefix} 关闭任务标签页失败: ${e.message}`);
+            }
+        } else if (task.href) {
+            // 标签页未打开（被弹窗拦截）：关掉可能的空白页，改用管理器打开任务链接
+            if (taskWindow && !taskWindow.closed) {
+                try {
+                    taskWindow.close();
+                } catch (e) {
+                    log(`${logPrefix} 关闭空白标签页失败: ${e.message}`);
+                }
+            }
+            let taskUrl = task.href;
+            try {
+                taskUrl = new URL(task.href, window.location.href).href;
+            } catch (e) {
+                log(`${logPrefix} 任务链接解析失败，按原值使用: ${e.message}`);
+            }
+            log(`${logPrefix} 未检测到任务标签页（可能被弹窗拦截），改用 GM_openInTab 打开: ${taskUrl}`);
+            if (!/^https?:/i.test(taskUrl)) {
+                log(`${logPrefix} 任务链接不是 http(s)，仅保留模拟点击: ${taskUrl}`);
+            } else {
+                try {
+                    const taskTab = GM_openInTab(taskUrl, { active: true, insert: true });
+                    await sleep(CONFIG.taskTabDwell);
+                    if (taskTab && typeof taskTab.close === 'function') {
+                        taskTab.close();
+                    }
+                    log(`${logPrefix} 已关闭任务标签页: ${taskUrl}`);
+                } catch (e) {
+                    log(`${logPrefix} 打开任务链接失败: ${e.message}`);
+                }
+            }
+        } else {
+            log(`${logPrefix} 任务无可用链接，仅保留模拟点击: ${task.taskId}`);
+        }
+
+        log(`${logPrefix} 成功点击任务: ${task.taskId}`);
         return true;
     } catch (error) {
         log(`${logPrefix} 模拟点击失败: ${error.message}`);
@@ -4895,7 +5055,7 @@ async function clickTask(task, flowName) {
             task.element.click();
             flowState.clicked.add(task.taskId);
             log(`${logPrefix} 备用方案成功: ${task.taskId}`);
-            await sleep(50);
+            await sleep(CONFIG.tasksClickDelay);
             return true;
         } catch (fallbackError) {
             log(`${logPrefix} 备用方案也失败: ${fallbackError.message}`);
@@ -4907,7 +5067,7 @@ async function clickTask(task, flowName) {
 /**
  * 处理任务点击（earn 与 dashboard 共用流程）
  * @param {string} flowName 流程标识：'earn' 或 'dashboard'
- * @param {Function} findTasks 异步函数，返回待办任务数组；返回 null 表示任务区域缺失，直接结束
+ * @param {Function} findTasks 异步函数，返回 {tasks, candidateCount}；返回 null 表示任务区域缺失
  */
 async function processTasks(flowName, findTasks) {
     const conf = TASK_FLOW_CONFIG[flowName];
@@ -4930,57 +5090,102 @@ async function processTasks(flowName, findTasks) {
     log(`${conf.logPrefix} 开始处理任务...`);
 
     try {
-        let tasks = await findTasks();
+        let result = await findTasks();
 
-        // 未找到任务时等待页面加载后重试（区域缺失不重试，交由下方直接结束）
-        while (Array.isArray(tasks) && tasks.length === 0 && flowState.retryCount < CONFIG.tasksMaxRetries) {
+        // 任务卡片尚未渲染（候选数为 0）时等待页面加载后重试
+        while (result && result.tasks.length === 0 && result.candidateCount === 0 &&
+               flowState.retryCount < CONFIG.tasksMaxRetries) {
             flowState.retryCount++;
             log(`${conf.logPrefix} 等待 ${CONFIG.tasksRetryDelay}ms 后重试 (${flowState.retryCount}/${CONFIG.tasksMaxRetries})`);
             await sleep(CONFIG.tasksRetryDelay);
-            tasks = await findTasks();
+            result = await findTasks();
         }
 
-        // 任务区域缺失（DOM 结构变化），直接标记完成并关闭页面
-        if (tasks === null) {
+        // 任务区域缺失（DOM 结构变化）：不写完成标记，避免「显示完成但实际未完成」
+        if (result === null) {
+            log(`${conf.logPrefix} 未找到任务区域（DOM 结构变化），本次不设置完成标记`);
+            recordTaskFlowIncomplete(flowName);
+            await sleep(CONFIG.tasksCloseTabDelay);
+            return;
+        }
+
+        // 一个任务卡片都未识别到：可能仍在加载或结构变化，同样不写完成标记
+        if (result.candidateCount === 0) {
+            log(`${conf.logPrefix} 未识别到任何任务卡片，本次不设置完成标记`);
+            recordTaskFlowIncomplete(flowName);
+            await sleep(CONFIG.tasksCloseTabDelay);
+            return;
+        }
+
+        // 卡片存在但均已完成
+        if (result.tasks.length === 0) {
             markTaskFlowCompleted(flowName);
-            log(`${conf.logPrefix} 已设置完成标记`);
-            await sleep(50);
-            closeCurrentTab(conf.logPrefix);
+            log(`${conf.logPrefix} 任务卡片均已完成，已设置完成标记`);
+            await sleep(CONFIG.tasksCloseTabDelay);
             return;
         }
 
-        if (tasks.length === 0) {
-            log(`${conf.logPrefix} 已达到最大重试次数，确认没有未完成任务`);
-            markTaskFlowCompleted(flowName);   // 写 completedKey + 日期戳，面板与日志一致
-            log(`${conf.logPrefix} 已设置完成标记`);
-            await sleep(50);
-            closeCurrentTab(conf.logPrefix);
-            return;
+        log(`${conf.logPrefix} 找到 ${result.tasks.length} 个任务，开始逐个处理...`);
+
+        let clickedCount = 0;
+        for (const task of result.tasks) {
+            if (await clickTask(task, flowName)) clickedCount++;
         }
 
-        log(`${conf.logPrefix} 找到 ${tasks.length} 个任务，开始逐个处理...`);
+        // 点击后回读校验：仍有未完成任务时补点一次，仍不通过则不写完成标记，交由下次搜索重试
+        let remaining = await verifyRemainingTasks(findTasks);
+        if (remaining && remaining.length > 0) {
+            log(`${conf.logPrefix} 回读仍有 ${remaining.length} 个未完成任务，补点一次`);
+            flowState.clicked.clear();
+            for (const task of remaining) {
+                if (await clickTask(task, flowName)) clickedCount++;
+            }
+            remaining = await verifyRemainingTasks(findTasks);
+        }
 
-        for (const task of tasks) {
-            await clickTask(task, flowName);
+        if (!remaining || remaining.length > 0) {
+            const remainText = remaining ? `${remaining.length} 个未完成` : '任务区域读取失败';
+            log(`${conf.logPrefix} 回读校验未通过（${remainText}），本次不设置完成标记`);
+            recordTaskFlowIncomplete(flowName);
+            if (typeof GM_notification !== 'undefined') {
+                GM_notification({
+                    text: `已点击 ${clickedCount} 个 ${conf.label}，${remainText}`,
+                    title: conf.notificationTitle,
+                    timeout: 3000
+                });
+            }
+            await sleep(CONFIG.tasksCloseTabDelay);
+            return;
         }
 
         markTaskFlowCompleted(flowName);
-        log(`${conf.logPrefix} 已设置完成标记`);
+        log(`${conf.logPrefix} 回读校验通过，已设置完成标记`);
         log(`${conf.logPrefix} 任务处理完成`);
 
         if (typeof GM_notification !== 'undefined') {
             GM_notification({
-                text: `已完成 ${flowState.clicked.size} 个 ${conf.label} 点击`,
+                text: `已完成 ${clickedCount} 个 ${conf.label} 点击`,
                 title: conf.notificationTitle,
                 timeout: 3000
             });
         }
 
         await sleep(CONFIG.tasksCloseTabDelay);
-        closeCurrentTab(conf.logPrefix);
     } finally {
         flowState.processing = false;
+        // 先写结束信号再关标签页：关页可能中断后续脚本执行，避免主流程空等到超时
+        markTaskFlowFinished(flowName);
+        closeCurrentTab(conf.logPrefix);
     }
+}
+
+/**
+ * 点击后回读任务区域：返回剩余未完成任务数组；区域缺失时返回 null（视为校验不通过）
+ */
+async function verifyRemainingTasks(findTasks) {
+    await sleep(CONFIG.tasksRetryDelay);
+    const result = await findTasks();
+    return result ? result.tasks : null;
 }
 
 /**
@@ -4991,8 +5196,7 @@ async function findAndPrepareEarnTasks() {
     await sleep(CONFIG.tasksScrollDelay);
     return collectIncompleteTasks(findMoreActivitiesSection(), {
         selector: 'a[href][target="_blank"]',
-        logPrefix: TASK_FLOW_CONFIG.earn.logPrefix,
-        missingResult: []
+        logPrefix: TASK_FLOW_CONFIG.earn.logPrefix
     });
 }
 
@@ -5012,17 +5216,16 @@ async function findAndPrepareDashboardTasks() {
     scrollToDashboardDailySet(dailySetSection);
     await sleep(CONFIG.tasksScrollDelay);
 
-    // 任务卡片仍在加载中（检测到 loading 占位符）时不解析，返回空数组由上层重试
+    // 任务卡片仍在加载中（检测到 loading 占位符）时不解析，返回空候选由上层重试
     const placeholders = dailySetSection.querySelectorAll('.animate-pulse, [class*="pulse"], [class*="skeleton"], [class*="placeholder"]');
     if (placeholders.length > 0) {
-        log('[DashboardTasks] 任务卡片仍在加载中（检测到 loading 占位符），返回空数组');
-        return [];
+        log('[DashboardTasks] 任务卡片仍在加载中（检测到 loading 占位符），返回空候选');
+        return { tasks: [], candidateCount: 0 };
     }
 
     return collectIncompleteTasks(dailySetSection, {
         selector: 'a[href], [role="button"], .card, [class*="card"]',
         logPrefix: TASK_FLOW_CONFIG.dashboard.logPrefix,
-        missingResult: null,
         skipLocked: true,
         progressAware: true,
         skipHref: href => href === '/earn' || href.startsWith('#')
@@ -5194,6 +5397,58 @@ async function checkAndStartTask() {
     }
 }
 
+/**
+ * 清除当日任务执行相关缓存（任务点击 / 搜索进度 / APP 签到与阅读），并复位内存状态
+ */
+function clearTodayTaskCache() {
+    // 任务点击：earn 日常任务 + dashboard 每日活动（完成 / 注入 / 结束 / 超时 / 放弃标记）
+    ['earn', 'dashboard'].forEach(flowName => {
+        const conf = TASK_FLOW_CONFIG[flowName];
+        GM_deleteValue(conf.completedKey);
+        GM_deleteValue(conf.lastDateKey);
+        GM_deleteValue(conf.injectedKey);
+        GM_deleteValue(conf.injectedDateKey);
+        GM_deleteValue(conf.finishedKey);
+        GM_deleteValue(conf.incompleteKey);
+        GM_deleteValue(conf.incompleteDateKey);
+        GM_deleteValue(conf.skipDateKey);
+        GM_deleteValue(conf.skipReasonKey);
+
+        const flowState = state.taskFlows[flowName];
+        flowState.clicked.clear();
+        flowState.retryCount = 0;
+    });
+
+    // 搜索进度与当日终止标记
+    GM_deleteValue('searchCount');
+    GM_deleteValue('searchCountDate');
+    GM_deleteValue('searchTerminatedDate');
+    GM_deleteValue('currentPauseInterval');
+    GM_deleteValue('cache_search_words');
+
+    // APP 签到 / 阅读当日缓存（含旧版分离键与重试计数）
+    GM_deleteValue('appCheckInResult');
+    GM_deleteValue('appCheckInDate');
+    GM_deleteValue('appCheckInPoints');
+    GM_deleteValue('appReadDate');
+    GM_deleteValue('appReadReportedDate');
+    GM_deleteValue('appReadReportedCount');
+    GM_deleteValue('appReadProgressCache');
+    GM_deleteValue('appTaskRetryCounters');
+    GM_deleteValue('appTaskRetryDate');
+
+    // 内存状态复位，避免面板继续显示清除前的进度
+    state.appTasks.checkInDone = false;
+    state.appTasks.checkInPoints = 0;
+    state.appTasks.readDone = false;
+    state.appTasks.readCurrent = 0;
+    state.appTasks.readTotal = 0;
+    state.appTasks.readProgressSynced = false;
+    state.appTasks.readRunning = false;
+
+    updateStatusPanel();
+}
+
 // 注册菜单命令
 GM_registerMenuCommand('🚀 开始任务', () => {
     GM_setValue('searchCount', 0);
@@ -5223,6 +5478,14 @@ GM_registerMenuCommand('🚀 开始任务', () => {
     // 获取当天的启动参数
     const startParam = utils.getRandomStartParam();
     window.location.href = utils.getBingOrigin() + '/?' + startParam + '=1';
+});
+
+GM_registerMenuCommand('🧹 清除当天任务缓存', () => {
+    if (!confirm('⚠️ 确认清除当天任务执行缓存？\n\n将清除：日常任务/每日活动的完成、注入、超时与放弃标记，搜索次数与当日终止标记，APP 签到与阅读进度。\n\n清除后可重新点击「🚀 开始任务」执行。')) {
+        return;
+    }
+    clearTodayTaskCache();
+    alert('✅ 已清除当天任务缓存，可重新点击「🚀 开始任务」。');
 });
 
 GM_registerMenuCommand('⏹️ 终止任务', () => {
