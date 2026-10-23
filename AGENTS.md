@@ -44,7 +44,7 @@ Hard rule: **propose a plan and get confirmation before modifying any code** (�
 ## Versioning
 
 - Format `YY.M.D.Revision` (e.g. `26.7.16.2`).
-- Versions are maintained **independently per target** and are currently out of sync: userscript `@version` = `26.7.16.2`, extension `manifest.json` version = `26.1.15.1`, simulator `csproj` = `26.2.2.1`.
+- Versions are maintained **independently per target** and are currently out of sync: userscript `@version` = `26.10.31.1`, Python `about_config.json` = `26.5.13.1`, extension `manifest.json` version = `26.1.15.1`, simulator `csproj` = `26.2.2.1`.
 - **Do NOT bump versions automatically on changes.** Only bump a target's version when the user explicitly requests it (版本号仅在用户明确要求时变更). Root `docs/changelog.md` tracks userscript history only.
 
 ## Commands
