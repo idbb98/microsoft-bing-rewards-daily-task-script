@@ -2,8 +2,16 @@
 
 > 仅记录浏览器脚本版（`BingRewards.user.js`）的更新历史。
 
-!!! success "最新版本：`26.10.31.1`"
-    2026-10-23 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+!!! success "最新版本：`26.10.31.2`"
+    2026-10-27 发布 · 一键安装：[BingRewards.user.js](https://gitee.com/idbb98/microsoft-bing-rewards-daily-task-script/raw/master/BingRewards.user.js)
+
+## `26.10.31.2` — 2026-10-27
+
+- **功能新增**：设置页新增「自定义搜索词」，支持热搜词 / 仅自定义词 / 混合三种来源；仅自定义词模式不请求热搜接口，词库最多 **2000 个**有效词，自动去重并过滤过短词、超长词与纯数字
+- **界面优化**：设置页重组为搜索设置、搜索节奏、行为模拟、任务点击、APP端任务、界面与配置 6 个分组，宽屏最多 4 列自适应；精简冗余说明与间距，统一卡片 / 输入 / 提示样式
+- **问题修复**：修复小屏下搜索框被挤压、底部按钮堆叠、双输入卡「至」单独换行、概率卡数值被裁切等显示问题
+- **问题修复**：任务标签页未获取到句柄时不再使用 `GM_openInTab` 二次打开，避免重复任务标签页
+- **文档同步**：补充自定义搜索词使用说明、词库 AI 生成提示词与设置页分组说明
 
 ## `26.10.31.1` — 2026-10-23
 
